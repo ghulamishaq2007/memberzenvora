@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="./error-guard.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Membership & VIP Pass | ZENVORA SHOOP</title>
+  <meta name="description" content="View your official ZENVORA VIP Membership pass, dynamic stars rating, and order purchase history. No password required.">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
+  <style>
+    .membership-page-wrap {
+      max-width: 800px;
+      margin: 2.5rem auto;
+      padding: 0 1rem;
+    }
+    .membership-hero-box {
+      text-align: center;
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      border-radius: 16px;
+      padding: 2.5rem 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+    .membership-lookup-input {
+      width: 100%;
+      max-width: 380px;
+      padding: 0.9rem 1.25rem;
+      font-size: 1.15rem;
+      font-family: monospace;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border: 2px solid #D1D5DB;
+      border-radius: 10px;
+      color: #111827;
+      background: #FAFAFA;
+      transition: var(--transition);
+      box-sizing: border-box;
+      margin-bottom: 1rem;
+    }
+    .membership-lookup-input:focus {
+      outline: none;
+      border-color: #B45309;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+    }
+    .membership-submit-btn {
+      width: 100%;
+      max-width: 380px;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #111827;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .membership-submit-btn:hover {
+      background: #000000;
+      transform: translateY(-1px);
+    }
+  </style>
+
+  <!-- Modular Firebase Services -->
+  <script type="module">
+    import { getMember, getMemberPurchases, normalizeMembershipCode } from "./firebase-service.js";
+
+    window.handlePublicMembershipLookup = async (e) => {
+      e.preventDefault();
+      const codeInput = document.getElementById('pub-member-code');
+      const errorBox = document.getElementById('pub-member-error');
+      const submitBtn = document.getElementById('btn-pub-lookup');
+      const detailsSection = document.getElementById('pub-member-details');
+
+      const rawCode = codeInput.value;
+      const cleanCode = normalizeMembershipCode(rawCode);
+
+      if (!cleanCode) {
+        errorBox.textContent = 'Please enter a valid Membership Code.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      errorBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying Code...';
+
+      try {
+        const member = await getMember(cleanCode);
+        if (!member.exists) {
+          errorBox.innerHTML = `<strong>Invalid Membership Code</strong><br><span style="font-size:0.85rem;">Code "${cleanCode}" was not found. Please double-check your code (e.g. ZV-MEM-000125) or contact our WhatsApp concierge.</span>`;
+          errorBox.style.display = 'block';
+          detailsSection.style.display = 'none';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'View Membership';
+          return;
+        }
+
+        // Fetch Purchases for dynamic stars
+        const purchases = await getMemberPurchases(cleanCode);
+        const purchaseCount = purchases.length;
+        const stars = purchaseCount > 0 ? '⭐'.repeat(purchaseCount) : '☆';
+
+        // Populate Card Front
+        document.getElementById('pub-card-code-display').textContent = cleanCode;
+        document.getElementById('pub-card-holder-name').textContent = member.name || 'VIP MEMBER';
+        document.getElementById('pub-card-since-display').textContent = member.joinedDate || '2026';
+        document.getElementById('pub-card-stars-display').textContent = stars;
+
+        // Populate Card Back
+        document.getElementById('pub-card-sig-code').textContent = cleanCode;
+
+        // Populate Summary details
+        document.getElementById('pub-summary-name').textContent = member.name || 'Valued Patron';
+        document.getElementById('pub-summary-code').textContent = cleanCode;
+        document.getElementById('pub-summary-since').textContent = member.joinedDate || '2026';
+        document.getElementById('pub-summary-purchases-count').textContent = `${purchaseCount} ${purchaseCount === 1 ? 'Purchase' : 'Purchases'}`;
+        document.getElementById('pub-summary-stars-visual').textContent = stars;
+
+        // Populate Purchases Table
+        const tbody = document.getElementById('pub-purchases-tbody');
+        if (purchaseCount === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem; color: #6B7280;">
+                No orders registered yet. Every purchase made at ZENVORA SHOOP earns 1 Star ⭐ toward luxury rewards!
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = purchases.map(p => `
+            <tr>
+              <td style="font-weight: 600; padding: 0.85rem 0.75rem; border-bottom: 1px solid #F3F4F6;">${p.purchaseDate || 'N/A'}</td>
+              <td style="padding: 0.85rem 0.75rem; border-bottom: 1px solid #F3F4F6;">
+                <div style="font-weight: 700; color: #111827;">${p.productName || 'Fashion Ensemble'}</div>
+                ${p.orderId ? `<div style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">Order: ${p.orderId}</div>` : ''}
+              </td>
+              <td style="text-align: center; font-weight: 600; padding: 0.85rem 0.75rem; border-bottom: 1px solid #F3F4F6;">${p.quantity || 1}</td>
+              <td style="font-weight: 700; color: #111827; padding: 0.85rem 0.75rem; border-bottom: 1px solid #F3F4F6;">Rs. ${Number(p.amount || 0).toLocaleString()}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Show details and scroll into view
+        detailsSection.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'View Membership';
+        detailsSection.scrollIntoView({ behavior: 'smooth' });
+
+      } catch (err) {
+        console.error('Lookup error:', err);
+        errorBox.textContent = 'An error occurred while looking up membership. Please try again.';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'View Membership';
+      }
+    };
+
+    window.togglePubCardFlip = () => {
+      const card = document.getElementById('pub-card-3d-wrapper');
+      if (card) card.classList.toggle('flipped');
+    };
+  </script>
+</head>
+<body style="background: #F8F9FA;">
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="logo">
+        <span class="logo-main">ZENVORA</span>
+        <span class="logo-sub">VIP CLUB</span>
+      </a>
+      <nav class="main-nav">
+        <a href="./index.html">Home</a>
+        <a href="./index.html#products">Products</a>
+        <a href="./cart.html">Cart</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="membership-page-wrap">
+    
+    <!-- Hero Box & Code Input Form (NO PASSWORD) -->
+    <div class="membership-hero-box">
+      <div style="width: 58px; height: 58px; border-radius: 50%; background: #FFFBEB; border: 1.5px solid #FCD34D; display: inline-flex; align-items: center; justify-content: center; font-size: 1.85rem; margin-bottom: 0.75rem;">
+        👑
+      </div>
+      <h1 style="font-family: var(--font-serif); font-size: 2rem; color: #111827; margin: 0 0 0.5rem 0;">
+        ZENVORA VIP MEMBERSHIP
+      </h1>
+      <p style="font-size: 1rem; color: #4B5563; margin: 0 0 1.75rem 0; line-height: 1.5;">
+        Enter your Membership Code to view your digital luxury pass, star rating, and purchase rewards.<br>
+        <span style="font-size: 0.85rem; color: #059669; font-weight: 600;">🔒 Password-free instant access</span>
+      </p>
+
+      <!-- Error Display -->
+      <div id="pub-member-error" style="display: none; padding: 1rem; background: #FEF2F2; color: #991B1B; border: 1.5px solid #FCA5A5; border-radius: 10px; max-width: 440px; margin: 0 auto 1.5rem auto; text-align: center; font-size: 0.95rem;"></div>
+
+      <!-- Form: ONLY Membership Code & View Membership -->
+      <form onsubmit="handlePublicMembershipLookup(event)" style="display: flex; flex-direction: column; align-items: center;">
+        <input 
+          type="text" 
+          id="pub-member-code" 
+          class="membership-lookup-input" 
+          placeholder="ZV-MEM-000125" 
+          required 
+          autocomplete="off"
+          aria-label="Membership Code"
+        >
+        <button type="submit" id="btn-pub-lookup" class="membership-submit-btn">
+          View Membership
+        </button>
+      </form>
+
+      <div style="margin-top: 1.5rem; font-size: 0.82rem; color: #6B7280;">
+        Need assistance with your membership? <a href="https://wa.me/923232974451" target="_blank" rel="noopener" style="color: #059669; font-weight: 700; text-decoration: underline;">WhatsApp Concierge (03232974451)</a>
+      </div>
+    </div>
+
+    <!-- Details Section: 3D Card & History (Shown upon valid code) -->
+    <div id="pub-member-details" style="display: none;">
+      
+      <!-- Interactive 3D Card Container -->
+      <div class="zv-card-viewport" style="margin-bottom: 2rem;">
+        <div id="pub-card-3d-wrapper" class="zv-card-3d" onclick="togglePubCardFlip()">
+          
+          <!-- CARD FRONT -->
+          <div class="zv-card-face zv-card-front">
+            <div class="zv-card-header">
+              <div class="zv-card-brand">
+                <span class="zv-card-brand-main">ZENVORA</span>
+                <span class="zv-card-brand-sub">VIP CLUB MEMBER</span>
+              </div>
+              <div class="zv-chip-wrapper">
+                <div class="zv-card-chip"></div>
+                <span class="zv-contactless">)))</span>
+              </div>
+            </div>
+
+            <div class="zv-card-number" id="pub-card-code-display">ZV-MEM-000125</div>
+
+            <div class="zv-card-footer">
+              <div class="zv-card-info-col">
+                <span class="zv-card-info-label">CARDHOLDER</span>
+                <span class="zv-card-info-value" id="pub-card-holder-name">VIP CUSTOMER</span>
+              </div>
+              <div class="zv-card-info-col">
+                <span class="zv-card-info-label">MEMBER SINCE</span>
+                <span class="zv-card-info-value" id="pub-card-since-display">2026</span>
+              </div>
+              <div class="zv-card-stars-col">
+                <span class="zv-card-info-label">STARS</span>
+                <div class="zv-card-stars" id="pub-card-stars-display">⭐</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD BACK -->
+          <div class="zv-card-face zv-card-back">
+            <div class="zv-card-mag-strip"></div>
+            
+            <div class="zv-card-sig-bar">
+              <div class="zv-card-sig-pattern">
+                <span id="pub-card-sig-code" style="font-family: monospace; font-size: 0.75rem; letter-spacing: 2px;">ZV-MEM-000125</span>
+              </div>
+              <div class="zv-card-cvv">VIP</div>
+            </div>
+
+            <div class="zv-card-terms">
+              This digital pass certifies honorary VIP membership with ZENVORA SHOOP. Present this card or quote your membership code on all orders to claim VIP privileges and rewards.
+            </div>
+
+            <div class="zv-card-back-footer">
+              <span class="zv-card-back-brand">ZENVORA SHOOP</span>
+              <span>WhatsApp: 03232974451 • Karachi</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="zv-card-controls" style="margin-bottom: 2rem;">
+        <button type="button" class="zv-btn-flip-hint" onclick="togglePubCardFlip()">
+          <span>⟳</span> Click to Flip Card (3D)
+        </button>
+      </div>
+
+      <!-- Member Stats Box -->
+      <div style="background: #ffffff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 1rem 0; border-bottom: 1px solid #F3F4F6; padding-bottom: 0.75rem;">
+          VIP Membership Privileges
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Member Name</span>
+            <div id="pub-summary-name" style="font-weight: 700; font-size: 1rem; color: #111827; margin-top: 0.25rem;">-</div>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Membership Code</span>
+            <div id="pub-summary-code" style="font-family: monospace; font-weight: 700; font-size: 1rem; color: #B45309; margin-top: 0.25rem;">-</div>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Total Orders</span>
+            <div id="pub-summary-purchases-count" style="font-weight: 700; font-size: 1rem; color: #059669; margin-top: 0.25rem;">0 Purchases</div>
+          </div>
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700;">Reward Stars</span>
+            <div id="pub-summary-stars-visual" style="font-size: 1.15rem; margin-top: 0.25rem;">⭐</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Purchase History -->
+      <div style="background: #ffffff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 1rem 0;">
+          Order Purchase Record
+        </h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #F9FAFB; font-size: 0.75rem; text-transform: uppercase; color: #374151; letter-spacing: 0.05em;">
+                <th style="padding: 0.75rem; text-align: left;">Date</th>
+                <th style="padding: 0.75rem; text-align: left;">Item Description</th>
+                <th style="padding: 0.75rem; text-align: center;">Qty</th>
+                <th style="padding: 0.75rem; text-align: left;">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="pub-purchases-tbody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container text-center">
+      <p style="font-size: 0.85rem; color: #9CA3AF; margin: 0;">
+        © 2026 ZENVORA SHOOP. All rights reserved. • Karachi, Pakistan
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
