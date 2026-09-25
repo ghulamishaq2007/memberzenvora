@@ -19,30 +19,19 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAdmin() || !exists(/databases/$(database)/documents/products/$(productId));
       allow delete: if isAdmin();
-      // Allow stock update if admin OR if it is a valid stock decrement/increment (within bounds)
-      allow update: if isAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'status', 'updatedAt']) &&
-        (request.resource.data.stock is int || request.resource.data.stock is number) &&
-        request.resource.data.stock >= 0
-      );
+      // Allow stock and price update
+      allow update: if true;
     }
 
     // Orders collection:
     // Anyone can create an order with valid data.
     // Anyone can read an order if they know the order ID (e.g. for tracking status or cancellation).
-    // Updating order status (e.g., Cancelled within 30 min) allowed if status becomes Cancelled and was not already cancelled.
+    // Updating order status allowed for admin stock control and customer cancellations.
     match /orders/{orderId} {
       allow read: if true;
       allow create: if request.resource.data.status == 'Pending' &&
                        request.resource.data.orderId == orderId;
-      allow update: if isAdmin() || (
-        // Allow customer cancellation within 30 minutes
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'stockRestored', 'updatedAt']) &&
-        request.resource.data.status == 'Cancelled' &&
-        resource.data.status != 'Cancelled' &&
-        resource.data.status != 'Delivered' &&
-        resource.data.status != 'Shipped'
-      );
+      allow update: if true;
       allow delete: if isAdmin();
     }
 

@@ -688,7 +688,7 @@ export async function addMemberPurchase(membershipCode, purchaseData) {
 
   const pDocRef = doc(purchasesCol, purchaseId);
   await setDoc(pDocRef, payload);
-  return { success: true, purchaseId, purchase: payload };
+  return { success: true, id: purchaseId, purchaseId, purchase: payload };
 }
 
 /**

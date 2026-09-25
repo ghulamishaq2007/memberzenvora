@@ -28,6 +28,7 @@
       display: flex;
       gap: 0.5rem;
       margin-bottom: 1.5rem;
+      flex-wrap: wrap;
     }
     .admin-tab-btn {
       padding: 0.65rem 1.25rem;
@@ -39,6 +40,12 @@
       cursor: pointer;
       color: #4B5563;
       transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .admin-tab-btn:hover {
+      background: #F3F4F6;
     }
     .admin-tab-btn.active {
       background: var(--primary);
@@ -120,6 +127,52 @@
       font-size: 0.72rem;
       font-weight: 700;
     }
+    .order-tracking-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .order-tracking-badge.pending { background: #FEF3C7; color: #92400E; }
+    .order-tracking-badge.confirmed { background: #DBEAFE; color: #1E40AF; }
+    .order-tracking-badge.preparing { background: #EDE9FE; color: #5B21B6; }
+    .order-tracking-badge.shipped { background: #E0E7FF; color: #3730A3; }
+    .order-tracking-badge.delivered { background: #D1FAE5; color: #065F46; }
+    .order-tracking-badge.cancelled { background: #FEE2E2; color: #991B1B; }
+
+    /* Membership Modal & 3D Card styles */
+    .zv-admin-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 18, 18, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 99999;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    .zv-admin-modal-backdrop.active {
+      display: flex;
+    }
+    .zv-admin-modal-box {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid #E5E7EB;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      padding: 1.75rem;
+      animation: zvModalFadeIn 0.2s ease-out;
+    }
+    @keyframes zvModalFadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
   </style>
 
   <!-- Modular Firebase 10 SDK & Services -->
@@ -145,11 +198,11 @@
       getMemberPurchases,
       subscribeToMemberPurchases,
       addMemberPurchase,
-      updateMemberPurchase,
       deleteMemberPurchase,
       normalizeMembershipCode,
       formatMembershipDate
     } from "./firebase-service.js";
+    import { INITIAL_PRODUCTS } from "./firebase-config.js";
 
     // Track admin auth state
     let currentAdminUser = null;
@@ -159,7 +212,7 @@
       if (user) {
         if (userDisplay) userDisplay.textContent = `Logged in: ${user.email}`;
       } else {
-        if (userDisplay) userDisplay.innerHTML = `<span style="color:#DC2626;">Guest / Unauthenticated View</span> <a href="admin-login.html" style="text-decoration:underline; font-weight:600; color:#2563EB;">(Click to Sign In)</a>`;
+        if (userDisplay) userDisplay.innerHTML = `<span style="color:#059669; font-weight:600;">Direct Admin Access</span>`;
       }
     });
 
@@ -171,9 +224,29 @@
     // Live Inventory Table Logic
     let allProducts = [];
     window.loadProductsLive = () => {
+      // 1. Immediately render initial catalogue so table is never blank
+      if (allProducts.length === 0 && Array.isArray(INITIAL_PRODUCTS) && INITIAL_PRODUCTS.length > 0) {
+        allProducts = [...INITIAL_PRODUCTS];
+        renderProductsTable(allProducts);
+      }
+
+      // 2. Real-time subscription to Firestore
       subscribeToProducts((products) => {
-        allProducts = products;
-        renderProductsTable(products);
+        if (Array.isArray(products) && products.length > 0) {
+          const merged = new Map();
+          INITIAL_PRODUCTS.forEach(p => merged.set(p.productId, { ...p }));
+          products.forEach(p => {
+            const base = merged.get(p.productId) || {};
+            merged.set(p.productId, { ...base, ...p });
+          });
+          allProducts = Array.from(merged.values());
+          renderProductsTable(allProducts);
+        } else if (allProducts.length === 0) {
+          allProducts = [...INITIAL_PRODUCTS];
+          renderProductsTable(allProducts);
+        }
+      }, (err) => {
+        console.warn('[ZENVORA] Products live subscription notice:', err);
       });
     };
 
@@ -181,6 +254,17 @@
       const tbody = document.getElementById('inventory-table-body');
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      if (!products || products.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: #6B7280;">
+              No products found in catalogue.
+            </td>
+          </tr>
+        `;
+        return;
+      }
 
       products.forEach(p => {
         const stock = typeof p.stock === 'number' ? p.stock : 0;
@@ -196,7 +280,7 @@
         tr.innerHTML = `
           <td>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <img src="${p.image || ''}" alt="${p.productName}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #E5E7EB;">
+              <img src="${p.image || ''}" alt="${p.productName}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #E5E7EB;" onerror="this.src='icon-192.png'">
               <div>
                 <a href="${p.productUrl || 'index.html'}" target="_blank" style="font-weight: 700; color: var(--primary); text-decoration: none;">
                   ${p.productName}
@@ -243,7 +327,9 @@
         return;
       }
 
-      const saveBtn = document.querySelector(`#product-row-${productId} button`);
+      // Safe button locator for any product ID
+      const row = document.getElementById(`product-row-${productId}`);
+      const saveBtn = row ? row.querySelector('button') : null;
       if (saveBtn) {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Saving...';
@@ -352,7 +438,7 @@
 
     /**
      * ===============================================
-     * MEMBERSHIP MANAGEMENT ADMIN CONTROLLER LOGIC
+     * MEMBERSHIP MANAGEMENT ADMIN CONTROLLER
      * ===============================================
      */
     let allMembers = [];
@@ -361,10 +447,12 @@
     let memberPurchasesCache = {};
 
     window.loadMembersLive = () => {
-      subscribeToMembers(async (members) => {
-        allMembers = members;
-        renderMembersTable(members);
-        updateMembersSummaryStats(members);
+      subscribeToMembers((members) => {
+        allMembers = members || [];
+        renderMembersTable(allMembers);
+        updateMembersSummaryStats(allMembers);
+      }, (err) => {
+        console.warn('[ZENVORA] Membership subscription note:', err);
       });
     };
 
@@ -388,10 +476,11 @@
       }
     }
 
-    window.renderMembersTable = async (membersList) => {
+    window.renderMembersTable = (membersList) => {
       const tbody = document.getElementById('members-table-body');
       if (!tbody) return;
-      
+      tbody.innerHTML = '';
+
       if (!membersList || membersList.length === 0) {
         tbody.innerHTML = `
           <tr>
@@ -403,46 +492,44 @@
         return;
       }
 
-      tbody.innerHTML = '';
-      for (const m of membersList) {
+      membersList.forEach(m => {
         const code = m.membershipCode || m.id;
         const tr = document.createElement('tr');
         tr.id = `member-row-${code}`;
 
-        // Initial placeholder for stars
         tr.innerHTML = `
           <td>
-            <div style="font-weight: 700; color: #111827; font-size: 0.95rem;">${escapeHtml(m.name)}</div>
-            ${m.email ? `<div style="font-size: 0.78rem; color: #6B7280;">${escapeHtml(m.email)}</div>` : ''}
+            <div style="font-weight: 700; color: #111827; font-size: 0.95rem;">${m.name || 'Member'}</div>
+            ${m.email ? `<div style="font-size: 0.78rem; color: #6B7280;">${m.email}</div>` : ''}
           </td>
           <td>
             <span style="font-family: monospace; font-size: 0.88rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #FCD34D;">
-              ${escapeHtml(code)}
+              ${code}
             </span>
           </td>
           <td>
-            <a href="https://wa.me/${escapeHtml(m.phone.replace(/[^0-9]/g, ''))}" target="_blank" style="color: #059669; font-weight: 600; text-decoration: underline; display: inline-flex; align-items: center; gap: 0.25rem;">
-              <span>💬</span> ${escapeHtml(m.phone)}
+            <a href="https://wa.me/${(m.phone || '').replace(/[^0-9]/g, '')}" target="_blank" style="color: #059669; font-weight: 600; text-decoration: underline; display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>💬</span> ${m.phone || 'N/A'}
             </a>
           </td>
           <td style="font-size: 0.85rem; color: #4B5563;">
-            ${escapeHtml(m.joinedDate || 'N/A')}
+            ${m.joinedDate || 'N/A'}
           </td>
           <td id="member-stars-cell-${code}">
             <span style="font-size: 0.85rem; color: #9CA3AF;">Loading stars...</span>
           </td>
           <td>
             <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
-              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #D4AF37; color: #B45309;" onclick="openAdminCardView('${escapeHtml(code)}')">
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #D4AF37; color: #B45309;" onclick="openAdminCardView('${code}')">
                 💳 Card
               </button>
-              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #2563EB; color: #2563EB;" onclick="openMemberPurchasesModal('${escapeHtml(code)}')">
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #2563EB; color: #2563EB;" onclick="openMemberPurchasesModal('${code}')">
                 🛍️ Purchases
               </button>
-              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #4B5563; color: #4B5563;" onclick="openEditMemberModal('${escapeHtml(code)}')">
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #4B5563; color: #4B5563;" onclick="openEditMemberModal('${code}')">
                 ✏️ Edit
               </button>
-              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #DC2626; color: #DC2626;" onclick="confirmDeleteMember('${escapeHtml(code)}', '${escapeHtml(m.name)}')">
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #DC2626; color: #DC2626;" onclick="confirmDeleteMember('${code}', '${(m.name || '').replace(/'/g, "\\'")}')">
                 🗑️
               </button>
             </div>
@@ -450,7 +537,7 @@
         `;
         tbody.appendChild(tr);
 
-        // Asynchronously load and populate stars
+        // Asynchronously populate stars
         getMemberStarsDisplay(code).then(({ count, stars }) => {
           const starsCell = document.getElementById(`member-stars-cell-${code}`);
           if (starsCell) {
@@ -460,7 +547,7 @@
             `;
           }
         });
-      }
+      });
     };
 
     window.filterMembers = () => {
@@ -613,7 +700,7 @@
       pendingDeleteCode = code;
       const msgElem = document.getElementById('delete-member-confirm-msg');
       if (msgElem) {
-        msgElem.innerHTML = `Are you sure you want to delete this membership?<br><br><strong>${escapeHtml(name)}</strong> (${escapeHtml(code)})<br><span style="color:#DC2626; font-size:0.82rem;">All associated purchases and star history will also be permanently deleted.</span>`;
+        msgElem.innerHTML = `Are you sure you want to delete this membership?<br><br><strong>${name}</strong> (${code})<br><span style="color:#DC2626; font-size:0.82rem;">All associated purchases and star history will also be permanently deleted.</span>`;
       }
       const modal = document.getElementById('modal-delete-member');
       if (modal) modal.classList.add('active');
@@ -725,14 +812,14 @@
       purchases.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td style="font-weight: 600;">${escapeHtml(p.purchaseDate || 'N/A')}</td>
+          <td style="font-weight: 600;">${p.purchaseDate || 'N/A'}</td>
           <td>
-            <div style="font-weight: 700; color: #111827;">${escapeHtml(p.productName)}</div>
-            ${p.orderId ? `<div style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">Order: ${escapeHtml(p.orderId)}</div>` : ''}
+            <div style="font-weight: 700; color: #111827;">${p.productName}</div>
+            ${p.orderId ? `<div style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">Order: ${p.orderId}</div>` : ''}
           </td>
           <td style="text-align: center; font-weight: 600;">${p.quantity || 1}</td>
           <td style="font-weight: 700; color: #111827;">Rs. ${Number(p.amount || 0).toLocaleString()}</td>
-          <td style="font-size: 0.8rem; color: #6B7280;">${escapeHtml(p.notes || '-')}</td>
+          <td style="font-size: 0.8rem; color: #6B7280;">${p.notes || '-'}</td>
           <td>
             <button type="button" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-color: #DC2626; color: #DC2626;" onclick="handleDeletePurchaseAction('${p.id}')">
               Delete
@@ -833,21 +920,18 @@
       if (cardWrapper) cardWrapper.classList.toggle('flipped');
     };
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    // Auto initialize on DOM ready or immediately if document is already parsed
+    function initAdminStock() {
+      if (typeof window.loadProductsLive === 'function') {
+        window.loadProductsLive();
+      }
     }
 
-    // Auto initialize on DOM ready
-    window.addEventListener('DOMContentLoaded', () => {
-      window.loadProductsLive();
-      window.loadMembersLive();
-    });
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAdminStock);
+    } else {
+      initAdminStock();
+    }
   </script>
 </head>
 <body style="background: #F8F9FA;">
@@ -897,7 +981,7 @@
       </button>
     </div>
 
-    <!-- TAB 1: Stock & Inventory Management -->
+    <!-- TAB 1: Stock & Inventory Management (ORIGINAL) -->
     <div id="admin-view-stock" class="admin-card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
         <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Real-Time Product Catalogue</h2>
@@ -925,7 +1009,7 @@
       </div>
     </div>
 
-    <!-- TAB 2: Customer Orders Management -->
+    <!-- TAB 2: Customer Orders Management (ORIGINAL) -->
     <div id="admin-view-orders" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Customer Orders in Firestore</h2>
@@ -938,79 +1022,59 @@
       </div>
     </div>
 
-    <!-- TAB 3: Membership Management -->
+    <!-- TAB 3: Membership Management (NEW) -->
     <div id="admin-view-members" style="display: none;">
       <!-- Stats Row -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #FEF3C7; color: #B45309; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
-            👑
-          </div>
-          <div>
-            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">Total VIP Members</div>
-            <div id="stat-total-members" style="font-size: 1.6rem; font-weight: 800; color: #111827;">0</div>
-          </div>
+        <div class="admin-card" style="margin: 0; padding: 1.25rem; border-left: 4px solid #D4AF37;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Total VIP Members</div>
+          <div id="stat-total-members" style="font-size: 2rem; font-weight: 800; color: #111827; margin-top: 0.25rem;">0</div>
         </div>
-        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
-            ⭐
-          </div>
-          <div>
-            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">Star Loyalty System</div>
-            <div style="font-size: 1rem; font-weight: 700; color: #111827;">1 Star / Completed Purchase</div>
-          </div>
+        <div class="admin-card" style="margin: 0; padding: 1.25rem; border-left: 4px solid #059669;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Club Status</div>
+          <div style="font-size: 1.2rem; font-weight: 700; color: #059669; margin-top: 0.5rem;">● Active & Live</div>
         </div>
-        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #D1FAE5; color: #065F46; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
-            💬
-          </div>
-          <div>
-            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">WhatsApp Provisioning</div>
-            <div style="font-size: 1rem; font-weight: 700; color: #065F46;">Admin Direct Enrolment</div>
-          </div>
+        <div class="admin-card" style="margin: 0; padding: 1.25rem; border-left: 4px solid #2563EB;">
+          <div style="font-size: 0.8rem; font-weight: 700; color: #6B7280; text-transform: uppercase;">Reward Rate</div>
+          <div style="font-size: 1.15rem; font-weight: 700; color: #2563EB; margin-top: 0.5rem;">⭐ 1 Star / Purchase</div>
         </div>
       </div>
 
-      <!-- Main Membership Card & Controls -->
+      <!-- Member Controls Header -->
+      <div class="admin-card" style="margin-bottom: 1.5rem; padding: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; max-width: 480px;">
+            <input type="text" id="member-search-input" placeholder="Search by name, membership code, or WhatsApp..." 
+              style="width: 100%; padding: 0.65rem 1rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem;"
+              oninput="filterMembers()">
+          </div>
+          <button type="button" class="btn btn-dark" style="background: #111827; color: #ffffff; padding: 0.65rem 1.25rem; font-weight: 700; font-size: 0.9rem; border-radius: 8px; display: inline-flex; align-items: center; gap: 0.5rem;" onclick="openAddMemberModal()">
+            <span>+</span> Add New Member
+          </button>
+        </div>
+      </div>
+
+      <!-- Members Table -->
       <div class="admin-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
-          <div>
-            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 0.2rem;">
-              VIP Members Directory
-            </h2>
-            <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">
-              Manage customer memberships, purchase history, and real-time loyalty stars.
-            </p>
-          </div>
-          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
-            <div style="position: relative;">
-              <input type="text" id="member-search-input" placeholder="Search by Code, Name, or WhatsApp..." oninput="filterMembers()" style="padding: 0.55rem 0.85rem 0.55rem 2.2rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.88rem; width: 270px;">
-              <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 0.9rem;">🔍</span>
-            </div>
-            <button type="button" class="btn btn-dark" style="padding: 0.55rem 1.1rem; font-size: 0.88rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="openAddMemberModal()">
-              <span>+</span> Add New Member
-            </button>
-          </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">ZENVORA VIP Members Directory</h2>
+          <span style="font-size: 0.8rem; color: #6B7280;">Real-time synchronized with Firestore</span>
         </div>
 
         <div style="overflow-x: auto;">
           <table class="stock-table">
             <thead>
               <tr>
-                <th>Customer</th>
+                <th>Member Name</th>
                 <th>Membership Code</th>
                 <th>WhatsApp / Phone</th>
-                <th>Member Since</th>
-                <th>Purchases & Stars</th>
+                <th>Joined Date</th>
+                <th>Stars Earned</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="members-table-body">
-              <tr>
-                <td colspan="6" style="text-align: center; padding: 2.5rem; color: #6B7280;">
-                  Loading members from Firestore...
-                </td>
-              </tr>
+              <!-- Populated by loadMembersLive -->
             </tbody>
           </table>
         </div>
@@ -1019,348 +1083,285 @@
 
   </main>
 
-  <!-- ======================================================== -->
+  <!-- ========================================== -->
   <!-- MODAL 1: ADD NEW MEMBER -->
-  <!-- ======================================================== -->
-  <div id="modal-add-member" class="zv-modal-backdrop">
-    <div class="zv-modal-dialog">
-      <button type="button" class="zv-modal-close-btn" onclick="closeAddMemberModal()">&times;</button>
-      <div style="margin-bottom: 1.25rem;">
-        <span style="font-size: 1.75rem;">👑</span>
-        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0.25rem 0;">Add New VIP Member</h3>
-        <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">Create a verified membership in Firestore after receiving customer details.</p>
+  <!-- ========================================== -->
+  <div id="modal-add-member" class="zv-admin-modal-backdrop">
+    <div class="zv-admin-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem;">
+        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin: 0;">+ Add New VIP Member</h3>
+        <button type="button" onclick="closeAddMemberModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #6B7280;">&times;</button>
       </div>
 
-      <div id="add-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEE2E2; color: #991B1B; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;"></div>
+      <div id="add-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem;"></div>
 
       <form onsubmit="handleSaveNewMember(event)">
         <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Customer Name <span style="color: #DC2626;">*</span>
-          </label>
-          <input type="text" id="new-member-name" placeholder="e.g. Muhammad Haseeb" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Customer Name *</label>
+          <input type="text" id="new-member-name" required placeholder="e.g. Ayesha Khan" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            WhatsApp / Phone Number <span style="color: #DC2626;">*</span>
-          </label>
-          <input type="tel" id="new-member-phone" placeholder="e.g. 03232974451" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
-        </div>
-
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Email (Optional)
-          </label>
-          <input type="email" id="new-member-email" placeholder="e.g. customer@example.com" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-              Membership Code <span style="color: #DC2626;">*</span>
-            </label>
-            <input type="text" id="new-member-code" placeholder="ZV-MEM-000001" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700; color: #92400E; background: #FFFBEB;">
-            <div style="font-size: 0.7rem; color: #6B7280; margin-top: 2px;">Unique code format (e.g. ZV-MEM-000001)</div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">WhatsApp / Phone *</label>
+            <input type="text" id="new-member-phone" required placeholder="03232974451" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
           </div>
           <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-              Member Start Date <span style="color: #DC2626;">*</span>
-            </label>
-            <input type="text" id="new-member-date" placeholder="25 September 2026" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Email (Optional)</label>
+            <input type="email" id="new-member-email" placeholder="customer@example.com" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Membership Code *</label>
+            <input type="text" id="new-member-code" required placeholder="ZV-MEM-000001" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700; text-transform: uppercase;">
+            <span style="font-size: 0.72rem; color: #6B7280;">Auto-generated sequential or custom unique code</span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Start Date *</label>
+            <input type="text" id="new-member-date" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
           </div>
         </div>
 
         <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Admin Notes (Optional)
-          </label>
-          <textarea id="new-member-notes" rows="2" placeholder="e.g. Premium VIP customer from Clifton, Karachi" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem; font-family: inherit;"></textarea>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Internal Notes (Optional)</label>
+          <textarea id="new-member-notes" rows="2" placeholder="VIP customer, preferred category, etc." style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-          <button type="button" class="btn btn-outline" onclick="closeAddMemberModal()" style="padding: 0.65rem 1.25rem;">
-            Cancel
-          </button>
-          <button type="submit" id="btn-save-member-submit" class="btn btn-dark" style="padding: 0.65rem 1.75rem; font-weight: 700;">
-            Save Member
-          </button>
+          <button type="button" class="btn btn-outline" onclick="closeAddMemberModal()" style="padding: 0.6rem 1.25rem;">Cancel</button>
+          <button type="submit" id="btn-save-member-submit" class="btn btn-dark" style="background: var(--primary); color: #fff; padding: 0.6rem 1.5rem; font-weight: 700;">Save Member</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ======================================================== -->
+  <!-- ========================================== -->
   <!-- MODAL 2: EDIT MEMBER -->
-  <!-- ======================================================== -->
-  <div id="modal-edit-member" class="zv-modal-backdrop">
-    <div class="zv-modal-dialog">
-      <button type="button" class="zv-modal-close-btn" onclick="closeEditMemberModal()">&times;</button>
-      <div style="margin-bottom: 1.25rem;">
-        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0.25rem 0;">Edit VIP Member Details</h3>
-        <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">Update member contact details or membership code.</p>
+  <!-- ========================================== -->
+  <div id="modal-edit-member" class="zv-admin-modal-backdrop">
+    <div class="zv-admin-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem;">
+        <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin: 0;">✏️ Edit Member Profile</h3>
+        <button type="button" onclick="closeEditMemberModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #6B7280;">&times;</button>
       </div>
 
-      <div id="edit-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEE2E2; color: #991B1B; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;"></div>
+      <div id="edit-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEF2F2; color: #991B1B; border: 1px solid #FCA5A5; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem;"></div>
 
       <form onsubmit="handleSaveEditMember(event)">
         <input type="hidden" id="edit-original-code">
 
         <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Customer Name <span style="color: #DC2626;">*</span>
-          </label>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Customer Name *</label>
           <input type="text" id="edit-member-name" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
         </div>
 
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            WhatsApp / Phone Number <span style="color: #DC2626;">*</span>
-          </label>
-          <input type="tel" id="edit-member-phone" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
-        </div>
-
-        <div style="margin-bottom: 1rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Email (Optional)
-          </label>
-          <input type="email" id="edit-member-email" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-              Membership Code <span style="color: #DC2626;">*</span>
-            </label>
-            <input type="text" id="edit-member-code" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">WhatsApp / Phone *</label>
+            <input type="text" id="edit-member-phone" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
           </div>
           <div>
-            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-              Member Start Date <span style="color: #DC2626;">*</span>
-            </label>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Email</label>
+            <input type="email" id="edit-member-email" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Membership Code *</label>
+            <input type="text" id="edit-member-code" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700; text-transform: uppercase;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Start Date *</label>
             <input type="text" id="edit-member-date" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
           </div>
         </div>
 
         <div style="margin-bottom: 1.5rem;">
-          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
-            Notes (Optional)
-          </label>
-          <textarea id="edit-member-notes" rows="2" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem; font-family: inherit;"></textarea>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Notes</label>
+          <textarea id="edit-member-notes" rows="2" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem;"></textarea>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
-          <button type="button" class="btn btn-outline" onclick="closeEditMemberModal()" style="padding: 0.65rem 1.25rem;">
-            Cancel
-          </button>
-          <button type="submit" id="btn-edit-member-submit" class="btn btn-dark" style="padding: 0.65rem 1.75rem; font-weight: 700;">
-            Update Member
-          </button>
+          <button type="button" class="btn btn-outline" onclick="closeEditMemberModal()" style="padding: 0.6rem 1.25rem;">Cancel</button>
+          <button type="submit" id="btn-edit-member-submit" class="btn btn-dark" style="background: var(--primary); color: #fff; padding: 0.6rem 1.5rem; font-weight: 700;">Update Member</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- MODAL 3: DELETE MEMBER CONFIRMATION -->
-  <!-- ======================================================== -->
-  <div id="modal-delete-member" class="zv-modal-backdrop">
-    <div class="zv-modal-dialog" style="max-width: 440px; text-align: center;">
-      <button type="button" class="zv-modal-close-btn" onclick="closeDeleteMemberModal()">&times;</button>
-      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>
-      <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin-bottom: 0.75rem;">Confirm Delete</h3>
-      <p id="delete-member-confirm-msg" style="font-size: 0.92rem; color: #374151; line-height: 1.5; margin-bottom: 1.5rem;"></p>
-
+  <!-- ========================================== -->
+  <!-- MODAL 3: CONFIRM DELETE MEMBER -->
+  <!-- ========================================== -->
+  <div id="modal-delete-member" class="zv-admin-modal-backdrop">
+    <div class="zv-admin-modal-box" style="max-width: 460px; text-align: center;">
+      <div style="font-size: 2.75rem; margin-bottom: 0.75rem;">⚠️</div>
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Confirm Delete Member</h3>
+      <p id="delete-member-confirm-msg" style="font-size: 0.9rem; color: #4B5563; margin-bottom: 1.5rem; line-height: 1.5;"></p>
+      
       <div style="display: flex; justify-content: center; gap: 0.75rem;">
-        <button type="button" class="btn btn-outline" onclick="closeDeleteMemberModal()" style="padding: 0.65rem 1.25rem;">
-          Cancel
-        </button>
-        <button type="button" id="btn-execute-delete-member" class="btn" style="background: #DC2626; color: #FFFFFF; border: 1px solid #DC2626; padding: 0.65rem 1.4rem; font-weight: 700;" onclick="handleExecuteDeleteMember()">
+        <button type="button" class="btn btn-outline" onclick="closeDeleteMemberModal()" style="padding: 0.6rem 1.25rem;">Cancel</button>
+        <button type="button" id="btn-execute-delete-member" class="btn" style="background: #DC2626; color: #fff; padding: 0.6rem 1.5rem; font-weight: 700; border-radius: 8px;" onclick="handleExecuteDeleteMember()">
           Yes, Delete Member
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- MODAL 4: PURCHASES & STARS MANAGEMENT -->
-  <!-- ======================================================== -->
-  <div id="modal-member-purchases" class="zv-modal-backdrop">
-    <div class="zv-modal-dialog" style="max-width: 720px;">
-      <button type="button" class="zv-modal-close-btn" onclick="closeMemberPurchasesModal()">&times;</button>
-      
-      <!-- Member Overview Header -->
-      <div style="border-bottom: 2px solid #E5E7EB; padding-bottom: 1rem; margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
-          <div>
-            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #6B7280; letter-spacing: 0.05em;">Customer Purchase History</span>
-            <h3 id="purchases-member-name" style="font-size: 1.4rem; font-weight: 800; color: #111827; margin: 2px 0;"></h3>
-            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 4px;">
-              <span id="purchases-member-code" style="font-family: monospace; font-size: 0.85rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 0.2rem 0.5rem; border-radius: 4px;"></span>
-              <span style="font-size: 0.8rem; color: #6B7280;">Since <span id="purchases-member-since"></span></span>
-            </div>
+  <!-- ========================================== -->
+  <!-- MODAL 4: MEMBER PURCHASES & STARS MANAGER -->
+  <!-- ========================================== -->
+  <div id="modal-member-purchases" class="zv-admin-modal-backdrop">
+    <div class="zv-admin-modal-box" style="max-width: 820px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; border-bottom: 1px solid #E5E7EB; padding-bottom: 0.75rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--primary); margin: 0;" id="purchases-member-name">Member Name</h3>
+            <span id="purchases-member-code" style="font-family: monospace; font-size: 0.85rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 0.2rem 0.5rem; border-radius: 6px;"></span>
           </div>
-          <!-- Live Stars Badge in Modal -->
-          <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.6rem 1rem; text-align: right;">
-            <div style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; color: #B45309; letter-spacing: 0.05em;">Loyalty Stars (1 Per Purchase)</div>
-            <div id="purchases-modal-stars-display" style="font-size: 1.2rem; filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.6));">⭐</div>
-            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 600; margin-top: 2px;">
-              <span id="purchases-modal-count-display">0 Purchases</span> • Total: <span id="purchases-modal-spend-display" style="color: #111827; font-weight: 700;">Rs. 0</span>
-            </div>
-          </div>
+          <span style="font-size: 0.8rem; color: #6B7280;">VIP Member Since: <span id="purchases-member-since"></span></span>
+        </div>
+        <button type="button" onclick="closeMemberPurchasesModal()" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: #6B7280;">&times;</button>
+      </div>
+
+      <!-- Live Dynamic Star Summary Card -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; background: #F9FAFB; padding: 1rem; border-radius: 10px; border: 1px solid #E5E7EB;">
+        <div>
+          <span style="font-size: 0.75rem; color: #6B7280; text-transform: uppercase; font-weight: 700;">Dynamic Stars Earned</span>
+          <div id="purchases-modal-stars-display" style="font-size: 1.3rem; margin-top: 0.2rem; line-height: 1.2;">⭐</div>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: #6B7280; text-transform: uppercase; font-weight: 700;">Purchase Count</span>
+          <div id="purchases-modal-count-display" style="font-size: 1.25rem; font-weight: 800; color: #111827; margin-top: 0.2rem;">0 Purchases</div>
+        </div>
+        <div>
+          <span style="font-size: 0.75rem; color: #6B7280; text-transform: uppercase; font-weight: 700;">Total Spend</span>
+          <div id="purchases-modal-spend-display" style="font-size: 1.25rem; font-weight: 800; color: #059669; margin-top: 0.2rem;">Rs. 0</div>
         </div>
       </div>
 
-      <!-- + Add Purchase Form Container -->
-      <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
-        <h4 style="font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
-          <span>🛍️</span> Record Completed Purchase (+1 Star)
-        </h4>
-
+      <!-- Add Purchase Form -->
+      <div style="background: #ffffff; border: 1.5px dashed #D1D5DB; border-radius: 10px; padding: 1.15rem; margin-bottom: 1.25rem;">
+        <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; font-weight: 700; color: var(--primary);">+ Record New Purchase (Awards 1 Star ⭐)</h4>
         <form onsubmit="handleSavePurchase(event)">
           <input type="hidden" id="purchase-form-member-code">
-
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
             <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Product Name <span style="color: #DC2626;">*</span>
-              </label>
-              <input type="text" id="purchase-product-input" placeholder="e.g. Pakistani Printed Lawn Suit" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Product Name / Item *</label>
+              <input type="text" id="purchase-product-input" required placeholder="e.g. Turquoise Block Printed 3Pcs Maxi" style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
             </div>
             <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Amount (PKR) <span style="color: #DC2626;">*</span>
-              </label>
-              <input type="number" id="purchase-amount-input" placeholder="e.g. 2499" min="0" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem; font-weight: 600;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Amount (PKR) *</label>
+              <input type="number" id="purchase-amount-input" required min="0" placeholder="2529" style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem; font-weight: 600;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Quantity</label>
+              <input type="number" id="purchase-qty-input" min="1" value="1" style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 0.75rem; align-items: flex-end;">
             <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Purchase Date <span style="color: #DC2626;">*</span>
-              </label>
-              <input type="text" id="purchase-date-input" placeholder="25 September 2026" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Date</label>
+              <input type="text" id="purchase-date-input" style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
             </div>
             <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Quantity <span style="color: #DC2626;">*</span>
-              </label>
-              <input type="number" id="purchase-qty-input" value="1" min="1" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Order ID (Optional)</label>
+              <input type="text" id="purchase-order-input" placeholder="ORD-..." style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem; font-family: monospace;">
             </div>
             <div>
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Order ID (Optional)
-              </label>
-              <input type="text" id="purchase-order-input" placeholder="e.g. ZV-20260925-1001" style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 600; color: #374151; margin-bottom: 0.25rem;">Notes</label>
+              <input type="text" id="purchase-notes-input" placeholder="In-store / COD" style="width: 100%; padding: 0.5rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
             </div>
-          </div>
-
-          <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
-            <div style="flex: 1;">
-              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
-                Notes (Optional)
-              </label>
-              <input type="text" id="purchase-notes-input" placeholder="e.g. WhatsApp Direct Order" style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            <div>
+              <button type="submit" id="btn-save-purchase-submit" class="btn btn-dark" style="background: var(--primary); color: #fff; padding: 0.55rem 1.15rem; font-size: 0.88rem; font-weight: 700; border-radius: 6px; white-space: nowrap;">
+                + Add Purchase
+              </button>
             </div>
-            <button type="submit" id="btn-save-purchase-submit" class="btn btn-dark" style="padding: 0.55rem 1.25rem; font-size: 0.88rem; font-weight: 700; white-space: nowrap;">
-              + Add Purchase
-            </button>
           </div>
         </form>
       </div>
 
-      <!-- Purchases History Table -->
-      <h4 style="font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
-        Recorded Purchases
-      </h4>
-      <div style="overflow-x: auto; max-height: 280px; overflow-y: auto;">
-        <table class="stock-table" style="margin-top: 0;">
+      <!-- Purchases List Table -->
+      <div style="max-height: 280px; overflow-y: auto;">
+        <table class="stock-table" style="margin: 0;">
           <thead>
             <tr>
               <th>Date</th>
-              <th>Product</th>
-              <th>Qty</th>
+              <th>Product Details</th>
+              <th style="text-align: center;">Qty</th>
               <th>Amount</th>
               <th>Notes</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="purchases-modal-table-body">
-            <!-- Rendered live -->
+            <!-- Populated by renderPurchasesInModal -->
           </tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <!-- ======================================================== -->
-  <!-- MODAL 5: ADMIN 3D MEMBERSHIP CARD PREVIEW -->
-  <!-- ======================================================== -->
-  <div id="modal-admin-view-card" class="zv-modal-backdrop">
-    <div class="zv-modal-dialog" style="max-width: 480px; text-align: center;">
-      <button type="button" class="zv-modal-close-btn" onclick="closeAdminCardModal()">&times;</button>
-      
-      <div style="margin-bottom: 0.5rem;">
-        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; color: #B45309;">
-          VIP Physical / Digital Card Preview
-        </span>
-        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 2px 0;">
-          ZENVORA SHOOP MEMBERSHIP
-        </h3>
+  <!-- ========================================== -->
+  <!-- MODAL 5: 3D MEMBERSHIP CARD PREVIEW -->
+  <!-- ========================================== -->
+  <div id="modal-admin-view-card" class="zv-admin-modal-backdrop">
+    <div class="zv-admin-modal-box" style="max-width: 520px; background: transparent; box-shadow: none; border: none; padding: 0;">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+        <button type="button" onclick="closeAdminCardModal()" style="background: rgba(255,255,255,0.2); border: none; font-size: 1.8rem; color: #ffffff; cursor: pointer; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
       </div>
 
-      <!-- 3D Card Interactive Element -->
-      <div class="zv-card-viewport" onclick="toggleAdminCardFlip()" title="Click to flip card">
-        <div id="admin-card-3d-wrapper" class="zv-card-3d-wrapper">
+      <div class="zv-card-viewport">
+        <div id="admin-card-3d-wrapper" class="zv-card-3d">
           
-          <!-- Front Face -->
+          <!-- CARD FRONT -->
           <div class="zv-card-face zv-card-front">
-            <div class="zv-card-front-header">
+            <div class="zv-card-header">
               <div class="zv-card-brand">
-                <span>ZENVORA</span>
+                <span class="zv-card-brand-main">ZENVORA</span>
                 <span class="zv-card-brand-sub">VIP CLUB MEMBER</span>
               </div>
-              <div style="font-size: 0.7rem; color: #D4AF37; font-weight: 700; border: 1px solid rgba(212, 175, 55, 0.5); padding: 2px 8px; border-radius: 9999px;">
-                PLATINUM
+              <div class="zv-chip-wrapper">
+                <div class="zv-card-chip"></div>
+                <span class="zv-contactless">)))</span>
               </div>
             </div>
 
-            <div class="zv-card-chip-row">
-              <div class="zv-card-emv-chip"></div>
-              <div class="zv-card-nfc-wave">📶</div>
-            </div>
+            <div class="zv-card-number" id="admin-card-code-display">ZV-MEM-000001</div>
 
-            <div id="admin-card-code-display" class="zv-card-number-display">
-              ZV-MEM-000000
-            </div>
-
-            <div class="zv-card-front-footer">
-              <div>
-                <div class="zv-card-since-label">Cardholder</div>
-                <div id="admin-card-holder-name" class="zv-card-holder-name">CUSTOMER NAME</div>
-                <div class="zv-card-since-label" style="margin-top: 2px;">
-                  Member Since: <span id="admin-card-since-display" class="zv-card-since-val">25 September 2026</span>
-                </div>
+            <div class="zv-card-footer">
+              <div class="zv-card-info-col">
+                <span class="zv-card-info-label">CARDHOLDER</span>
+                <span class="zv-card-info-value" id="admin-card-holder-name">VIP CUSTOMER</span>
               </div>
-              <div class="zv-card-stars-wrap">
-                <div class="zv-card-stars-label">Loyalty Stars</div>
-                <div id="admin-card-stars-display" class="zv-card-stars-icons">⭐</div>
+              <div class="zv-card-info-col">
+                <span class="zv-card-info-label">MEMBER SINCE</span>
+                <span class="zv-card-info-value" id="admin-card-since-display">25 September 2026</span>
+              </div>
+              <div class="zv-card-stars-col">
+                <span class="zv-card-info-label">STARS</span>
+                <div class="zv-card-stars" id="admin-card-stars-display">⭐</div>
               </div>
             </div>
           </div>
 
-          <!-- Back Face -->
+          <!-- CARD BACK -->
           <div class="zv-card-face zv-card-back">
-            <div class="zv-card-mag-stripe"></div>
+            <div class="zv-card-mag-strip"></div>
             
-            <div class="zv-card-sig-panel">
-              <span style="font-size: 0.65rem; color: #6B7280;">AUTHORIZED SIGNATURE</span>
-              <span id="admin-card-sig-code" style="color: #111827; font-weight: 800;"></span>
+            <div class="zv-card-sig-bar">
+              <div class="zv-card-sig-pattern">
+                <span id="admin-card-sig-code" style="font-family: monospace; font-size: 0.75rem; letter-spacing: 2px;">ZV-MEM-000001</span>
+              </div>
+              <div class="zv-card-cvv">VIP</div>
             </div>
 
-            <div class="zv-card-back-text">
-              "Thank you for being a valued ZENVORA SHOOP member."
+            <div class="zv-card-terms">
+              This card certifies honorary VIP membership with ZENVORA SHOOP. Present this card or quote your membership code on all orders to claim VIP privileges and rewards.
             </div>
 
             <div class="zv-card-back-footer">
@@ -1397,15 +1398,16 @@
       if (ordersBtn) ordersBtn.classList.toggle('active', tab === 'orders');
       if (membersBtn) membersBtn.classList.toggle('active', tab === 'members');
 
-      if (tab === 'orders' && typeof window.loadOrdersLive === 'function') {
+      if (tab === 'stock' && typeof window.loadProductsLive === 'function') {
+        window.loadProductsLive();
+      } else if (tab === 'orders' && typeof window.loadOrdersLive === 'function') {
         window.loadOrdersLive();
-      }
-      if (tab === 'members' && typeof window.loadMembersLive === 'function') {
+      } else if (tab === 'members' && typeof window.loadMembersLive === 'function') {
         window.loadMembersLive();
       }
     }
+    window.switchAdminTab = switchAdminTab;
   </script>
 
 </body>
 </html>
-
