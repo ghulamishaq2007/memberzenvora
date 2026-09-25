@@ -1,0 +1,13 @@
+# ZENVORA SHOOP Netlify Clean URL & Direct Routing
+/admin-stock        /admin-stock.html       200
+/admin-stock/       /admin-stock.html       200
+/admin-login        /admin-login.html       200
+/admin-login/       /admin-login.html       200
+/cart               /cart.html              200
+/cart/              /cart.html              200
+/about              /about.html             200
+/about/             /about.html             200
+/contact            /contact.html           200
+/contact/           /contact.html           200
+/my-order           /my-order.html          200
+/my-order/          /my-order.html          200

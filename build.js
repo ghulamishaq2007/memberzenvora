@@ -75,7 +75,7 @@ for (const file of files) {
   if (stat.isFile()) {
     if (ignoredFiles.has(file)) continue;
     const ext = path.extname(file).toLowerCase();
-    if (extensions.has(ext) || file === '_headers') {
+    if (extensions.has(ext) || file === '_headers' || file === '_redirects') {
       fs.copyFileSync(fullPath, path.join(distDir, file));
       copiedCount++;
     }

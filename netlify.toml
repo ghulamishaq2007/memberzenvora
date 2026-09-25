@@ -1,6 +1,36 @@
 [build]
   publish = "."
-  command = ""
+  command = "node build.js"
 
 [build.environment]
   NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/admin-stock"
+  to = "/admin-stock.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-login"
+  to = "/admin-login.html"
+  status = 200
+
+[[redirects]]
+  from = "/cart"
+  to = "/cart.html"
+  status = 200
+
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/my-order"
+  to = "/my-order.html"
+  status = 200
