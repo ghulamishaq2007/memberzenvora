@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated admin
+    function isAdmin() {
+      return request.auth != null && 
+        (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) ||
+         request.auth.token.email == 'zenvorashoop@gmail.com' ||
+         request.auth.token.email == 'admin@zenvora.com' ||
+         request.auth.token.email == 'g.ishaq2007@gmail.com');
+    }
+
+    // Products collection:
+    // Anyone can read products and stock levels to view inventory and checkout.
+    // Admins can create, update, and delete products.
+    // Customers checking out or cancelling need to update stock atomically via transactions.
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin() || !exists(/databases/$(database)/documents/products/$(productId));
+      allow delete: if isAdmin();
+      // Allow stock update if admin OR if it is a valid stock decrement/increment (within bounds)
+      allow update: if isAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock', 'status', 'updatedAt']) &&
+        (request.resource.data.stock is int || request.resource.data.stock is number) &&
+        request.resource.data.stock >= 0
+      );
+    }
+
+    // Orders collection:
+    // Anyone can create an order with valid data.
+    // Anyone can read an order if they know the order ID (e.g. for tracking status or cancellation).
+    // Updating order status (e.g., Cancelled within 30 min) allowed if status becomes Cancelled and was not already cancelled.
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create: if request.resource.data.status == 'Pending' &&
+                       request.resource.data.orderId == orderId;
+      allow update: if isAdmin() || (
+        // Allow customer cancellation within 30 minutes
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'cancelledAt', 'stockRestored', 'updatedAt']) &&
+        request.resource.data.status == 'Cancelled' &&
+        resource.data.status != 'Cancelled' &&
+        resource.data.status != 'Delivered' &&
+        resource.data.status != 'Shipped'
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Admin Users collection:
+    // Authenticated admin can read/write their admin settings
+    match /adminUsers/{userId} {
+      allow read, write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Members collection:
+    // Membership code acts as document identifier and lookup key.
+    // Customers can get their own membership profile and purchases.
+    // Admin Stock panel can manage members and purchases.
+    match /members/{memberCode} {
+      allow read, write: if true;
+
+      match /purchases/{purchaseId} {
+        allow read, write: if true;
+      }
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "entities": {
+    "products": {
+      "title": "Products",
+      "description": "Store products with real-time stock levels, pricing, status, and details.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "Canonical product identifier" },
+        "productName": { "type": "string", "description": "Display name of the product" },
+        "productUrl": { "type": "string", "description": "Relative product HTML URL" },
+        "image": { "type": "string", "description": "Product image filename or URL" },
+        "price": { "type": "number", "description": "Authoritative price in PKR" },
+        "stock": { "type": "number", "description": "Authoritative live stock quantity" },
+        "status": { "type": "string", "enum": ["available", "out_of_stock"], "description": "Stock status" },
+        "category": { "type": "string", "description": "Product category" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of last stock update" }
+      },
+      "required": ["productId", "productName", "price", "stock", "status"]
+    },
+    "orders": {
+      "title": "Orders",
+      "description": "Customer orders placed via direct WhatsApp checkout with 30-minute cancellation window and stock deduction.",
+      "type": "object",
+      "properties": {
+        "orderId": { "type": "string", "description": "Formatted unique order ID (e.g. ZV-20260920-0001)" },
+        "customerName": { "type": "string", "description": "Customer full name" },
+        "phone": { "type": "string", "description": "Pakistani mobile number" },
+        "province": { "type": "string", "description": "Province or region" },
+        "city": { "type": "string", "description": "Delivery city" },
+        "area": { "type": "string", "description": "Delivery area or locality" },
+        "address": { "type": "string", "description": "Full street address" },
+        "items": { "type": "array", "description": "Ordered items with verified prices and quantities" },
+        "total": { "type": "number", "description": "Calculated total price in PKR" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Preparing", "Shipped", "Delivered", "Cancelled"], "description": "Order status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Order placement server timestamp" },
+        "cancellationDeadline": { "type": "string", "format": "date-time", "description": "30 minutes from creation" },
+        "cancelledAt": { "type": "string", "format": "date-time", "description": "Timestamp when customer cancelled order" },
+        "stockRestored": { "type": "boolean", "description": "Flag indicating stock has already been restored upon cancellation" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last modified timestamp" }
+      },
+      "required": ["orderId", "customerName", "phone", "province", "city", "area", "address", "items", "total", "status", "createdAt", "cancellationDeadline"]
+    },
+    "adminUsers": {
+      "title": "Admin Users",
+      "description": "Authorized administrators permitted to manage stock, prices, and orders.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Admin email address" },
+        "role": { "type": "string", "enum": ["admin"], "description": "Role permission" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["email", "role"]
+    },
+    "members": {
+      "title": "Members",
+      "description": "ZENVORA SHOOP VIP members directory managed via Admin Stock panel.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Customer full name" },
+        "phone": { "type": "string", "description": "WhatsApp or mobile contact number" },
+        "email": { "type": "string", "description": "Optional email address" },
+        "membershipCode": { "type": "string", "description": "Unique VIP membership code (e.g. ZV-MEM-000001)" },
+        "joinedDate": { "type": "string", "description": "Membership commencement date display string" },
+        "notes": { "type": "string", "description": "Optional internal administrator notes" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Record creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Record update timestamp" }
+      },
+      "required": ["name", "phone", "membershipCode", "joinedDate"]
+    },
+    "purchases": {
+      "title": "Member Purchases",
+      "description": "Customer purchase transaction records giving 1 star per purchase.",
+      "type": "object",
+      "properties": {
+        "productName": { "type": "string", "description": "Purchased product name" },
+        "productId": { "type": "string", "description": "Optional product catalog ID" },
+        "purchaseDate": { "type": "string", "description": "Purchase transaction date" },
+        "quantity": { "type": "number", "description": "Quantity purchased" },
+        "amount": { "type": "number", "description": "Purchase price amount in PKR" },
+        "orderId": { "type": "string", "description": "Optional order reference ID" },
+        "notes": { "type": "string", "description": "Optional notes on this purchase" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Record creation timestamp" }
+      },
+      "required": ["productName", "purchaseDate", "quantity", "amount"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "products",
+      "description": "Store catalogue inventory and prices"
+    },
+    "/orders/{orderId}": {
+      "schema": "orders",
+      "description": "Store customer orders"
+    },
+    "/adminUsers/{userId}": {
+      "schema": "adminUsers",
+      "description": "Store administrator roles"
+    },
+    "/members/{memberCode}": {
+      "schema": "members",
+      "description": "Store membership profiles keyed by normalized unique membership code"
+    },
+    "/members/{memberCode}/purchases/{purchaseId}": {
+      "schema": "purchases",
+      "description": "Store member purchases for star calculations and purchase history"
+    }
+  }
+}

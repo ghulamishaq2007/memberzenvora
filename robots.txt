@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /cart.html
+Disallow: /sandal-product-template.html
+Sitemap: https://zenvorashoop.netlify.app/sitemap.xml

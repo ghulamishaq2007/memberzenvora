@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="error-guard.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Stock & Order Control Center | ZENVORA SHOOP</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    .admin-dashboard-layout {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .admin-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #E5E7EB;
+    }
+    .admin-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .admin-tab-btn {
+      padding: 0.65rem 1.25rem;
+      border: 1px solid #D1D5DB;
+      background: #ffffff;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #4B5563;
+      transition: var(--transition);
+    }
+    .admin-tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+    .admin-card {
+      background: #ffffff;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+      margin-bottom: 2rem;
+    }
+    .stock-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+    .stock-table th, .stock-table td {
+      padding: 0.85rem 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #F3F4F6;
+      font-size: 0.9rem;
+    }
+    .stock-table th {
+      background: #F9FAFB;
+      font-weight: 700;
+      color: #374151;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    .stock-input-field {
+      width: 80px;
+      padding: 0.4rem 0.5rem;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .price-input-field {
+      width: 110px;
+      padding: 0.4rem 0.5rem;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .status-select-field {
+      padding: 0.4rem 0.5rem;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .badge-out {
+      background: #FEE2E2;
+      color: #991B1B;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-in {
+      background: #D1FAE5;
+      color: #065F46;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+    .badge-low {
+      background: #FEF3C7;
+      color: #92400E;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+  </style>
+
+  <!-- Modular Firebase 10 SDK & Services -->
+  <script type="module">
+    import { 
+      auth, 
+      signOut, 
+      onAuthStateChanged,
+      subscribeToProducts,
+      adminUpdateProduct,
+      adminUpdateOrderStatus,
+      db,
+      collection,
+      getDocs,
+      query,
+      orderBy,
+      createMember,
+      updateMember,
+      deleteMember,
+      getMember,
+      subscribeToMembers,
+      getNextSequentialMembershipCode,
+      getMemberPurchases,
+      subscribeToMemberPurchases,
+      addMemberPurchase,
+      updateMemberPurchase,
+      deleteMemberPurchase,
+      normalizeMembershipCode,
+      formatMembershipDate
+    } from "./firebase-service.js";
+
+    // Track admin auth state
+    let currentAdminUser = null;
+    onAuthStateChanged(auth, (user) => {
+      currentAdminUser = user;
+      const userDisplay = document.getElementById('admin-user-display');
+      if (user) {
+        if (userDisplay) userDisplay.textContent = `Logged in: ${user.email}`;
+      } else {
+        if (userDisplay) userDisplay.innerHTML = `<span style="color:#DC2626;">Guest / Unauthenticated View</span> <a href="admin-login.html" style="text-decoration:underline; font-weight:600; color:#2563EB;">(Click to Sign In)</a>`;
+      }
+    });
+
+    window.handleAdminSignOut = async () => {
+      await signOut(auth);
+      window.location.href = "admin-login.html";
+    };
+
+    // Live Inventory Table Logic
+    let allProducts = [];
+    window.loadProductsLive = () => {
+      subscribeToProducts((products) => {
+        allProducts = products;
+        renderProductsTable(products);
+      });
+    };
+
+    function renderProductsTable(products) {
+      const tbody = document.getElementById('inventory-table-body');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      products.forEach(p => {
+        const stock = typeof p.stock === 'number' ? p.stock : 0;
+        let badge = '<span class="badge-in">Available</span>';
+        if (p.status === 'out_of_stock' || stock <= 0) {
+          badge = '<span class="badge-out">Out of Stock</span>';
+        } else if (stock <= 2) {
+          badge = '<span class="badge-low">Low Stock</span>';
+        }
+
+        const tr = document.createElement('tr');
+        tr.id = `product-row-${p.productId}`;
+        tr.innerHTML = `
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <img src="${p.image || ''}" alt="${p.productName}" style="width: 44px; height: 44px; object-fit: cover; border-radius: 6px; border: 1px solid #E5E7EB;">
+              <div>
+                <a href="${p.productUrl || 'index.html'}" target="_blank" style="font-weight: 700; color: var(--primary); text-decoration: none;">
+                  ${p.productName}
+                </a>
+                <div style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">ID: ${p.productId}</div>
+              </div>
+            </div>
+          </td>
+          <td>${p.category || 'Fashion'}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.25rem;">
+              <span style="font-size: 0.85rem; color: #6B7280;">Rs.</span>
+              <input type="number" id="price-input-${p.productId}" class="price-input-field" value="${p.price}" min="0">
+            </div>
+          </td>
+          <td>
+            <input type="number" id="stock-input-${p.productId}" class="stock-input-field" value="${stock}" min="0">
+          </td>
+          <td>${badge}</td>
+          <td>
+            <button type="button" class="btn btn-outline" style="padding: 0.35rem 0.85rem; font-size: 0.8rem; border-color: #2563EB; color: #2563EB;" onclick="saveProductChanges('${p.productId}')">
+              Save
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.saveProductChanges = async (productId) => {
+      const stockInput = document.getElementById(`stock-input-${productId}`);
+      const priceInput = document.getElementById(`price-input-${productId}`);
+      if (!stockInput || !priceInput) return;
+
+      const newStock = parseInt(stockInput.value, 10);
+      const newPrice = parseFloat(priceInput.value);
+
+      if (isNaN(newStock) || newStock < 0) {
+        alert('Please enter a valid non-negative integer for stock quantity.');
+        return;
+      }
+      if (isNaN(newPrice) || newPrice < 0) {
+        alert('Please enter a valid price in PKR.');
+        return;
+      }
+
+      const saveBtn = document.querySelector(`#product-row-${productId} button`);
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+      }
+
+      try {
+        await adminUpdateProduct(productId, {
+          stock: newStock,
+          price: newPrice
+        });
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = '✓ Saved';
+          setTimeout(() => { saveBtn.textContent = 'Save'; }, 1500);
+        }
+      } catch (err) {
+        console.error('Failed to update product in Firestore:', err);
+        alert('Error saving changes: ' + (err.message || 'Permission denied'));
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save';
+        }
+      }
+    };
+
+    // Live Orders Management Logic
+    window.loadOrdersLive = async () => {
+      const ordersContainer = document.getElementById('orders-list-container');
+      if (!ordersContainer) return;
+      ordersContainer.innerHTML = '<p style="color:#6B7280;">Loading orders from Firestore...</p>';
+
+      try {
+        const ordersCol = collection(db, 'orders');
+        const snap = await getDocs(ordersCol);
+        if (snap.empty) {
+          ordersContainer.innerHTML = '<p style="color:#6B7280;">No customer orders placed yet.</p>';
+          return;
+        }
+
+        const orders = [];
+        snap.forEach(docSnap => orders.push({ id: docSnap.id, ...docSnap.data() }));
+        orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+        let html = '';
+        orders.forEach(ord => {
+          const status = (ord.status || 'Pending').toLowerCase();
+          const itemsCount = (ord.items || []).reduce((acc, it) => acc + (it.quantity || 1), 0);
+          
+          html += `
+            <div class="admin-card" style="margin-bottom: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+                <div>
+                  <span class="order-tracking-badge ${status}">${ord.status}</span>
+                  <strong style="margin-left: 0.5rem; font-family: monospace; font-size: 1.05rem;">${ord.orderId}</strong>
+                  <span style="font-size: 0.8rem; color: #6B7280; margin-left: 0.75rem;">${new Date(ord.createdAt).toLocaleString()}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <label style="font-size: 0.82rem; font-weight: 600;">Status:</label>
+                  <select class="status-select-field" onchange="updateOrderStatus('${ord.orderId}', this.value)">
+                    <option value="Pending" ${ord.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                    <option value="Confirmed" ${ord.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                    <option value="Preparing" ${ord.status === 'Preparing' ? 'selected' : ''}>Preparing</option>
+                    <option value="Shipped" ${ord.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                    <option value="Delivered" ${ord.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                    <option value="Cancelled" ${ord.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="font-size: 0.88rem; color: #374151; margin-bottom: 0.75rem; line-height: 1.5; background: #F9FAFB; padding: 0.75rem; border-radius: 8px;">
+                <div><strong>Customer:</strong> ${ord.customerName || 'N/A'} • <strong>Phone:</strong> <a href="https://wa.me/${(ord.phone || '').replace(/[^0-9]/g, '')}" target="_blank" style="color: #059669; text-decoration: underline;">${ord.phone || 'N/A'}</a></div>
+                <div><strong>Address:</strong> ${ord.address || ''}, ${ord.area || ''}, ${ord.city || ''}, ${ord.province || ''}</div>
+              </div>
+
+              <div style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+                <strong>Items (${itemsCount}):</strong>
+                <ul style="margin: 0.35rem 0 0 1.25rem; padding: 0;">
+                  ${(ord.items || []).map(it => `<li>${it.quantity}x ${it.productName || it.name} @ Rs. ${Number(it.price).toLocaleString()}</li>`).join('')}
+                </ul>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; font-weight: 700; border-top: 1px dashed #E5E7EB; padding-top: 0.5rem;">
+                <span>Total (COD): Rs. ${Number(ord.total || 0).toLocaleString()}</span>
+                <a href="https://api.whatsapp.com/send?phone=03232974451&text=${encodeURIComponent('Regarding Order ' + ord.orderId + ' for customer ' + ord.customerName)}" target="_blank" class="btn btn-outline" style="font-size: 0.78rem; padding: 0.3rem 0.75rem;">
+                  WhatsApp Log
+                </a>
+              </div>
+            </div>
+          `;
+        });
+        ordersContainer.innerHTML = html;
+      } catch (err) {
+        console.error('Error loading orders:', err);
+        ordersContainer.innerHTML = `<p style="color:#DC2626;">Failed to load orders: ${err.message}</p>`;
+      }
+    };
+
+    window.updateOrderStatus = async (orderId, newStatus) => {
+      try {
+        await adminUpdateOrderStatus(orderId, newStatus);
+        alert(`Order #${orderId} status updated to ${newStatus}.`);
+      } catch (err) {
+        alert('Failed to update status: ' + err.message);
+      }
+    };
+
+    /**
+     * ===============================================
+     * MEMBERSHIP MANAGEMENT ADMIN CONTROLLER LOGIC
+     * ===============================================
+     */
+    let allMembers = [];
+    let activePurchasesUnsub = null;
+    let currentManagingMember = null;
+    let memberPurchasesCache = {};
+
+    window.loadMembersLive = () => {
+      subscribeToMembers(async (members) => {
+        allMembers = members;
+        renderMembersTable(members);
+        updateMembersSummaryStats(members);
+      });
+    };
+
+    function updateMembersSummaryStats(members) {
+      const totalCountElem = document.getElementById('stat-total-members');
+      if (totalCountElem) totalCountElem.textContent = members.length;
+    }
+
+    async function getMemberStarsDisplay(code) {
+      if (memberPurchasesCache[code]) {
+        const count = memberPurchasesCache[code].length;
+        return { count, stars: count > 0 ? '⭐'.repeat(count) : '☆ (0)' };
+      }
+      try {
+        const purchases = await getMemberPurchases(code);
+        memberPurchasesCache[code] = purchases;
+        const count = purchases.length;
+        return { count, stars: count > 0 ? '⭐'.repeat(count) : '☆ (0)' };
+      } catch {
+        return { count: 0, stars: '☆ (0)' };
+      }
+    }
+
+    window.renderMembersTable = async (membersList) => {
+      const tbody = document.getElementById('members-table-body');
+      if (!tbody) return;
+      
+      if (!membersList || membersList.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2.5rem; color: #6B7280;">
+              No VIP members created yet. Click <strong>+ Add New Member</strong> above to create your first ZENVORA SHOOP VIP member.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      for (const m of membersList) {
+        const code = m.membershipCode || m.id;
+        const tr = document.createElement('tr');
+        tr.id = `member-row-${code}`;
+
+        // Initial placeholder for stars
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight: 700; color: #111827; font-size: 0.95rem;">${escapeHtml(m.name)}</div>
+            ${m.email ? `<div style="font-size: 0.78rem; color: #6B7280;">${escapeHtml(m.email)}</div>` : ''}
+          </td>
+          <td>
+            <span style="font-family: monospace; font-size: 0.88rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid #FCD34D;">
+              ${escapeHtml(code)}
+            </span>
+          </td>
+          <td>
+            <a href="https://wa.me/${escapeHtml(m.phone.replace(/[^0-9]/g, ''))}" target="_blank" style="color: #059669; font-weight: 600; text-decoration: underline; display: inline-flex; align-items: center; gap: 0.25rem;">
+              <span>💬</span> ${escapeHtml(m.phone)}
+            </a>
+          </td>
+          <td style="font-size: 0.85rem; color: #4B5563;">
+            ${escapeHtml(m.joinedDate || 'N/A')}
+          </td>
+          <td id="member-stars-cell-${code}">
+            <span style="font-size: 0.85rem; color: #9CA3AF;">Loading stars...</span>
+          </td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #D4AF37; color: #B45309;" onclick="openAdminCardView('${escapeHtml(code)}')">
+                💳 Card
+              </button>
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #2563EB; color: #2563EB;" onclick="openMemberPurchasesModal('${escapeHtml(code)}')">
+                🛍️ Purchases
+              </button>
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #4B5563; color: #4B5563;" onclick="openEditMemberModal('${escapeHtml(code)}')">
+                ✏️ Edit
+              </button>
+              <button type="button" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.78rem; border-color: #DC2626; color: #DC2626;" onclick="confirmDeleteMember('${escapeHtml(code)}', '${escapeHtml(m.name)}')">
+                🗑️
+              </button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        // Asynchronously load and populate stars
+        getMemberStarsDisplay(code).then(({ count, stars }) => {
+          const starsCell = document.getElementById(`member-stars-cell-${code}`);
+          if (starsCell) {
+            starsCell.innerHTML = `
+              <div style="font-size: 0.95rem; line-height: 1.2;">${stars}</div>
+              <div style="font-size: 0.72rem; color: #6B7280; font-weight: 600;">${count} ${count === 1 ? 'purchase' : 'purchases'}</div>
+            `;
+          }
+        });
+      }
+    };
+
+    window.filterMembers = () => {
+      const q = (document.getElementById('member-search-input')?.value || '').trim().toLowerCase();
+      if (!q) {
+        renderMembersTable(allMembers);
+        return;
+      }
+      const filtered = allMembers.filter(m => {
+        const code = (m.membershipCode || '').toLowerCase();
+        const name = (m.name || '').toLowerCase();
+        const phone = (m.phone || '').toLowerCase();
+        return code.includes(q) || name.includes(q) || phone.includes(q);
+      });
+      renderMembersTable(filtered);
+    };
+
+    // Modal Helpers
+    window.openAddMemberModal = () => {
+      const nextCode = getNextSequentialMembershipCode(allMembers);
+      document.getElementById('new-member-code').value = nextCode;
+      document.getElementById('new-member-date').value = formatMembershipDate(new Date());
+      document.getElementById('new-member-name').value = '';
+      document.getElementById('new-member-phone').value = '';
+      document.getElementById('new-member-email').value = '';
+      document.getElementById('new-member-notes').value = '';
+      document.getElementById('add-member-error').style.display = 'none';
+      
+      const modal = document.getElementById('modal-add-member');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeAddMemberModal = () => {
+      const modal = document.getElementById('modal-add-member');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.handleSaveNewMember = async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('new-member-name').value.trim();
+      const phone = document.getElementById('new-member-phone').value.trim();
+      const email = document.getElementById('new-member-email').value.trim();
+      const membershipCode = normalizeMembershipCode(document.getElementById('new-member-code').value);
+      const joinedDate = document.getElementById('new-member-date').value.trim();
+      const notes = document.getElementById('new-member-notes').value.trim();
+      const submitBtn = document.getElementById('btn-save-member-submit');
+      const errorBox = document.getElementById('add-member-error');
+
+      if (!name || !phone || !membershipCode) {
+        errorBox.textContent = 'Please fill all required fields: Name, Phone, and Membership Code.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving to Firestore...';
+      errorBox.style.display = 'none';
+
+      try {
+        await createMember({
+          name,
+          phone,
+          email,
+          membershipCode,
+          joinedDate,
+          notes
+        });
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Member';
+        closeAddMemberModal();
+        alert(`Member "${name}" with code ${membershipCode} successfully saved!`);
+      } catch (err) {
+        console.error('Error creating member:', err);
+        errorBox.textContent = err.message || 'Failed to save member.';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Member';
+      }
+    };
+
+    window.openEditMemberModal = (code) => {
+      const member = allMembers.find(m => (m.membershipCode || m.id) === code);
+      if (!member) return;
+
+      document.getElementById('edit-original-code').value = code;
+      document.getElementById('edit-member-name').value = member.name || '';
+      document.getElementById('edit-member-phone').value = member.phone || '';
+      document.getElementById('edit-member-email').value = member.email || '';
+      document.getElementById('edit-member-code').value = member.membershipCode || code;
+      document.getElementById('edit-member-date').value = member.joinedDate || '';
+      document.getElementById('edit-member-notes').value = member.notes || '';
+      document.getElementById('edit-member-error').style.display = 'none';
+
+      const modal = document.getElementById('modal-edit-member');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeEditMemberModal = () => {
+      const modal = document.getElementById('modal-edit-member');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.handleSaveEditMember = async (e) => {
+      e.preventDefault();
+      const originalCode = document.getElementById('edit-original-code').value;
+      const name = document.getElementById('edit-member-name').value.trim();
+      const phone = document.getElementById('edit-member-phone').value.trim();
+      const email = document.getElementById('edit-member-email').value.trim();
+      const newCode = normalizeMembershipCode(document.getElementById('edit-member-code').value);
+      const joinedDate = document.getElementById('edit-member-date').value.trim();
+      const notes = document.getElementById('edit-member-notes').value.trim();
+      const submitBtn = document.getElementById('btn-edit-member-submit');
+      const errorBox = document.getElementById('edit-member-error');
+
+      if (!name || !phone || !newCode) {
+        errorBox.textContent = 'Name, Phone, and Membership Code are required.';
+        errorBox.style.display = 'block';
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Updating Firestore...';
+      errorBox.style.display = 'none';
+
+      try {
+        await updateMember(originalCode, {
+          name,
+          phone,
+          email,
+          membershipCode: newCode,
+          joinedDate,
+          notes
+        });
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Update Member';
+        closeEditMemberModal();
+        alert('Member updated successfully!');
+      } catch (err) {
+        console.error('Error updating member:', err);
+        errorBox.textContent = err.message || 'Failed to update member.';
+        errorBox.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Update Member';
+      }
+    };
+
+    // Delete Member Dialog
+    let pendingDeleteCode = null;
+    window.confirmDeleteMember = (code, name) => {
+      pendingDeleteCode = code;
+      const msgElem = document.getElementById('delete-member-confirm-msg');
+      if (msgElem) {
+        msgElem.innerHTML = `Are you sure you want to delete this membership?<br><br><strong>${escapeHtml(name)}</strong> (${escapeHtml(code)})<br><span style="color:#DC2626; font-size:0.82rem;">All associated purchases and star history will also be permanently deleted.</span>`;
+      }
+      const modal = document.getElementById('modal-delete-member');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeDeleteMemberModal = () => {
+      pendingDeleteCode = null;
+      const modal = document.getElementById('modal-delete-member');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.handleExecuteDeleteMember = async () => {
+      if (!pendingDeleteCode) return;
+      const btn = document.getElementById('btn-execute-delete-member');
+      btn.disabled = true;
+      btn.textContent = 'Deleting...';
+      try {
+        await deleteMember(pendingDeleteCode);
+        delete memberPurchasesCache[pendingDeleteCode];
+        btn.disabled = false;
+        btn.textContent = 'Yes, Delete Member';
+        closeDeleteMemberModal();
+        alert('Membership successfully deleted.');
+      } catch (err) {
+        console.error('Error deleting member:', err);
+        alert('Failed to delete member: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Yes, Delete Member';
+      }
+    };
+
+    // Purchases Management Modal
+    window.openMemberPurchasesModal = (code) => {
+      const member = allMembers.find(m => (m.membershipCode || m.id) === code);
+      if (!member) return;
+      currentManagingMember = member;
+
+      document.getElementById('purchases-member-name').textContent = member.name;
+      document.getElementById('purchases-member-code').textContent = code;
+      document.getElementById('purchases-member-since').textContent = member.joinedDate || 'N/A';
+      document.getElementById('purchase-form-member-code').value = code;
+
+      // Reset purchase form
+      document.getElementById('purchase-date-input').value = formatMembershipDate(new Date());
+      document.getElementById('purchase-product-input').value = '';
+      document.getElementById('purchase-qty-input').value = '1';
+      document.getElementById('purchase-amount-input').value = '';
+      document.getElementById('purchase-order-input').value = '';
+      document.getElementById('purchase-notes-input').value = '';
+
+      // Realtime subscription to purchases for this member
+      if (activePurchasesUnsub) activePurchasesUnsub();
+      activePurchasesUnsub = subscribeToMemberPurchases(code, (purchases) => {
+        memberPurchasesCache[code] = purchases;
+        renderPurchasesInModal(purchases);
+        // Refresh stars on main table cell
+        const starsCell = document.getElementById(`member-stars-cell-${code}`);
+        if (starsCell) {
+          const count = purchases.length;
+          const stars = count > 0 ? '⭐'.repeat(count) : '☆ (0)';
+          starsCell.innerHTML = `
+            <div style="font-size: 0.95rem; line-height: 1.2;">${stars}</div>
+            <div style="font-size: 0.72rem; color: #6B7280; font-weight: 600;">${count} ${count === 1 ? 'purchase' : 'purchases'}</div>
+          `;
+        }
+      });
+
+      const modal = document.getElementById('modal-member-purchases');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeMemberPurchasesModal = () => {
+      if (activePurchasesUnsub) {
+        activePurchasesUnsub();
+        activePurchasesUnsub = null;
+      }
+      currentManagingMember = null;
+      const modal = document.getElementById('modal-member-purchases');
+      if (modal) modal.classList.remove('active');
+    };
+
+    function renderPurchasesInModal(purchases) {
+      const tbody = document.getElementById('purchases-modal-table-body');
+      const starsDisplay = document.getElementById('purchases-modal-stars-display');
+      const countDisplay = document.getElementById('purchases-modal-count-display');
+      const totalSpendDisplay = document.getElementById('purchases-modal-spend-display');
+
+      const count = purchases.length;
+      const starsString = count > 0 ? '⭐'.repeat(count) : '☆ (0 Purchases)';
+      const totalSpend = purchases.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+      if (starsDisplay) starsDisplay.textContent = starsString;
+      if (countDisplay) countDisplay.textContent = `${count} ${count === 1 ? 'Purchase' : 'Purchases'}`;
+      if (totalSpendDisplay) totalSpendDisplay.textContent = `Rs. ${totalSpend.toLocaleString()}`;
+
+      if (!tbody) return;
+      if (count === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 2rem; color: #6B7280;">
+              No purchases added yet for this member. Use the form below to add a purchase and award stars.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      purchases.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight: 600;">${escapeHtml(p.purchaseDate || 'N/A')}</td>
+          <td>
+            <div style="font-weight: 700; color: #111827;">${escapeHtml(p.productName)}</div>
+            ${p.orderId ? `<div style="font-size: 0.75rem; color: #6B7280; font-family: monospace;">Order: ${escapeHtml(p.orderId)}</div>` : ''}
+          </td>
+          <td style="text-align: center; font-weight: 600;">${p.quantity || 1}</td>
+          <td style="font-weight: 700; color: #111827;">Rs. ${Number(p.amount || 0).toLocaleString()}</td>
+          <td style="font-size: 0.8rem; color: #6B7280;">${escapeHtml(p.notes || '-')}</td>
+          <td>
+            <button type="button" class="btn btn-outline" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; border-color: #DC2626; color: #DC2626;" onclick="handleDeletePurchaseAction('${p.id}')">
+              Delete
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    window.handleSavePurchase = async (e) => {
+      e.preventDefault();
+      if (!currentManagingMember) return;
+      const code = currentManagingMember.membershipCode || currentManagingMember.id;
+      const productName = document.getElementById('purchase-product-input').value.trim();
+      const purchaseDate = document.getElementById('purchase-date-input').value.trim();
+      const quantity = parseInt(document.getElementById('purchase-qty-input').value, 10);
+      const amount = parseFloat(document.getElementById('purchase-amount-input').value);
+      const orderId = document.getElementById('purchase-order-input').value.trim();
+      const notes = document.getElementById('purchase-notes-input').value.trim();
+      const btn = document.getElementById('btn-save-purchase-submit');
+
+      if (!productName || isNaN(amount) || amount < 0) {
+        alert('Please provide valid Product Name and Amount.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await addMemberPurchase(code, {
+          productName,
+          purchaseDate,
+          quantity: isNaN(quantity) ? 1 : quantity,
+          amount,
+          orderId,
+          notes
+        });
+        btn.disabled = false;
+        btn.textContent = '+ Add Purchase';
+        document.getElementById('purchase-product-input').value = '';
+        document.getElementById('purchase-amount-input').value = '';
+        document.getElementById('purchase-order-input').value = '';
+        document.getElementById('purchase-notes-input').value = '';
+      } catch (err) {
+        console.error('Failed to add purchase:', err);
+        alert('Error adding purchase: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = '+ Add Purchase';
+      }
+    };
+
+    window.handleDeletePurchaseAction = async (purchaseId) => {
+      if (!currentManagingMember || !purchaseId) return;
+      if (!confirm('Are you sure you want to delete this purchase? (Star count will automatically decrease by 1)')) return;
+
+      const code = currentManagingMember.membershipCode || currentManagingMember.id;
+      try {
+        await deleteMemberPurchase(code, purchaseId);
+      } catch (err) {
+        alert('Failed to delete purchase: ' + err.message);
+      }
+    };
+
+    // 3D Card Preview in Admin Panel
+    window.openAdminCardView = async (code) => {
+      const member = allMembers.find(m => (m.membershipCode || m.id) === code) || await getMember(code);
+      if (!member) {
+        alert('Member not found');
+        return;
+      }
+
+      const purchases = memberPurchasesCache[code] || await getMemberPurchases(code);
+      const count = purchases.length;
+      const stars = count > 0 ? '⭐'.repeat(count) : '☆';
+
+      document.getElementById('admin-card-holder-name').textContent = member.name || 'VIP MEMBER';
+      document.getElementById('admin-card-code-display').textContent = code;
+      document.getElementById('admin-card-since-display').textContent = member.joinedDate || '25 September 2026';
+      document.getElementById('admin-card-stars-display').textContent = stars;
+      document.getElementById('admin-card-sig-code').textContent = code;
+
+      const cardWrapper = document.getElementById('admin-card-3d-wrapper');
+      if (cardWrapper) cardWrapper.classList.remove('flipped');
+
+      const modal = document.getElementById('modal-admin-view-card');
+      if (modal) modal.classList.add('active');
+    };
+
+    window.closeAdminCardModal = () => {
+      const modal = document.getElementById('modal-admin-view-card');
+      if (modal) modal.classList.remove('active');
+    };
+
+    window.toggleAdminCardFlip = () => {
+      const cardWrapper = document.getElementById('admin-card-3d-wrapper');
+      if (cardWrapper) cardWrapper.classList.toggle('flipped');
+    };
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Auto initialize on DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      window.loadProductsLive();
+      window.loadMembersLive();
+    });
+  </script>
+</head>
+<body style="background: #F8F9FA;">
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-main">ZENVORA</span>
+        <span class="logo-sub">ADMIN CONTROL</span>
+      </a>
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span id="admin-user-display" style="font-size: 0.82rem; color: #4B5563;"></span>
+        <a href="index.html" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.4rem 0.9rem;">
+          View Store
+        </a>
+        <button type="button" class="btn btn-dark" style="font-size: 0.8rem; padding: 0.4rem 0.9rem;" onclick="handleAdminSignOut()">
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-dashboard-layout">
+    
+    <div class="admin-header-row">
+      <div>
+        <h1 style="font-family: var(--font-serif); font-size: 2rem; color: var(--primary); margin-bottom: 0.25rem;">
+          Inventory & Order Control Center
+        </h1>
+        <p style="font-size: 0.88rem; color: #6B7280; margin: 0;">
+          Authoritative real-time Firestore database connection for ZENVORA SHOOP.
+        </p>
+      </div>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab-btn active" id="tab-btn-stock" onclick="switchAdminTab('stock')">
+        📦 Stock & Pricing Manager
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-orders" onclick="switchAdminTab('orders')">
+        📋 Customer Orders
+      </button>
+      <button type="button" class="admin-tab-btn" id="tab-btn-members" onclick="switchAdminTab('members')">
+        👥 Membership Management
+      </button>
+    </div>
+
+    <!-- TAB 1: Stock & Inventory Management -->
+    <div id="admin-view-stock" class="admin-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Real-Time Product Catalogue</h2>
+        <div style="font-size: 0.82rem; color: #6B7280;">
+          💡 Changes take effect immediately on product pages and storefront cards.
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="stock-table">
+          <thead>
+            <tr>
+              <th>Product Details</th>
+              <th>Category</th>
+              <th>Price (PKR)</th>
+              <th>Stock Quantity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-table-body">
+            <!-- Rendered by live Firestore subscriber -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: Customer Orders Management -->
+    <div id="admin-view-orders" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Customer Orders in Firestore</h2>
+        <button type="button" class="btn btn-outline" style="font-size: 0.82rem; padding: 0.4rem 0.85rem;" onclick="loadOrdersLive()">
+          🔄 Refresh Orders
+        </button>
+      </div>
+      <div id="orders-list-container">
+        <!-- Rendered by loadOrdersLive -->
+      </div>
+    </div>
+
+    <!-- TAB 3: Membership Management -->
+    <div id="admin-view-members" style="display: none;">
+      <!-- Stats Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #FEF3C7; color: #B45309; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            👑
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">Total VIP Members</div>
+            <div id="stat-total-members" style="font-size: 1.6rem; font-weight: 800; color: #111827;">0</div>
+          </div>
+        </div>
+        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #E0E7FF; color: #4338CA; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            ⭐
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">Star Loyalty System</div>
+            <div style="font-size: 1rem; font-weight: 700; color: #111827;">1 Star / Completed Purchase</div>
+          </div>
+        </div>
+        <div class="admin-card" style="margin: 0; padding: 1.2rem; display: flex; align-items: center; gap: 1rem;">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #D1FAE5; color: #065F46; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+            💬
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 700; text-transform: uppercase;">WhatsApp Provisioning</div>
+            <div style="font-size: 1rem; font-weight: 700; color: #065F46;">Admin Direct Enrolment</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Membership Card & Controls -->
+      <div class="admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: var(--primary); margin-bottom: 0.2rem;">
+              VIP Members Directory
+            </h2>
+            <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">
+              Manage customer memberships, purchase history, and real-time loyalty stars.
+            </p>
+          </div>
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <div style="position: relative;">
+              <input type="text" id="member-search-input" placeholder="Search by Code, Name, or WhatsApp..." oninput="filterMembers()" style="padding: 0.55rem 0.85rem 0.55rem 2.2rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.88rem; width: 270px;">
+              <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: 0.9rem;">🔍</span>
+            </div>
+            <button type="button" class="btn btn-dark" style="padding: 0.55rem 1.1rem; font-size: 0.88rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.4rem;" onclick="openAddMemberModal()">
+              <span>+</span> Add New Member
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="stock-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Membership Code</th>
+                <th>WhatsApp / Phone</th>
+                <th>Member Since</th>
+                <th>Purchases & Stars</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="members-table-body">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 2.5rem; color: #6B7280;">
+                  Loading members from Firestore...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: ADD NEW MEMBER -->
+  <!-- ======================================================== -->
+  <div id="modal-add-member" class="zv-modal-backdrop">
+    <div class="zv-modal-dialog">
+      <button type="button" class="zv-modal-close-btn" onclick="closeAddMemberModal()">&times;</button>
+      <div style="margin-bottom: 1.25rem;">
+        <span style="font-size: 1.75rem;">👑</span>
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0.25rem 0;">Add New VIP Member</h3>
+        <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">Create a verified membership in Firestore after receiving customer details.</p>
+      </div>
+
+      <div id="add-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEE2E2; color: #991B1B; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;"></div>
+
+      <form onsubmit="handleSaveNewMember(event)">
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Customer Name <span style="color: #DC2626;">*</span>
+          </label>
+          <input type="text" id="new-member-name" placeholder="e.g. Muhammad Haseeb" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            WhatsApp / Phone Number <span style="color: #DC2626;">*</span>
+          </label>
+          <input type="tel" id="new-member-phone" placeholder="e.g. 03232974451" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Email (Optional)
+          </label>
+          <input type="email" id="new-member-email" placeholder="e.g. customer@example.com" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+              Membership Code <span style="color: #DC2626;">*</span>
+            </label>
+            <input type="text" id="new-member-code" placeholder="ZV-MEM-000001" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700; color: #92400E; background: #FFFBEB;">
+            <div style="font-size: 0.7rem; color: #6B7280; margin-top: 2px;">Unique code format (e.g. ZV-MEM-000001)</div>
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+              Member Start Date <span style="color: #DC2626;">*</span>
+            </label>
+            <input type="text" id="new-member-date" placeholder="25 September 2026" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Admin Notes (Optional)
+          </label>
+          <textarea id="new-member-notes" rows="2" placeholder="e.g. Premium VIP customer from Clifton, Karachi" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem; font-family: inherit;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn btn-outline" onclick="closeAddMemberModal()" style="padding: 0.65rem 1.25rem;">
+            Cancel
+          </button>
+          <button type="submit" id="btn-save-member-submit" class="btn btn-dark" style="padding: 0.65rem 1.75rem; font-weight: 700;">
+            Save Member
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: EDIT MEMBER -->
+  <!-- ======================================================== -->
+  <div id="modal-edit-member" class="zv-modal-backdrop">
+    <div class="zv-modal-dialog">
+      <button type="button" class="zv-modal-close-btn" onclick="closeEditMemberModal()">&times;</button>
+      <div style="margin-bottom: 1.25rem;">
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 0.25rem 0;">Edit VIP Member Details</h3>
+        <p style="font-size: 0.82rem; color: #6B7280; margin: 0;">Update member contact details or membership code.</p>
+      </div>
+
+      <div id="edit-member-error" style="display: none; padding: 0.75rem 1rem; background: #FEE2E2; color: #991B1B; border-radius: 8px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem;"></div>
+
+      <form onsubmit="handleSaveEditMember(event)">
+        <input type="hidden" id="edit-original-code">
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Customer Name <span style="color: #DC2626;">*</span>
+          </label>
+          <input type="text" id="edit-member-name" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            WhatsApp / Phone Number <span style="color: #DC2626;">*</span>
+          </label>
+          <input type="tel" id="edit-member-phone" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Email (Optional)
+          </label>
+          <input type="email" id="edit-member-email" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+              Membership Code <span style="color: #DC2626;">*</span>
+            </label>
+            <input type="text" id="edit-member-code" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem; font-family: monospace; font-weight: 700;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+              Member Start Date <span style="color: #DC2626;">*</span>
+            </label>
+            <input type="text" id="edit-member-date" required style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.95rem;">
+          </div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #374151; margin-bottom: 0.35rem;">
+            Notes (Optional)
+          </label>
+          <textarea id="edit-member-notes" rows="2" style="width: 100%; padding: 0.65rem 0.85rem; border: 1.5px solid #D1D5DB; border-radius: 8px; font-size: 0.9rem; font-family: inherit;"></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem;">
+          <button type="button" class="btn btn-outline" onclick="closeEditMemberModal()" style="padding: 0.65rem 1.25rem;">
+            Cancel
+          </button>
+          <button type="submit" id="btn-edit-member-submit" class="btn btn-dark" style="padding: 0.65rem 1.75rem; font-weight: 700;">
+            Update Member
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 3: DELETE MEMBER CONFIRMATION -->
+  <!-- ======================================================== -->
+  <div id="modal-delete-member" class="zv-modal-backdrop">
+    <div class="zv-modal-dialog" style="max-width: 440px; text-align: center;">
+      <button type="button" class="zv-modal-close-btn" onclick="closeDeleteMemberModal()">&times;</button>
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin-bottom: 0.75rem;">Confirm Delete</h3>
+      <p id="delete-member-confirm-msg" style="font-size: 0.92rem; color: #374151; line-height: 1.5; margin-bottom: 1.5rem;"></p>
+
+      <div style="display: flex; justify-content: center; gap: 0.75rem;">
+        <button type="button" class="btn btn-outline" onclick="closeDeleteMemberModal()" style="padding: 0.65rem 1.25rem;">
+          Cancel
+        </button>
+        <button type="button" id="btn-execute-delete-member" class="btn" style="background: #DC2626; color: #FFFFFF; border: 1px solid #DC2626; padding: 0.65rem 1.4rem; font-weight: 700;" onclick="handleExecuteDeleteMember()">
+          Yes, Delete Member
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 4: PURCHASES & STARS MANAGEMENT -->
+  <!-- ======================================================== -->
+  <div id="modal-member-purchases" class="zv-modal-backdrop">
+    <div class="zv-modal-dialog" style="max-width: 720px;">
+      <button type="button" class="zv-modal-close-btn" onclick="closeMemberPurchasesModal()">&times;</button>
+      
+      <!-- Member Overview Header -->
+      <div style="border-bottom: 2px solid #E5E7EB; padding-bottom: 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #6B7280; letter-spacing: 0.05em;">Customer Purchase History</span>
+            <h3 id="purchases-member-name" style="font-size: 1.4rem; font-weight: 800; color: #111827; margin: 2px 0;"></h3>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 4px;">
+              <span id="purchases-member-code" style="font-family: monospace; font-size: 0.85rem; font-weight: 700; background: #FEF3C7; color: #92400E; padding: 0.2rem 0.5rem; border-radius: 4px;"></span>
+              <span style="font-size: 0.8rem; color: #6B7280;">Since <span id="purchases-member-since"></span></span>
+            </div>
+          </div>
+          <!-- Live Stars Badge in Modal -->
+          <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 0.6rem 1rem; text-align: right;">
+            <div style="font-size: 0.68rem; text-transform: uppercase; font-weight: 700; color: #B45309; letter-spacing: 0.05em;">Loyalty Stars (1 Per Purchase)</div>
+            <div id="purchases-modal-stars-display" style="font-size: 1.2rem; filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.6));">⭐</div>
+            <div style="font-size: 0.75rem; color: #6B7280; font-weight: 600; margin-top: 2px;">
+              <span id="purchases-modal-count-display">0 Purchases</span> • Total: <span id="purchases-modal-spend-display" style="color: #111827; font-weight: 700;">Rs. 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- + Add Purchase Form Container -->
+      <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem;">
+        <h4 style="font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+          <span>🛍️</span> Record Completed Purchase (+1 Star)
+        </h4>
+
+        <form onsubmit="handleSavePurchase(event)">
+          <input type="hidden" id="purchase-form-member-code">
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Product Name <span style="color: #DC2626;">*</span>
+              </label>
+              <input type="text" id="purchase-product-input" placeholder="e.g. Pakistani Printed Lawn Suit" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Amount (PKR) <span style="color: #DC2626;">*</span>
+              </label>
+              <input type="number" id="purchase-amount-input" placeholder="e.g. 2499" min="0" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem; font-weight: 600;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Purchase Date <span style="color: #DC2626;">*</span>
+              </label>
+              <input type="text" id="purchase-date-input" placeholder="25 September 2026" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Quantity <span style="color: #DC2626;">*</span>
+              </label>
+              <input type="number" id="purchase-qty-input" value="1" min="1" required style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Order ID (Optional)
+              </label>
+              <input type="text" id="purchase-order-input" placeholder="e.g. ZV-20260925-1001" style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
+            <div style="flex: 1;">
+              <label style="display: block; font-size: 0.78rem; font-weight: 700; color: #374151; margin-bottom: 0.25rem;">
+                Notes (Optional)
+              </label>
+              <input type="text" id="purchase-notes-input" placeholder="e.g. WhatsApp Direct Order" style="width: 100%; padding: 0.55rem 0.75rem; border: 1.5px solid #D1D5DB; border-radius: 6px; font-size: 0.88rem;">
+            </div>
+            <button type="submit" id="btn-save-purchase-submit" class="btn btn-dark" style="padding: 0.55rem 1.25rem; font-size: 0.88rem; font-weight: 700; white-space: nowrap;">
+              + Add Purchase
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Purchases History Table -->
+      <h4 style="font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
+        Recorded Purchases
+      </h4>
+      <div style="overflow-x: auto; max-height: 280px; overflow-y: auto;">
+        <table class="stock-table" style="margin-top: 0;">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="purchases-modal-table-body">
+            <!-- Rendered live -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 5: ADMIN 3D MEMBERSHIP CARD PREVIEW -->
+  <!-- ======================================================== -->
+  <div id="modal-admin-view-card" class="zv-modal-backdrop">
+    <div class="zv-modal-dialog" style="max-width: 480px; text-align: center;">
+      <button type="button" class="zv-modal-close-btn" onclick="closeAdminCardModal()">&times;</button>
+      
+      <div style="margin-bottom: 0.5rem;">
+        <span style="font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.1em; color: #B45309;">
+          VIP Physical / Digital Card Preview
+        </span>
+        <h3 style="font-size: 1.35rem; font-weight: 800; color: #111827; margin: 2px 0;">
+          ZENVORA SHOOP MEMBERSHIP
+        </h3>
+      </div>
+
+      <!-- 3D Card Interactive Element -->
+      <div class="zv-card-viewport" onclick="toggleAdminCardFlip()" title="Click to flip card">
+        <div id="admin-card-3d-wrapper" class="zv-card-3d-wrapper">
+          
+          <!-- Front Face -->
+          <div class="zv-card-face zv-card-front">
+            <div class="zv-card-front-header">
+              <div class="zv-card-brand">
+                <span>ZENVORA</span>
+                <span class="zv-card-brand-sub">VIP CLUB MEMBER</span>
+              </div>
+              <div style="font-size: 0.7rem; color: #D4AF37; font-weight: 700; border: 1px solid rgba(212, 175, 55, 0.5); padding: 2px 8px; border-radius: 9999px;">
+                PLATINUM
+              </div>
+            </div>
+
+            <div class="zv-card-chip-row">
+              <div class="zv-card-emv-chip"></div>
+              <div class="zv-card-nfc-wave">📶</div>
+            </div>
+
+            <div id="admin-card-code-display" class="zv-card-number-display">
+              ZV-MEM-000000
+            </div>
+
+            <div class="zv-card-front-footer">
+              <div>
+                <div class="zv-card-since-label">Cardholder</div>
+                <div id="admin-card-holder-name" class="zv-card-holder-name">CUSTOMER NAME</div>
+                <div class="zv-card-since-label" style="margin-top: 2px;">
+                  Member Since: <span id="admin-card-since-display" class="zv-card-since-val">25 September 2026</span>
+                </div>
+              </div>
+              <div class="zv-card-stars-wrap">
+                <div class="zv-card-stars-label">Loyalty Stars</div>
+                <div id="admin-card-stars-display" class="zv-card-stars-icons">⭐</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Back Face -->
+          <div class="zv-card-face zv-card-back">
+            <div class="zv-card-mag-stripe"></div>
+            
+            <div class="zv-card-sig-panel">
+              <span style="font-size: 0.65rem; color: #6B7280;">AUTHORIZED SIGNATURE</span>
+              <span id="admin-card-sig-code" style="color: #111827; font-weight: 800;"></span>
+            </div>
+
+            <div class="zv-card-back-text">
+              "Thank you for being a valued ZENVORA SHOOP member."
+            </div>
+
+            <div class="zv-card-back-footer">
+              <span class="zv-card-back-brand">ZENVORA SHOOP</span>
+              <span>WhatsApp: 03232974451 • Karachi</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="zv-card-controls">
+        <button type="button" class="zv-btn-flip-hint" onclick="toggleAdminCardFlip()">
+          <span>⟳</span> Click to Flip Card (3D)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchAdminTab(tab) {
+      const stockView = document.getElementById('admin-view-stock');
+      const ordersView = document.getElementById('admin-view-orders');
+      const membersView = document.getElementById('admin-view-members');
+      const stockBtn = document.getElementById('tab-btn-stock');
+      const ordersBtn = document.getElementById('tab-btn-orders');
+      const membersBtn = document.getElementById('tab-btn-members');
+
+      if (stockView) stockView.style.display = tab === 'stock' ? 'block' : 'none';
+      if (ordersView) ordersView.style.display = tab === 'orders' ? 'block' : 'none';
+      if (membersView) membersView.style.display = tab === 'members' ? 'block' : 'none';
+
+      if (stockBtn) stockBtn.classList.toggle('active', tab === 'stock');
+      if (ordersBtn) ordersBtn.classList.toggle('active', tab === 'orders');
+      if (membersBtn) membersBtn.classList.toggle('active', tab === 'members');
+
+      if (tab === 'orders' && typeof window.loadOrdersLive === 'function') {
+        window.loadOrdersLive();
+      }
+      if (tab === 'members' && typeof window.loadMembersLive === 'function') {
+        window.loadMembersLive();
+      }
+    }
+  </script>
+
+</body>
+</html>
+

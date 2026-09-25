@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="error-guard.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal Login | ZENVORA SHOOP</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- Firebase Auth via Firebase 10 Modular SDK -->
+  <script type="module">
+    import { auth, signInWithEmailAndPassword, onAuthStateChanged } from "./firebase-service.js";
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "admin-stock.html";
+      }
+    });
+
+    window.handleAdminLogin = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-email').value.trim();
+      const password = document.getElementById('admin-password').value;
+      const errorMsg = document.getElementById('login-error');
+      const submitBtn = document.getElementById('btn-login-submit');
+
+      errorMsg.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying credentials...';
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = 'admin-stock.html';
+      } catch (err) {
+        console.error('Admin login error:', err);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign In to Portal';
+        errorMsg.textContent = err.message || 'Invalid administrator email or password.';
+        errorMsg.style.display = 'block';
+      }
+    };
+  </script>
+  <style>
+    .admin-login-card {
+      max-width: 440px;
+      margin: 4rem auto;
+      background: #ffffff;
+      padding: 2.5rem;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border: 1px solid #E5E7EB;
+    }
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.4rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid #D1D5DB;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body style="background: #F8F9FA;">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner" style="justify-content: center;">
+      <a href="index.html" class="logo">
+        <span class="logo-main">ZENVORA</span>
+        <span class="logo-sub">ADMIN</span>
+      </a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="admin-login-card">
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <span style="font-size: 2.5rem;">🔒</span>
+        <h1 style="font-size: 1.5rem; font-weight: 700; color: var(--primary); margin-top: 0.5rem;">Admin Management Portal</h1>
+        <p style="font-size: 0.85rem; color: #6B7280; margin-top: 0.25rem;">Authorized personnel only. Authenticate to manage stock & orders.</p>
+      </div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label for="admin-email">Admin Email</label>
+          <input type="email" id="admin-email" placeholder="admin@zenvora.shop" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="admin-password">Password</label>
+          <input type="password" id="admin-password" placeholder="••••••••••••" required autocomplete="current-password">
+        </div>
+
+        <div id="login-error" style="display: none; background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.25rem;"></div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="btn-login-submit" style="padding: 0.85rem; font-weight: 700;">
+          Sign In to Portal
+        </button>
+      </form>
+
+      <div style="margin-top: 1.75rem; text-align: center;">
+        <a href="index.html" style="font-size: 0.85rem; color: #6B7280; text-decoration: underline;">
+          ← Back to Storefront
+        </a>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

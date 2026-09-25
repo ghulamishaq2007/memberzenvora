@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="error-guard.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart & Checkout — ZENVORA SHOOP | Karachi WhatsApp Ordering</title>
+  <meta name="description" content="Review your shopping bag and place your order directly via WhatsApp on 03232974451 with Cash on Delivery across Karachi.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260913_nostock">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <!-- ZENVORA SEO START -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#111111">
+  <meta name="author" content="ZENVORA SHOOP">
+  <meta name="keywords" content="Pakistani fashion, ladies suits, gents suits, lawn suits, Pakistani shoes, sandals, Karachi fashion, ZENVORA SHOOP">
+  <link rel="canonical" href="./cart.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ZENVORA SHOOP">
+  <meta property="og:title" content="Shopping Cart &amp; Checkout — ZENVORA SHOOP | Karachi WhatsApp Ordering">
+  <meta property="og:description" content="Review your shopping bag and place your order directly via WhatsApp on 03232974451 with Cash on Delivery across Karachi.">
+  <meta property="og:url" content="./cart.html">
+  <meta property="og:locale" content="en_PK">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Shopping Cart &amp; Checkout — ZENVORA SHOOP | Karachi WhatsApp Ordering">
+  <meta name="twitter:description" content="Review your shopping bag and place your order directly via WhatsApp on 03232974451 with Cash on Delivery across Karachi.">
+  <link rel="alternate" hreflang="en-PK" href="./cart.html">
+  <link rel="alternate" hreflang="x-default" href="./cart.html">
+  <!-- ZENVORA SEO END -->
+
+    <!-- ZENVORA SHOOP App Install Popup & Download Button - inline styles prevent cache/style conflicts -->
+  <style id="zenvora-app-install-styles">
+    #download-app-btn, .download-app-link {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.35rem !important;
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(212, 175, 55, 0.6) !important;
+      border-radius: 999px !important;
+      padding: 0.22rem 0.65rem !important;
+      font-family: inherit !important;
+      font-size: 0.74rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.03em !important;
+      cursor: pointer !important;
+      text-decoration: none !important;
+      line-height: 1.2 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: all 0.2s ease !important;
+      box-sizing: border-box !important;
+    }
+    #download-app-btn:hover, .download-app-link:hover {
+      background: rgba(212, 175, 55, 0.22) !important;
+      border-color: #d4af37 !important;
+      color: #ffffff !important;
+      transform: translateY(-1px) !important;
+    }
+    #download-app-btn span, .download-app-link span {
+      color: #d4af37 !important;
+      font-size: 0.95rem !important;
+      line-height: 1 !important;
+      font-weight: 800 !important;
+    }
+
+    /* Top Bar Mobile & WhatsApp Responsiveness */
+    .top-bar-whatsapp { display: inline-flex !important; align-items: center !important; white-space: nowrap !important; }
+    .top-bar-wa-btn {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.35rem !important;
+      color: #d1d5db !important;
+      text-decoration: none !important;
+      transition: all 0.2s ease !important;
+      box-sizing: border-box !important;
+    }
+    .top-bar-wa-icon { font-size: 0.9rem !important; line-height: 1 !important; display: inline-block !important; }
+    .top-bar-wa-label { color: #d1d5db !important; }
+    .top-bar-wa-number { color: #d4af37 !important; font-weight: 700 !important; letter-spacing: 0.04em !important; }
+    .top-bar-wa-btn:hover .top-bar-wa-number { text-decoration: underline !important; color: #ffffff !important; }
+
+    @media (max-width: 768px) {
+      .top-bar { padding: 0.35rem 0 !important; overflow-x: hidden !important; }
+      .top-bar .container,
+      .top-bar-content {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        margin: 0 auto !important;
+        text-align: center !important;
+      }
+      /* Hide Karachi Delivery Exclusive, Same Day / Next Day Dispatch, WhatsApp Orders & social links in top bar on mobile */
+      .top-bar-left,
+      .top-bar-whatsapp,
+      .top-bar-right > .top-bar-item,
+      .top-bar-wa-btn,
+      .top-social-wrap,
+      .top-bar-right > div[style*="margin-left"] {
+        display: none !important;
+      }
+      .top-bar-right {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        gap: 0 !important;
+      }
+      #download-app-btn, .download-app-link {
+        font-size: 0.76rem !important;
+        padding: 0.28rem 0.85rem !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        line-height: 1.2 !important;
+        margin: 0 auto !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .top-bar { padding: 0.35rem 0 !important; }
+      .top-bar-right { gap: 0 !important; }
+      #download-app-btn, .download-app-link { font-size: 0.74rem !important; padding: 0.26rem 0.8rem !important; margin: 0 auto !important; }
+    }
+
+    @media (max-width: 360px) {
+      #download-app-btn, .download-app-link { font-size: 0.7rem !important; padding: 0.24rem 0.7rem !important; gap: 0.25rem !important; margin: 0 auto !important; }
+    }
+
+    @media (max-width: 330px) {
+      .top-bar { padding: 0.3rem 0 !important; }
+      .top-bar .container { padding-left: 0.3rem !important; padding-right: 0.3rem !important; }
+      #download-app-btn, .download-app-link { font-size: 0.68rem !important; padding: 0.22rem 0.6rem !important; gap: 0.2rem !important; margin: 0 auto !important; }
+    }
+
+    .app-install-backdrop{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:2147483647!important;background:rgba(0,0,0,.62)!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;box-sizing:border-box!important;backdrop-filter:blur(4px)!important;}
+    .app-install-modal{position:relative!important;box-sizing:border-box!important;width:min(390px,calc(100vw - 32px))!important;background:#fff!important;color:#111!important;border:1px solid #ddd!important;border-radius:16px!important;padding:28px 24px!important;box-shadow:0 24px 80px rgba(0,0,0,.35)!important;text-align:center!important;font-family:Arial,sans-serif!important;margin:auto!important;}
+    .app-install-icon{width:64px!important;height:64px!important;max-width:64px!important;max-height:64px!important;object-fit:cover!important;border-radius:14px!important;margin:0 auto 14px!important;display:block!important;}
+    .app-install-modal h3{margin:0 0 8px!important;padding:0!important;color:#111!important;font-family:Georgia,'Times New Roman',serif!important;font-size:25px!important;line-height:1.2!important;}
+    .app-install-modal p{margin:0 0 20px!important;padding:0!important;color:#666!important;font-size:14px!important;line-height:1.55!important;}
+    .app-install-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin:0!important;}
+    .app-install-actions button{box-sizing:border-box!important;width:100%!important;border:1px solid #111!important;border-radius:6px!important;padding:12px 16px!important;margin:0!important;min-height:44px!important;font-family:Arial,sans-serif!important;font-size:12px!important;text-transform:uppercase!important;letter-spacing:.12em!important;font-weight:700!important;cursor:pointer!important;}
+    .app-install-yes{background:#111!important;color:#fff!important;}
+    .app-install-no{background:#fff!important;color:#111!important;}
+    .app-install-actions button:disabled{opacity:.55!important;cursor:wait!important;}
+    .app-install-help{margin-top:14px!important;color:#777!important;font-size:11px!important;line-height:1.45!important;}
+    @media(max-width:480px){.app-install-modal{padding:24px 18px!important;border-radius:14px!important}.app-install-modal h3{font-size:22px!important}}
+  </style>
+
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div class="top-bar-left">
+        <div class="top-bar-item">
+          <span>📍 Karachi Cash on Delivery</span>
+        </div>
+        <div class="top-bar-item">
+          <span>⚡ 2-3 Days Fast Doorstep Delivery</span>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button type="button" id="download-app-btn" class="download-app-link" aria-label="Download ZENVORA SHOOP App">
+          <span aria-hidden="true">⇩</span> Download App
+        </button>
+        <div class="top-bar-item top-bar-whatsapp">
+          <a href="https://wa.me/923232974451" class="top-bar-link top-bar-wa-btn" target="_blank" rel="noopener" aria-label="WhatsApp Orders: 03232974451">
+            <span class="top-bar-wa-icon" aria-hidden="true">💬</span>
+            <span class="top-bar-wa-label">WhatsApp Orders:</span>
+            <span class="top-bar-wa-number">03232974451</span>
+          </a>
+        </div>
+        <div class="top-social-wrap" style="display: flex; gap: 0.75rem; margin-left: 0.5rem;">
+          <a href="https://www.facebook.com/zenvorashoop/" target="_blank" rel="noopener" class="top-social-link" title="Facebook">FB</a>
+          <a href="https://www.instagram.com/zenvorashoop/?hl=en" target="_blank" rel="noopener" class="top-social-link" title="Instagram">IG</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-title">ZENVORA <span>SHOOP</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li class="mobile-nav-header">
+            <span class="mobile-nav-title">ZENVORA <span>SHOOP</span></span>
+            <button type="button" class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </li>
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#products" class="nav-link">Categories</a></li>
+          <li><a href="my-order.html" class="nav-link">Track Order</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="nav-contact-badge">
+          <span class="nav-contact-label">WhatsApp Direct</span>
+          <a href="https://wa.me/923232974451" target="_blank" rel="noopener" class="nav-contact-value">0323 2974451</a>
+        </div>
+
+        <a href="cart.html" class="cart-icon-btn" title="View Shopping Cart">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span class="cart-badge">0</span>
+        </a>
+
+        <button class="hamburger" id="hamburger-btn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu">
+          <span></span>
+          <span></span>
+          <span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Breadcrumb & Header -->
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="index.html">Home</a>
+      <span class="breadcrumb-separator">/</span>
+      <span style="color: var(--primary); font-weight: 600;">Shopping Cart</span>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+      <h1 class="section-title" style="margin-bottom: 0.25rem;">Shopping Cart & Checkout</h1>
+      <p style="color: var(--text-muted);">Review your selected garments and footwear, fill your Karachi delivery details, and place your order instantly on WhatsApp.</p>
+    </div>
+  </div>
+
+  <!-- Main Cart Section -->
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      
+      <!-- Empty Cart Screen (Toggled via JS when cart is empty) -->
+      <div id="empty-cart-state" class="empty-cart-card" style="display: none;">
+        <div class="empty-cart-icon">🛒</div>
+        <h2 class="empty-cart-title">Your cart is empty</h2>
+        <p class="empty-cart-desc">
+          Looks like you haven't added any designer suits or luxury footwear to your cart yet. Explore our latest arrivals now!
+        </p>
+        <a href="index.html#products" class="btn btn-primary">
+          Continue Shopping →
+        </a>
+      </div>
+
+      <!-- Active Cart Layout (Table on Left, Delivery Checkout Form on Right) -->
+      <div id="cart-active-layout" class="cart-layout">
+        
+        <!-- Left: Items Table -->
+        <div>
+          <div class="cart-table-wrap">
+            <div class="cart-table-header">
+              <div>Product</div>
+              <div>Price</div>
+              <div>Quantity</div>
+              <div>Subtotal</div>
+              <div></div>
+            </div>
+
+            <div class="cart-items-list" id="cart-items-container">
+              <!-- Dynamically rendered by cart.js -->
+            </div>
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <a href="index.html#products" class="btn btn-card-view" style="padding: 0.75rem 1.25rem;">
+              ← Continue Shopping
+            </a>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">
+              🔒 Orders are confirmed directly on WhatsApp with official team members.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Order Summary & Karachi Delivery Form -->
+        <div>
+          <div class="checkout-panel">
+            <h3 class="checkout-heading">
+              <span>📋</span> Order Summary & Delivery
+            </h3>
+
+            <!-- Totals calculation -->
+            <div class="order-summary-totals">
+              <div class="summary-row">
+                <span>Cart Subtotal</span>
+                <span id="summary-subtotal" style="font-weight: 600; color: var(--primary);">Rs. 0</span>
+              </div>
+              <div class="summary-row">
+                <span>Karachi Delivery</span>
+                <span style="color: var(--success); font-weight: 600;">Cash on Delivery (Standard)</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total Amount</span>
+                <span id="summary-total">Rs. 0</span>
+              </div>
+            </div>
+
+            <div class="payment-badge-info">
+              <span>ℹ️</span>
+              <span><strong>Payment Method:</strong> Cash on Delivery (COD) across Pakistan. Pay safely after receiving your parcel.</span>
+            </div>
+
+            <!-- Customer Checkout Form -->
+            <form id="checkout-form">
+              <!-- Customer Name -->
+              <div class="form-group">
+                <label for="customer-name" class="form-label">
+                  Customer Full Name <span class="required">*</span>
+                </label>
+                <input type="text" id="customer-name" class="form-control" placeholder="e.g. Ahmed Raza / Fatima Noor" required>
+                <div class="form-error-msg" id="error-name">Please enter your full name.</div>
+              </div>
+
+              <!-- Phone Number -->
+              <div class="form-group">
+                <label for="customer-phone" class="form-label">
+                  WhatsApp / Mobile Number <span class="required">*</span>
+                </label>
+                <input type="tel" id="customer-phone" class="form-control" placeholder="e.g. 03232974451" required>
+                <div class="form-help">Enter active Pakistani WhatsApp number (e.g. 03XXXXXXXXX)</div>
+                <div class="form-error-msg" id="error-phone">Please enter a valid Pakistani mobile number.</div>
+              </div>
+
+              <!-- 1. Province / Region Dropdown -->
+              <div class="form-group">
+                <label for="customer-province" class="form-label">
+                  Province / Region <span class="required">*</span>
+                </label>
+                <select id="customer-province" class="form-control" required>
+                  <option value="" disabled selected>-- Select Province / Region --</option>
+                  <option value="Punjab">Punjab</option>
+                  <option value="Sindh">Sindh</option>
+                  <option value="Khyber Pakhtunkhwa (KPK)">Khyber Pakhtunkhwa (KPK)</option>
+                  <option value="Balochistan">Balochistan</option>
+                  <option value="Islamabad Capital Territory">Islamabad Capital Territory</option>
+                  <option value="Azad Jammu & Kashmir (AJK)">Azad Jammu & Kashmir (AJK)</option>
+                  <option value="Gilgit-Baltistan">Gilgit-Baltistan</option>
+                </select>
+                <div class="form-error-msg" id="error-province">Please select your province or region.</div>
+              </div>
+
+              <!-- 2. City Dropdown (Dependent on Province) -->
+              <div class="form-group">
+                <label for="customer-city" class="form-label">
+                  City <span class="required">*</span>
+                </label>
+                <select id="customer-city" class="form-control" required disabled>
+                  <option value="" disabled selected>-- Select Province First --</option>
+                </select>
+                <div class="form-error-msg" id="error-city">Please select your city.</div>
+              </div>
+
+              <!-- 3. Area / Locality Dropdown (Dependent on City) -->
+              <div class="form-group">
+                <label for="delivery-area" class="form-label">
+                  Area / Locality <span class="required">*</span>
+                </label>
+                <select id="delivery-area" class="form-control" required disabled>
+                  <option value="" disabled selected>-- Select City First --</option>
+                </select>
+                <div class="form-error-msg" id="error-area">Please select your delivery area or locality.</div>
+              </div>
+
+              <!-- Complete Delivery Address -->
+              <div class="form-group">
+                <label for="customer-address" class="form-label">
+                  Complete Delivery Address <span class="required">*</span>
+                </label>
+                <textarea id="customer-address" class="form-control" placeholder="House / Flat No., Street No., Sector / Block, Nearby Famous Landmark..." required></textarea>
+                <div class="form-error-msg" id="error-address">Please enter your complete doorstep address.</div>
+              </div>
+
+              <!-- Place Order Button -->
+              <button type="submit" id="btn-place-whatsapp-order" class="btn btn-whatsapp btn-block" onclick="handleWhatsAppOrder(event)" style="padding: 1.1rem; font-size: 1.05rem; font-weight: 700; margin-top: 1rem;">
+                <span>💬 Place Order on WhatsApp</span>
+              </button>
+              <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.6rem;">
+                Official ZENVORA SHOOP WhatsApp Line: 03232974451
+              </p>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>ZENVORA SHOOP</h3>
+          <span class="tagline">Luxury Pakistani Fashion</span>
+          <p>
+            Your premier destination for luxury designer lawn, unstitched & stitched festive wear, executive gents apparel, and artisanal footwear crafted with passion.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="cart.html">Shopping Cart</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Categories</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#products">Ladies Suits</a></li>
+            <li><a href="index.html#products">Gents Suits</a></li>
+            <li><a href="index.html#products">Shoes</a></li>
+            <li><a href="index.html#products">Sandals</a></li>
+            <li><a href="index.html#products">New Arrivals</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Get in Touch</h4>
+          <div class="footer-contact-item">
+            <span>💬 WhatsApp:</span>
+            <a href="https://wa.me/923232974451" style="color: #fff; font-weight: 600;" target="_blank" rel="noopener">03232974451</a>
+          </div>
+          <div class="footer-contact-item">
+            <span>📍 City:</span>
+            <span>Karachi, Pakistan</span>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 1.25rem;">
+            <a href="https://www.facebook.com/zenvorashoop/" target="_blank" rel="noopener" class="social-btn" style="padding: 0.5rem 1rem;">
+              Facebook
+            </a>
+            <a href="https://www.instagram.com/zenvorashoop/?hl=en" target="_blank" rel="noopener" class="social-btn" style="padding: 0.5rem 1rem;">
+              Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 ZENVORA SHOOP. All Rights Reserved.</p>
+        <p>Crafted for Seamless Shopping with WhatsApp Ordering</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="firebase-bridge.js"></script>
+  <script src="pakistan-locations.js?v=20260913_nostock"></script>
+  <script src="cart.js?v=20260913_nostock"></script>
+  <script src="script.js?v=20260913_nostock"></script>
+  <script src="app-install-v2.js?v=20260913_nostock"></script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="error-guard.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track or Cancel My Order | ZENVORA SHOOP</title>
+  <meta name="description" content="Enter your official ZENVORA Order ID below to view real-time delivery status or cancel within 30 minutes of placing your order.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20260920_track">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- ZENVORA SHOOP App Install Popup & Download Button styles -->
+  <style id="zenvora-app-install-styles">
+    #download-app-btn, .download-app-link {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 0.35rem !important;
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(212, 175, 55, 0.6) !important;
+      border-radius: 999px !important;
+      padding: 0.22rem 0.65rem !important;
+      font-family: inherit !important;
+      font-size: 0.74rem !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.03em !important;
+      cursor: pointer !important;
+      text-decoration: none !important;
+      line-height: 1.2 !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: all 0.2s ease !important;
+      box-sizing: border-box !important;
+    }
+    #download-app-btn:hover, .download-app-link:hover {
+      background: rgba(212, 175, 55, 0.22) !important;
+      border-color: #D4AF37 !important;
+      color: #D4AF37 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div class="top-bar-left">
+        <span class="top-bar-delivery-highlight">🚚 Karachi Express Delivery</span>
+        <span class="top-bar-divider" aria-hidden="true">•</span>
+        <span>Cash on Delivery (COD)</span>
+        <span class="top-bar-divider" aria-hidden="true">•</span>
+        <span>Direct WhatsApp Ordering</span>
+      </div>
+      <div class="top-bar-actions">
+        <button type="button" class="top-bar-link top-bar-install-btn" id="download-app-btn">
+          <span aria-hidden="true">⇩</span> Download App
+        </button>
+        <div class="top-bar-item top-bar-whatsapp">
+          <a href="https://wa.me/923232974451?text=Hello%20ZENVORA%20SHOOP,%20I%20would%20like%20to%20inquire%20about%20your%20collection" class="top-bar-link top-bar-wa-btn" target="_blank" rel="noopener" aria-label="WhatsApp Orders: 03232974451">
+            <span class="top-bar-wa-icon" aria-hidden="true">💬</span>
+            <span class="top-bar-wa-label">WhatsApp Orders:</span>
+            <span class="top-bar-wa-number">03232974451</span>
+          </a>
+        </div>
+        <div class="top-social-wrap" style="display: flex; gap: 0.75rem; margin-left: 0.5rem;">
+          <a href="https://www.facebook.com/zenvorashoop/" target="_blank" rel="noopener" class="top-social-link" title="Facebook">FB</a>
+          <a href="https://www.instagram.com/zenvorashoop/?hl=en" target="_blank" rel="noopener" class="top-social-link" title="Instagram">IG</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-title">ZENVORA <span>SHOOP</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-menu" id="nav-menu">
+          <li class="mobile-nav-header">
+            <span class="mobile-nav-title">ZENVORA <span>SHOOP</span></span>
+            <button type="button" class="mobile-nav-close" id="mobile-nav-close" aria-label="Close navigation menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </li>
+          <li><a href="index.html" class="nav-link">Home</a></li>
+          <li><a href="index.html#products" class="nav-link">Categories</a></li>
+          <li><a href="cart.html" class="nav-link">Cart</a></li>
+          <li><a href="my-order.html" class="nav-link active">Track Order</a></li>
+          <li><a href="about.html" class="nav-link">About</a></li>
+          <li><a href="contact.html" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <div class="nav-contact-badge">
+          <span class="nav-contact-label">WhatsApp Direct</span>
+          <a href="https://wa.me/923232974451" target="_blank" rel="noopener" class="nav-contact-value">0323 2974451</a>
+        </div>
+
+        <a href="cart.html" class="cart-icon-btn" title="View Shopping Cart">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span class="cart-badge">0</span>
+        </a>
+
+        <button class="hamburger" id="hamburger-btn" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nav-menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Main Container -->
+  <main class="track-order-section">
+    <div class="container">
+      
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <span style="color: var(--primary); font-weight: 600;">Track Order</span>
+      </div>
+
+      <!-- Page Heading -->
+      <div class="track-page-header">
+        <h1 class="section-title">Track or Cancel My Order</h1>
+        <p class="section-subtitle">
+          Enter your official ZENVORA Order ID below to view your order status or cancel within 30 minutes of placing your order.
+        </p>
+      </div>
+
+      <!-- Tracking Search Card -->
+      <div class="track-search-card">
+        <form id="order-lookup-form" class="track-search-form">
+          <input 
+            type="text" 
+            id="lookup-order-id" 
+            class="track-search-input"
+            placeholder="Enter Order ID (e.g. ZV-20260920-4321)" 
+            autocomplete="off"
+            spellcheck="false"
+            required 
+          >
+          <button type="submit" class="track-search-btn" id="btn-search-order">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            TRACK ORDER
+          </button>
+        </form>
+
+        <div id="lookup-error" class="track-error-banner" role="alert">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span id="lookup-error-text">Order not found. Please check your Order ID and try again.</span>
+        </div>
+      </div>
+
+      <!-- Order Details Display Card -->
+      <div class="track-result-card" id="order-details-card">
+        
+        <!-- 30-Minute Cancellation Timer Banner -->
+        <div class="cancellation-banner" id="order-timer-banner">
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <span id="timer-icon" style="font-size: 1.25rem;">⏱️</span>
+            <span id="timer-text" style="font-weight: 600;">Cancellation available for:</span>
+          </div>
+          <div id="timer-countdown" class="cancellation-clock">
+            --:--
+          </div>
+        </div>
+
+        <!-- Order Header & Status -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+          <div>
+            <span style="font-size: 0.74rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.08em; display: block;">Order ID</span>
+            <h2 id="card-order-id" style="font-size: 1.45rem; color: var(--primary); font-family: monospace; font-weight: 700; margin: 0.2rem 0;"></h2>
+            <p id="card-order-date" style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"></p>
+          </div>
+          <div style="text-align: right;">
+            <span id="card-order-status" class="order-tracking-badge pending">Pending</span>
+          </div>
+        </div>
+
+        <!-- Visual Status Timeline -->
+        <div class="timeline-container">
+          <div class="timeline-title">Order Status Timeline</div>
+          <div class="timeline-track" id="timeline-track">
+            <div class="timeline-line-bg">
+              <div class="timeline-line-fill" id="timeline-line-fill"></div>
+            </div>
+
+            <!-- 5 Standard Order Status Steps -->
+            <div class="timeline-step" id="step-pending" data-step="1">
+              <div class="timeline-step-icon">1</div>
+              <div class="timeline-step-label">Pending</div>
+            </div>
+            <div class="timeline-step" id="step-confirmed" data-step="2">
+              <div class="timeline-step-icon">2</div>
+              <div class="timeline-step-label">Confirmed</div>
+            </div>
+            <div class="timeline-step" id="step-preparing" data-step="3">
+              <div class="timeline-step-icon">3</div>
+              <div class="timeline-step-label">Preparing</div>
+            </div>
+            <div class="timeline-step" id="step-shipped" data-step="4">
+              <div class="timeline-step-icon">4</div>
+              <div class="timeline-step-label">Shipped</div>
+            </div>
+            <div class="timeline-step" id="step-delivered" data-step="5">
+              <div class="timeline-step-icon">5</div>
+              <div class="timeline-step-label">Delivered</div>
+            </div>
+          </div>
+
+          <!-- Cancelled Notice (Visible only if order is cancelled) -->
+          <div id="timeline-cancelled-box" class="timeline-cancelled-notice" style="display: none;">
+            <strong>❌ This order was cancelled.</strong> Reserved stock has been returned to the store inventory.
+          </div>
+        </div>
+
+        <!-- Customer & Shipping Summary Grid -->
+        <div class="order-meta-grid">
+          <div>
+            <div class="order-meta-item-label">Customer Name</div>
+            <div class="order-meta-item-val" id="card-customer-name">-</div>
+          </div>
+          <div>
+            <div class="order-meta-item-label">Mobile / WhatsApp</div>
+            <div class="order-meta-item-val" id="card-customer-phone">-</div>
+          </div>
+          <div>
+            <div class="order-meta-item-label">Delivery Address</div>
+            <div class="order-meta-item-val" id="card-customer-address">-</div>
+          </div>
+          <div>
+            <div class="order-meta-item-label">City & Province</div>
+            <div class="order-meta-item-val" id="card-customer-region">Karachi, Sindh</div>
+          </div>
+        </div>
+
+        <!-- Items List -->
+        <h3 style="font-family: var(--font-serif); font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 0.65rem;">
+          Ordered Products
+        </h3>
+        
+        <table class="order-products-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: right;">Price</th>
+              <th style="text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="card-items-tbody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+
+        <!-- Order Total -->
+        <div class="order-total-summary">
+          <div>
+            <span>Total Payable (COD):</span>
+            <small style="display: block; font-size: 0.76rem; font-weight: 500; color: var(--text-muted); text-transform: none;">
+              Cash on Delivery upon physical inspection
+            </small>
+          </div>
+          <span id="card-order-total" class="order-total-amount">Rs. 0</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="track-actions-row">
+          <button type="button" class="btn-cancel-order" id="btn-cancel-order" style="display: none;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            CANCEL ORDER
+          </button>
+
+          <a id="btn-whatsapp-support" href="https://wa.me/923232974451" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="font-size: 0.78rem; padding: 0.8rem 1.6rem;">
+            💬 WhatsApp Support
+          </a>
+        </div>
+
+        <!-- Cancellation Status Note -->
+        <div id="cancel-success-message" style="display: none; margin-top: 1.25rem; background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; padding: 1.15rem; border-radius: 8px; text-align: center; font-size: 0.92rem; line-height: 1.5;">
+          <strong>Your order has been cancelled successfully.</strong> All items and reserved stock have been automatically restored to the ZENVORA store inventory.
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <h3>ZENVORA SHOOP</h3>
+          <span class="tagline">Luxury Pakistani Fashion</span>
+          <p>
+            Your premier destination for luxury designer lawn, unstitched & stitched festive wear, executive gents apparel, and artisanal footwear crafted with passion.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="cart.html">Shopping Cart</a></li>
+            <li><a href="my-order.html">Track Order</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Categories</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#products">Ladies Suits</a></li>
+            <li><a href="index.html#products">Gents Suits</a></li>
+            <li><a href="index.html#products">Shoes</a></li>
+            <li><a href="index.html#products">Sandals</a></li>
+            <li><a href="index.html#products">New Arrivals</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Get in Touch</h4>
+          <div class="footer-contact-item">
+            <span>💬 WhatsApp:</span>
+            <a href="https://wa.me/923232974451" style="color: #fff; font-weight: 600;" target="_blank" rel="noopener">03232974451</a>
+          </div>
+          <div class="footer-contact-item">
+            <span>📍 City:</span>
+            <span>Karachi, Pakistan</span>
+          </div>
+          <div style="display: flex; gap: 1rem; margin-top: 1.25rem;">
+            <a href="https://www.facebook.com/zenvorashoop/" target="_blank" rel="noopener" class="social-btn" style="padding: 0.5rem 1rem;">
+              Facebook
+            </a>
+            <a href="https://www.instagram.com/zenvorashoop/?hl=en" target="_blank" rel="noopener" class="social-btn" style="padding: 0.5rem 1rem;">
+              Instagram
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© 2026 ZENVORA SHOOP. All Rights Reserved.</p>
+        <p>Crafted for Seamless Shopping with WhatsApp Ordering</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="firebase-bridge.js"></script>
+  <script src="cart.js?v=20260920_track"></script>
+  <script src="script.js?v=20260920_track"></script>
+  <script src="app-install-v2.js?v=20260920_track"></script>
+
+  <script>
+    let currentActiveOrder = null;
+    let timerInterval = null;
+
+    // Search and Fetch Order from Firestore
+    async function lookupOrder(orderId) {
+      const errorDiv = document.getElementById('lookup-error');
+      const errorText = document.getElementById('lookup-error-text');
+      const detailsCard = document.getElementById('order-details-card');
+      const searchBtn = document.getElementById('btn-search-order');
+
+      errorDiv.style.display = 'none';
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '<span style="display:inline-block; animation:spin 1s linear infinite;">⏳</span> SEARCHING...';
+
+      // Wait if Firebase bridge is initializing
+      let attempts = 0;
+      while (!window.zenvoraFirebase && attempts < 15) {
+        await new Promise(r => setTimeout(r, 200));
+        attempts++;
+      }
+
+      if (!window.zenvoraFirebase || typeof window.zenvoraFirebase.getOrder !== 'function') {
+        errorText.textContent = 'Database system initializing. Please try again in a moment.';
+        errorDiv.style.display = 'flex';
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> TRACK ORDER';
+        return;
+      }
+
+      try {
+        const order = await window.zenvoraFirebase.getOrder(orderId);
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> TRACK ORDER';
+
+        if (!order) {
+          errorText.textContent = 'Order not found. Please check your Order ID and try again.';
+          errorDiv.style.display = 'flex';
+          detailsCard.style.display = 'none';
+          return;
+        }
+
+        currentActiveOrder = order;
+        renderOrderDetails(order);
+      } catch (err) {
+        console.error('[ZENVORA] Lookup error:', err);
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> TRACK ORDER';
+        errorText.textContent = 'Order not found. Please check your Order ID and try again.';
+        errorDiv.style.display = 'flex';
+        detailsCard.style.display = 'none';
+      }
+    }
+
+    // Render Order Details into UI Card
+    function renderOrderDetails(order) {
+      const detailsCard = document.getElementById('order-details-card');
+      detailsCard.style.display = 'block';
+      detailsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      document.getElementById('card-order-id').textContent = order.orderId;
+      document.getElementById('card-order-date').textContent = new Date(order.createdAt).toLocaleString('en-PK', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      });
+
+      const statusEl = document.getElementById('card-order-status');
+      const rawStatus = (order.status || 'Pending').trim();
+      const statusKey = rawStatus.toLowerCase();
+      statusEl.className = `order-tracking-badge ${statusKey}`;
+      statusEl.textContent = rawStatus;
+
+      // Update Visual Status Timeline
+      updateStatusTimeline(rawStatus);
+
+      // Customer Info
+      document.getElementById('card-customer-name').textContent = order.customerName || 'Customer';
+      document.getElementById('card-customer-phone').textContent = order.phone || 'N/A';
+      document.getElementById('card-customer-address').textContent = `${order.address || ''}${order.area ? ', ' + order.area : ''}`;
+      document.getElementById('card-customer-region').textContent = `${order.city || 'Karachi'}${order.province ? ', ' + order.province : ', Sindh'}`;
+
+      // Populate Products Table
+      const tbody = document.getElementById('card-items-tbody');
+      tbody.innerHTML = '';
+      (order.items || []).forEach(item => {
+        const row = document.createElement('tr');
+        const unitPrice = Number(item.price || 0);
+        const qty = Number(item.quantity || 1);
+        const subtotal = Number(item.subtotal || (unitPrice * qty));
+
+        row.innerHTML = `
+          <td>
+            <strong style="color: var(--primary);">${item.productName || item.name || 'ZENVORA Fashion Item'}</strong>
+            ${item.size && item.size !== 'Standard' ? `<br><small style="color: var(--text-muted); font-weight: 500;">Size: ${item.size}</small>` : ''}
+            ${item.color && item.color !== 'Standard' ? `<small style="color: var(--text-muted); font-weight: 500;"> • Color: ${item.color}</small>` : ''}
+          </td>
+          <td style="text-align: center; font-weight: 600;">${qty}</td>
+          <td style="text-align: right; color: var(--text-muted);">Rs. ${unitPrice.toLocaleString('en-PK')}</td>
+          <td style="text-align: right; font-weight: 700; color: var(--primary);">Rs. ${subtotal.toLocaleString('en-PK')}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('card-order-total').textContent = 'Rs. ' + Number(order.total || 0).toLocaleString('en-PK');
+
+      // Update WhatsApp Support Link with specific order ID
+      const waBtn = document.getElementById('btn-whatsapp-support');
+      const waMsg = encodeURIComponent(`Hi ZENVORA! I have an inquiry regarding my Order #${order.orderId}.`);
+      waBtn.href = `https://wa.me/923232974451?text=${waMsg}`;
+
+      // Initialize 30-Minute Cancellation Timer
+      initOrderCancellationTimer(order);
+    }
+
+    // Update Status Timeline Steps
+    function updateStatusTimeline(status) {
+      const steps = ['pending', 'confirmed', 'preparing', 'shipped', 'delivered'];
+      const currentLower = (status || '').toLowerCase();
+      const lineFill = document.getElementById('timeline-line-fill');
+      const cancelledBox = document.getElementById('timeline-cancelled-box');
+      const timelineTrack = document.getElementById('timeline-track');
+
+      if (currentLower === 'cancelled') {
+        timelineTrack.style.opacity = '0.5';
+        cancelledBox.style.display = 'block';
+        lineFill.style.width = '0%';
+        steps.forEach(s => {
+          const el = document.getElementById(`step-${s}`);
+          if (el) el.className = 'timeline-step';
+        });
+        return;
+      }
+
+      timelineTrack.style.opacity = '1';
+      cancelledBox.style.display = 'none';
+
+      let targetIndex = steps.indexOf(currentLower);
+      if (targetIndex === -1) targetIndex = 0; // Default to pending
+
+      // Progress percentages: 0%, 25%, 50%, 75%, 100%
+      const fillPercentage = (targetIndex / (steps.length - 1)) * 100;
+      lineFill.style.width = `${fillPercentage}%`;
+
+      steps.forEach((s, idx) => {
+        const stepEl = document.getElementById(`step-${s}`);
+        if (!stepEl) return;
+
+        if (idx < targetIndex) {
+          stepEl.className = 'timeline-step completed';
+          stepEl.querySelector('.timeline-step-icon').textContent = '✓';
+        } else if (idx === targetIndex) {
+          stepEl.className = 'timeline-step current';
+          stepEl.querySelector('.timeline-step-icon').textContent = idx + 1;
+        } else {
+          stepEl.className = 'timeline-step';
+          stepEl.querySelector('.timeline-step-icon').textContent = idx + 1;
+        }
+      });
+    }
+
+    // 30-Minute Cancellation Countdown & Controls
+    function initOrderCancellationTimer(order) {
+      if (timerInterval) clearInterval(timerInterval);
+
+      const banner = document.getElementById('order-timer-banner');
+      const timerIcon = document.getElementById('timer-icon');
+      const timerText = document.getElementById('timer-text');
+      const timerCountdown = document.getElementById('timer-countdown');
+      const cancelBtn = document.getElementById('btn-cancel-order');
+      const successMsg = document.getElementById('cancel-success-message');
+
+      // 1. Order is Cancelled
+      if (order.status === 'Cancelled') {
+        banner.className = 'cancellation-banner cancelled';
+        timerIcon.textContent = '❌';
+        timerText.textContent = 'This order has been cancelled.';
+        timerCountdown.textContent = 'Cancelled';
+        cancelBtn.style.display = 'none';
+        successMsg.style.display = 'block';
+        return;
+      }
+
+      // 2. Order is Shipped or Delivered
+      if (['Shipped', 'Delivered'].includes(order.status)) {
+        banner.className = 'cancellation-banner locked';
+        timerIcon.textContent = '🔒';
+        timerText.textContent = `Order is ${order.status.toLowerCase()} and cannot be cancelled online.`;
+        timerCountdown.textContent = 'Locked';
+        cancelBtn.style.display = 'none';
+        successMsg.style.display = 'none';
+        return;
+      }
+
+      successMsg.style.display = 'none';
+      const deadline = new Date(order.cancellationDeadline).getTime();
+
+      const updateClock = () => {
+        const now = Date.now();
+        const diffMs = deadline - now;
+
+        if (diffMs <= 0) {
+          clearInterval(timerInterval);
+          banner.className = 'cancellation-banner expired';
+          timerIcon.textContent = '⌛';
+          timerText.textContent = 'Cancellation window expired';
+          timerCountdown.textContent = '00:00';
+          cancelBtn.style.display = 'none';
+        } else {
+          banner.className = 'cancellation-banner active';
+          timerIcon.textContent = '⏱️';
+          timerText.textContent = 'Cancellation available for:';
+          cancelBtn.style.display = 'inline-flex';
+
+          const totalSeconds = Math.floor(diffMs / 1000);
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
+          timerCountdown.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+      };
+
+      updateClock();
+      timerInterval = setInterval(updateClock, 1000);
+    }
+
+    // Handle Order Cancellation Request
+    document.getElementById('btn-cancel-order').addEventListener('click', async () => {
+      if (!currentActiveOrder) return;
+
+      const confirmCancel = confirm(`Are you sure you want to cancel Order #${currentActiveOrder.orderId}? The reserved stock will be immediately returned to our store.`);
+      if (!confirmCancel) return;
+
+      const cancelBtn = document.getElementById('btn-cancel-order');
+      cancelBtn.disabled = true;
+      cancelBtn.textContent = 'Cancelling order in database...';
+
+      try {
+        const res = await window.zenvoraFirebase.cancelOrder(currentActiveOrder.orderId);
+
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> CANCEL ORDER';
+
+        if (res && res.success) {
+          document.getElementById('cancel-success-message').style.display = 'block';
+          lookupOrder(currentActiveOrder.orderId);
+        } else {
+          alert(res.error || 'Failed to cancel order.');
+        }
+      } catch (err) {
+        console.error('[ZENVORA] Cancellation error:', err);
+        cancelBtn.disabled = false;
+        cancelBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg> CANCEL ORDER';
+        alert('An error occurred while cancelling your order. Please try again or contact WhatsApp support.');
+      }
+    });
+
+    // Handle Form Submit
+    document.getElementById('order-lookup-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = document.getElementById('lookup-order-id').value.trim();
+      if (val) {
+        lookupOrder(val);
+      }
+    });
+
+    // Read orderId from URL parameters on page load (e.g., ?orderId=ZV-20260920-1234)
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const orderIdParam = params.get('orderId');
+      if (orderIdParam) {
+        document.getElementById('lookup-order-id').value = orderIdParam;
+        lookupOrder(orderIdParam);
+      }
+    });
+  </script>
+</body>
+</html>
+
