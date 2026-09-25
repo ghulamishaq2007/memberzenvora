@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <script src="error-guard.js"></script>
+  <script src="./error-guard.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal Login | ZENVORA SHOOP</title>
   <meta name="robots" content="noindex, nofollow">
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <!-- Firebase Auth via Firebase 10 Modular SDK -->
   <script type="module">
     import { auth, signInWithEmailAndPassword, onAuthStateChanged } from "./firebase-service.js";
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        window.location.href = "admin-stock.html";
+        window.location.href = "./admin-stock.html";
       }
     });
 
@@ -31,7 +31,7 @@
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = 'admin-stock.html';
+        window.location.href = './admin-stock.html';
       } catch (err) {
         console.error('Admin login error:', err);
         submitBtn.disabled = false;
@@ -79,7 +79,7 @@
   <!-- Header -->
   <header class="site-header">
     <div class="container header-inner" style="justify-content: center;">
-      <a href="index.html" class="logo">
+      <a href="./index.html" class="logo">
         <span class="logo-main">ZENVORA</span>
         <span class="logo-sub">ADMIN</span>
       </a>
