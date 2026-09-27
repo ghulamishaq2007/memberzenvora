@@ -288,6 +288,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- FAQ Accordion ---
   initFaqAccordion();
+
+  // --- Back to Top Button ---
+  initBackToTop();
 });
 
 // Category filtering logic
@@ -1533,5 +1536,75 @@ function initFaqAccordion() {
     }
   }, { passive: true });
 }
+
+// ==========================================================================
+// BACK TO TOP BUTTON
+// Appears smoothly when scrolling down (> 280px), fixed at bottom-right
+// vertically stacked above the WhatsApp floating button with zero overlap.
+// ==========================================================================
+function initBackToTop() {
+  let backToTopBtn = document.getElementById('back-to-top-btn');
+
+  // If button not already statically in DOM, create and inject it
+  if (!backToTopBtn) {
+    backToTopBtn = document.createElement('button');
+    backToTopBtn.type = 'button';
+    backToTopBtn.id = 'back-to-top-btn';
+    backToTopBtn.className = 'back-to-top-btn';
+    backToTopBtn.setAttribute('aria-label', 'Back to top');
+    backToTopBtn.innerHTML = `
+      <svg class="back-to-top-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+      <span class="back-to-top-tooltip">Back to top</span>
+    `;
+    document.body.appendChild(backToTopBtn);
+  }
+
+  // Optimized scroll handler using requestAnimationFrame
+  let isTicking = false;
+  const SCROLL_THRESHOLD = 280;
+
+  function updateVisibility() {
+    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    if (currentScrollY > SCROLL_THRESHOLD) {
+      backToTopBtn.classList.add('visible');
+    } else {
+      backToTopBtn.classList.remove('visible');
+    }
+    isTicking = false;
+  }
+
+  window.addEventListener('scroll', () => {
+    if (!isTicking) {
+      window.requestAnimationFrame(updateVisibility);
+      isTicking = true;
+    }
+  }, { passive: true });
+
+  // Initial check on load (e.g. if refreshed while scrolled)
+  updateVisibility();
+
+  // Smooth scroll to top when clicked
+  backToTopBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    // Remove focus outline after mouse click
+    backToTopBtn.blur();
+  });
+}
+
+// Auto-initialize Back to Top safely across all pages
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBackToTop);
+  } else {
+    initBackToTop();
+  }
+}
+
 
 

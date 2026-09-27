@@ -17,6 +17,15 @@ const WA_BUTTON_HTML = `
     <span class="whatsapp-tooltip">Chat on WhatsApp</span>
   </a>`;
 
+const BACK_TO_TOP_HTML = `
+  <!-- Back to Top Button (Positioned cleanly above WhatsApp Floating Button) -->
+  <button type="button" class="back-to-top-btn" id="back-to-top-btn" aria-label="Back to top">
+    <svg class="back-to-top-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+    <span class="back-to-top-tooltip">Back to top</span>
+  </button>`;
+
 console.log(`Auditing and optimizing ${INITIAL_PRODUCTS.length} products...`);
 
 let updatedCount = 0;
@@ -32,7 +41,13 @@ for (const p of INITIAL_PRODUCTS) {
 
   const canonicalUrl = `${BASE_URL}/${p.productUrl}`;
   const pageTitle = `${p.productName} | ZENVORA SHOOP`;
-  const metaDesc = `Shop ${p.productName} at ZENVORA SHOOP. Authentic Pakistani ${p.category.toLowerCase()} crafted for luxury and elegance with Cash on Delivery in Karachi and WhatsApp ordering.`;
+  
+  // High-value targeted keywords included naturally within 120-160 characters
+  let metaDesc = `Shop ${p.productName} at ZENVORA SHOOP. Best Pakistani fashion online with Cash on Delivery Pakistan & WhatsApp ordering.`;
+  if (metaDesc.length > 160) {
+    metaDesc = `Buy ${p.productName} at ZENVORA SHOOP — Pakistani fashion online with Cash on Delivery Pakistan & WhatsApp orders.`;
+  }
+  const metaKeywords = `Pakistani fashion online, Cash on Delivery Pakistan, ${p.category}, ${p.productName}, Pakistani suits, ZENVORA SHOOP`;
   
   const mainImage = p.image.startsWith('http') ? p.image : `${BASE_URL}/${p.image}`;
 
@@ -44,6 +59,15 @@ for (const p of INITIAL_PRODUCTS) {
   // 2. Ensure Meta Description
   if (html.includes('<meta name="description"')) {
     html = html.replace(/<meta name="description" content="[^"]*">/i, `<meta name="description" content="${metaDesc}">`);
+  } else {
+    html = html.replace(/(<meta name="viewport"[^>]*>)/i, `$1\n  <meta name="description" content="${metaDesc}">`);
+  }
+
+  // 2b. Ensure Meta Keywords
+  if (html.includes('<meta name="keywords"')) {
+    html = html.replace(/<meta name="keywords" content="[^"]*">/i, `<meta name="keywords" content="${metaKeywords}">`);
+  } else {
+    html = html.replace(/(<meta name="description"[^>]*>)/i, `$1\n  <meta name="keywords" content="${metaKeywords}">`);
   }
 
   // 3. Ensure Favicons
@@ -168,6 +192,17 @@ for (const p of INITIAL_PRODUCTS) {
   // 9. Floating WhatsApp Button
   if (!html.includes('class="floating-whatsapp-btn"')) {
     html = html.replace('</body>', `${WA_BUTTON_HTML}\n</body>`);
+  }
+
+  // 10. Back to Top Button (positioned cleanly above WhatsApp button)
+  if (!html.includes('class="back-to-top-btn"')) {
+    if (html.includes('<!-- Floating WhatsApp Button -->')) {
+      html = html.replace('<!-- Floating WhatsApp Button -->', `${BACK_TO_TOP_HTML}\n  <!-- Floating WhatsApp Button -->`);
+    } else if (html.includes('class="floating-whatsapp-btn"')) {
+      html = html.replace(/(<a [^>]*class="floating-whatsapp-btn")/i, `${BACK_TO_TOP_HTML}\n  $1`);
+    } else {
+      html = html.replace('</body>', `${BACK_TO_TOP_HTML}\n</body>`);
+    }
   }
 
   fs.writeFileSync(filePath, html, 'utf8');

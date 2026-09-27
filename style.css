@@ -5719,5 +5719,133 @@ button:disabled {
   }
 }
 
+/* ==========================================================================
+   BACK TO TOP BUTTON (Global)
+   Fixed at bottom-right, vertically stacked cleanly above WhatsApp button
+   ========================================================================== */
+.back-to-top-btn {
+  position: fixed;
+  bottom: 96px; /* 24px (WhatsApp bottom) + 58px (WhatsApp height) + 14px (gap) */
+  right: 29px;  /* Co-axial with WhatsApp button: (58 - 48)/2 + 24 = 29px */
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: #161618;
+  color: #E5C158;
+  border: 1.5px solid rgba(212, 175, 55, 0.45);
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(212, 175, 55, 0.15);
+  cursor: pointer;
+  outline: none;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.9);
+  transition: opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 0.28s,
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease,
+              color 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 0;
+}
+
+.back-to-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top-btn:hover {
+  background-color: #1F1F24;
+  border-color: #D4AF37;
+  color: #FFFDF0;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(212, 175, 55, 0.35);
+}
+
+.back-to-top-btn:hover .back-to-top-icon {
+  transform: translateY(-2px);
+}
+
+.back-to-top-btn:active {
+  transform: translateY(-1px) scale(0.97);
+}
+
+.back-to-top-btn:focus-visible {
+  outline: 2px solid #D4AF37;
+  outline-offset: 3px;
+}
+
+.back-to-top-btn .back-to-top-icon {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+/* Tooltip matching luxury WhatsApp tooltip style */
+.back-to-top-btn .back-to-top-tooltip {
+  position: absolute;
+  right: calc(100% + 12px);
+  background: #111827;
+  color: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 5px 11px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.back-to-top-btn .back-to-top-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  transform: translateY(-50%);
+  border-width: 5px 0 5px 5px;
+  border-style: solid;
+  border-color: transparent transparent transparent #111827;
+}
+
+.back-to-top-btn:hover .back-to-top-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+  .back-to-top-btn {
+    bottom: 84px; /* 20px (mobile WhatsApp bottom) + 52px (mobile WhatsApp height) + 12px (gap) */
+    right: 22px;  /* Co-axial with mobile WhatsApp: (52 - 44)/2 + 18 = 22px */
+    width: 44px;
+    height: 44px;
+  }
+  .back-to-top-btn .back-to-top-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .back-to-top-btn .back-to-top-tooltip {
+    display: none !important;
+  }
+}
+
+
 
 
