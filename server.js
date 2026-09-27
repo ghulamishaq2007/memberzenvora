@@ -19,6 +19,16 @@ const staticDir = (process.env.NODE_ENV === 'production' && fs.existsSync(path.j
   ? path.join(__dirname, 'dist')
   : __dirname;
 
+// Clean URL routing: redirect trailing slashes to clean path
+app.use((req, res, next) => {
+  if (req.path.length > 1 && req.path.endsWith('/')) {
+    const cleanPath = req.path.slice(0, -1);
+    const query = req.url.slice(req.path.length);
+    return res.redirect(301, cleanPath + query);
+  }
+  next();
+});
+
 // Serve static assets with html extension resolution
 app.use(express.static(staticDir, {
   extensions: ['html', 'htm'],

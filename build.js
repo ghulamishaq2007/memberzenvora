@@ -8,24 +8,22 @@ const __dirname = path.dirname(__filename);
 
 const bundleFirebase = async () => {
   const firebaseBundlePath = path.join(__dirname, 'firebase-bundle.js');
-  if (!fs.existsSync(firebaseBundlePath)) {
-    console.log('Generating firebase-bundle.js with esbuild...');
-    await esbuild.build({
-      stdin: {
-        contents: `
-          export { initializeApp, getApps, getApp } from 'firebase/app';
-          export { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, runTransaction, serverTimestamp, query, orderBy, where, limit, addDoc } from 'firebase/firestore';
-          export { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
-        `,
-        resolveDir: __dirname
-      },
-      bundle: true,
-      format: 'esm',
-      outfile: firebaseBundlePath,
-      minify: false
-    });
-    console.log('firebase-bundle.js generated.');
-  }
+  console.log('Generating firebase-bundle.js with esbuild...');
+  await esbuild.build({
+    stdin: {
+      contents: `
+        export { initializeApp, getApps, getApp } from 'firebase/app';
+        export { getFirestore, doc, getDoc, getDocFromServer, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, runTransaction, serverTimestamp, query, orderBy, where, limit, addDoc } from 'firebase/firestore';
+        export { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+      `,
+      resolveDir: __dirname
+    },
+    bundle: true,
+    format: 'esm',
+    outfile: firebaseBundlePath,
+    minify: false
+  });
+  console.log('firebase-bundle.js generated.');
 };
 
 await bundleFirebase();

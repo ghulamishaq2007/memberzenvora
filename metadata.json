@@ -1,6 +1,6 @@
 {
   "name": "ZENVORA SHOOP - Fashion E-Commerce",
-  "description": "Premium Pakistani fashion e-commerce store for Ladies Suits, Gents Suits, Shoes, and Sandals with WhatsApp direct ordering.",
+  "description": "Shop Pakistani fashion online at ZENVORA SHOOP. Discover ladies suits, lawn suits, gents suits, shoes, sandals and more with convenient WhatsApp ordering.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
