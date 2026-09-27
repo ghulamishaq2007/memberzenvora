@@ -25525,6 +25525,13 @@ function getDoc(e2) {
   const t2 = ra(e2.firestore, da), n2 = oa(t2);
   return __PRIVATE_firestoreClientGetDocumentViaSnapshotListener(n2, e2._key).then(((n3) => __PRIVATE_convertToDocSnapshot(t2, e2, n3)));
 }
+function getDocFromServer(e2) {
+  e2 = ra(e2, aa);
+  const t2 = ra(e2.firestore, da), n2 = oa(t2);
+  return __PRIVATE_firestoreClientGetDocumentViaSnapshotListener(n2, e2._key, {
+    source: "server"
+  }).then(((n3) => __PRIVATE_convertToDocSnapshot(t2, e2, n3)));
+}
 function getDocs(e2) {
   e2 = ra(e2, Query);
   const t2 = ra(e2.firestore, da), n2 = oa(t2), r2 = new ua(t2);
@@ -31764,6 +31771,7 @@ export {
   getApps,
   getAuth,
   getDoc,
+  getDocFromServer,
   getDocs,
   getFirestore,
   initializeApp,
