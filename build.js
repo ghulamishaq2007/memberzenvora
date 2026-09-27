@@ -81,3 +81,4 @@ for (const file of files) {
 }
 
 console.log(`Successfully built ${copiedCount} static assets into /dist directory.`);
+process.exit(0);

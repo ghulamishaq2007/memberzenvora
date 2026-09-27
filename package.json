@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node server.js",
-    "build": "node build.js",
+    "seo": "node apply-seo-architecture.js",
+    "build": "node apply-seo-architecture.js && node build.js",
     "start": "node server.js",
     "clean": "rm -rf dist",
     "lint": "node -e \"console.log('Lint passed')\""

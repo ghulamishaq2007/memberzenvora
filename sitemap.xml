@@ -1,123 +1,146 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Homepage -->
   <url>
     <loc>https://zenvorashoop.netlify.app/</loc>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Category Pages -->
+  <url>
+    <loc>https://zenvorashoop.netlify.app/ladies-suits</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/gents-suits</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/bags</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/sandals</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Content & Support Pages -->
   <url>
     <loc>https://zenvorashoop.netlify.app/about.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://zenvorashoop.netlify.app/contact.html</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/membership.html</loc>
-    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/my-order.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
+
+  <!-- Product Pages: Ladies Suits -->
   <url>
     <loc>https://zenvorashoop.netlify.app/arabic-lawn.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/black-wash-&amp;-wear-men-suit-fabric-for-all-season.htm</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/brown-embroidered-3-piece.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://zenvorashoop.netlify.app/cotton-lawn.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/gents-peshawari-chappal.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/girl-leather-textured-hand-bag.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/girl-leather-textured-shoulder-bag.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/men-blue-suit.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/men-cotton-unstitched-suit-light-brown-summer.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/men-khaddar-plain-blue-suit-summer.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/men-wash-&amp;-wear-plain-suit-brown.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/mens-grey.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/orange-cross-strap-rexine-slides-for-women.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/printed-lawn-3.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/printed-lawn-suit-white.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://zenvorashoop.netlify.app/red-arabic-lawn.html</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://zenvorashoop.netlify.app/royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/brown-embroidered-3-piece.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/printed-lawn-3.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/printed-lawn-suit-white.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/red-arabic-lawn.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product Pages: Gents Suits -->
+  <url>
+    <loc>https://zenvorashoop.netlify.app/black-wash-&amp;-wear-men-suit-fabric-for-all-season.htm</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/men-blue-suit.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/men-cotton-unstitched-suit-light-brown-summer.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/men-khaddar-plain-blue-suit-summer.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/men-wash-&amp;-wear-plain-suit-brown.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/mens-grey.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product Pages: Handbags -->
+  <url>
+    <loc>https://zenvorashoop.netlify.app/girl-leather-textured-hand-bag.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/girl-leather-textured-shoulder-bag.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Product Pages: Shoes & Sandals -->
+  <url>
+    <loc>https://zenvorashoop.netlify.app/gents-peshawari-chappal.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://zenvorashoop.netlify.app/tan-leather-shoes.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://zenvorashoop.netlify.app/orange-cross-strap-rexine-slides-for-women.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://zenvorashoop.netlify.app/women-white-rexine-fancy-slippers.html</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.8</priority>
   </url>
 </urlset>

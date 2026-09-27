@@ -1,4 +1,14 @@
 # ZENVORA SHOOP Netlify Clean URL & Direct Routing
+/ladies-suits        /ladies-suits.html       200
+/ladies-suits/       /ladies-suits.html       200
+/gents-suits         /gents-suits.html        200
+/gents-suits/        /gents-suits.html        200
+/bags                /bags.html               200
+/bags/               /bags.html               200
+/sandals             /sandals.html            200
+/sandals/            /sandals.html            200
+/footwear            /sandals.html            200
+/footwear/           /sandals.html            200
 /admin-stock        /admin-stock.html       200
 /admin-stock/       /admin-stock.html       200
 /admin-login        /admin-login.html       200
