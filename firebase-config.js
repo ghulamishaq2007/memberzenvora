@@ -202,6 +202,17 @@ export const INITIAL_PRODUCTS = [
     category: "Ladies Suits",
     stock: 4,
     status: "available"
+  },
+
+    {
+    productId: "men-double-fold-stylish-wallet",
+    productName: "Men's Double Fold Stylish Wallet",
+    productUrl: "men-double-fold-stylish-wallet.html",
+    price: 1500,
+    image: "men-double-fold-stylish-wallet.jpeg",
+    category: "Men Wallets",
+    stock: 273,
+    status: "available"
   }
 
 ];
@@ -217,6 +228,8 @@ export const PRODUCT_ID_ALIASES = {
   "black-wash-&-wear-men-suit-fabric-for-all-season": "black-wash-wear-men-suit-fabric-for-all-season",
   "tan-leather-Gents Suits": "men-khaddar-plain-blue-suit-summer",
   "urban-sneakers": "girl-leather-textured-hand-bag",
+  "orange-cross-strap-rexine-slides-for-women": "orange-cross-strap-rexine-slides-for-women",
+  "men-double-fold-stylish-wallet": "men-double-fold-stylish-wallet",
   "royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women": "royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women"
 
 };
