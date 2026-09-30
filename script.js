@@ -291,6 +291,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Back to Top Button ---
   initBackToTop();
+
+  // --- Professional Scroll Reveal System ---
+  initScrollReveal();
 });
 
 // Category filtering logic
@@ -313,6 +316,7 @@ function initCategoryFilter() {
       );
     });
 
+    let visibleCount = 0;
     productCards.forEach((card) => {
       const cardCategory = normalize(card.getAttribute('data-category'));
       const isNew = normalize(card.getAttribute('data-new')) === 'true';
@@ -345,6 +349,15 @@ function initCategoryFilter() {
       card.hidden = !show;
       card.style.display = show ? '' : 'none';
       card.classList.toggle('category-hidden', !show);
+      if (show) {
+        const delay = (visibleCount % 4) * 60;
+        visibleCount++;
+        card.classList.remove('card-revealed');
+        card.style.transitionDelay = `${delay}ms`;
+        setTimeout(() => {
+          card.classList.add('card-revealed');
+        }, 30);
+      }
     });
 
     if (updateHash) {
@@ -428,7 +441,7 @@ function initQuickAddButtons() {
         return;
       }
 
-      window.addToCart({
+      const addResult = window.addToCart({
         id: canonicalId,
         name,
         price,
@@ -438,6 +451,18 @@ function initQuickAddButtons() {
         size: 'Standard',
         color: 'Standard'
       }, 1);
+
+      if (addResult !== false) {
+        const origHtml = btn.innerHTML;
+        btn.classList.add('btn-added-feedback');
+        btn.innerHTML = '✓ Added!';
+        setTimeout(() => {
+          btn.classList.remove('btn-added-feedback');
+          if (!btn.disabled && !btn.classList.contains('btn-disabled')) {
+            btn.innerHTML = origHtml;
+          }
+        }, 1100);
+      }
     });
   });
 
@@ -773,11 +798,20 @@ function initProductDetailPage(config) {
         document.querySelectorAll('.thumbnail-btn').forEach(b => b.classList.remove('active'));
         thumbBtn.classList.add('active');
         if (mainImage) {
-          mainImage.style.opacity = '0.4';
+          mainImage.style.transition = 'opacity 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1)';
+          mainImage.style.opacity = '0.35';
+          mainImage.style.transform = 'scale(0.97)';
           setTimeout(() => {
             mainImage.src = imgSrc;
-            mainImage.style.opacity = '1';
-          }, 150);
+            mainImage.onload = () => {
+              mainImage.style.opacity = '1';
+              mainImage.style.transform = 'scale(1)';
+            };
+            setTimeout(() => {
+              mainImage.style.opacity = '1';
+              mainImage.style.transform = 'scale(1)';
+            }, 60);
+          }, 140);
         }
       });
 
@@ -994,6 +1028,16 @@ function initProductDetailPage(config) {
 
     const success = addToCart(productPayload, selectedQty, liveStock);
     if (!success) return false;
+
+    if (addToCartBtn && !isBuyNow) {
+      const origHtml = addToCartBtn.innerHTML;
+      addToCartBtn.classList.add('btn-added-feedback');
+      addToCartBtn.innerHTML = '✓ Added to Cart!';
+      setTimeout(() => {
+        addToCartBtn.classList.remove('btn-added-feedback');
+        addToCartBtn.innerHTML = origHtml;
+      }, 1400);
+    }
 
     if (isBuyNow) {
       window.location.href = 'cart.html';
@@ -1606,5 +1650,135 @@ if (typeof document !== 'undefined') {
   }
 }
 
+// ==========================================================================
+// ADVANCED MOTION & SCROLL REVEAL ENGINE
+// Coordinated multi-directional scroll reveals, mobile staggered entrance & luxury indicator
+// ==========================================================================
+function initScrollReveal() {
+  // 1. Luxury Gold Reading/Scroll Progress Indicator
+  if (typeof document !== 'undefined') {
+    let progressIndicator = document.getElementById('scroll-progress-indicator');
+    if (!progressIndicator) {
+      progressIndicator = document.createElement('div');
+      progressIndicator.id = 'scroll-progress-indicator';
+      progressIndicator.setAttribute('aria-hidden', 'true');
+      document.body.prepend(progressIndicator);
+    }
 
+    let isScrollTicking = false;
+    const updateScrollProgress = () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      if (progressIndicator) {
+        progressIndicator.style.width = Math.min(100, Math.max(0, scrolled)) + '%';
+      }
+      isScrollTicking = false;
+    };
 
+    window.addEventListener('scroll', () => {
+      if (!isScrollTicking) {
+        window.requestAnimationFrame(updateScrollProgress);
+        isScrollTicking = true;
+      }
+    }, { passive: true });
+    updateScrollProgress();
+  }
+
+  // 2. Reduced Motion Fallback
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced || !('IntersectionObserver' in window)) {
+    document.querySelectorAll('.product-card').forEach(c => c.classList.add('card-revealed'));
+    document.querySelectorAll(
+      '.features-bar .feature-item, .section-header, .categories-filter, .why-card, .testimonial-card, .review-card, .faq-item, .footer-col, .pillar-card'
+    ).forEach(el => el.classList.add('is-revealed'));
+    return;
+  }
+
+  // 3. Staggered Product Cards
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach((card, idx) => {
+    card.classList.add('card-revealing');
+    card.style.transitionDelay = `${(idx % 4) * 75}ms`;
+  });
+
+  // 4. Feature Items in Benefits Bar (Fade Up)
+  document.querySelectorAll('.features-bar .feature-item').forEach((item, idx) => {
+    item.classList.add('reveal-fade-up');
+    item.style.transitionDelay = `${(idx * 80)}ms`;
+  });
+
+  // 5. Section Headers (Fade Up)
+  document.querySelectorAll('.section-header').forEach((header) => {
+    header.classList.add('reveal-fade-up');
+  });
+
+  // 6. Category Filter (Zoom In)
+  const catFilter = document.querySelector('.categories-filter');
+  if (catFilter) {
+    catFilter.classList.add('reveal-zoom-in');
+  }
+
+  // 7. Why Choose Us Cards (Scale In)
+  document.querySelectorAll('.why-card').forEach((card, idx) => {
+    card.classList.add('reveal-scale-in');
+    card.style.transitionDelay = `${(idx * 75)}ms`;
+  });
+
+  // 8. Testimonials & Happy Customer Reviews (Scale In)
+  document.querySelectorAll('.testimonial-card, .review-card').forEach((card, idx) => {
+    card.classList.add('reveal-scale-in');
+    card.style.transitionDelay = `${(idx % 3 * 85)}ms`;
+  });
+
+  // 9. FAQ Items (Fade Up)
+  document.querySelectorAll('.faq-item').forEach((item, idx) => {
+    item.classList.add('reveal-fade-up');
+    item.style.transitionDelay = `${(idx * 65)}ms`;
+  });
+
+  // 10. Footer Columns (Fade Up)
+  document.querySelectorAll('.footer-col').forEach((col, idx) => {
+    col.classList.add('reveal-fade-up');
+    col.style.transitionDelay = `${(idx * 85)}ms`;
+  });
+
+  // 11. Pillars & About Cards
+  document.querySelectorAll('.pillar-card, .about-experience-card').forEach((el, idx) => {
+    el.classList.add('reveal-scale-in');
+    el.style.transitionDelay = `${(idx * 80)}ms`;
+  });
+
+  // Intersection Observer for silky element reveals
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const target = entry.target;
+        if (target.classList.contains('card-revealing')) {
+          target.classList.add('card-revealed');
+        } else {
+          target.classList.add('is-revealed');
+        }
+        obs.unobserve(target);
+      }
+    });
+  }, {
+    root: null,
+    rootMargin: '0px 0px -40px 0px',
+    threshold: 0.08
+  });
+
+  const allRevealElements = document.querySelectorAll(
+    '.card-revealing, .reveal-fade-up, .reveal-slide-left, .reveal-slide-right, .reveal-scale-in, .reveal-zoom-in'
+  );
+  allRevealElements.forEach(el => observer.observe(el));
+}
+
+// Auto-initialize Scroll Reveal safely across all pages
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollReveal);
+  } else {
+    initScrollReveal();
+  }
+}
