@@ -263,8 +263,8 @@ for (const p of INITIAL_PRODUCTS) {
   console.log(`✓ SEO Enhanced: ${p.productUrl} (${catInfo.name})`);
 }
 
-// Also update footer category links on index.html, about.html, contact.html, my-order.html, cart.html
-const staticPages = ['index.html', 'about.html', 'contact.html', 'my-order.html', 'cart.html'];
+// Also update footer category links on index.html, about.html, contact.html, my-order.html, cart.html, privacy-policy.html, return-policy.html
+const staticPages = ['index.html', 'about.html', 'contact.html', 'my-order.html', 'cart.html', 'privacy-policy.html', 'return-policy.html'];
 for (const page of staticPages) {
   const pPath = path.join(__dirname, page);
   if (!fs.existsSync(pPath)) continue;
