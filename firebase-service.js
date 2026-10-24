@@ -3,21 +3,23 @@ import {
   getApps, 
   getApp,
   getFirestore, 
+  initializeFirestore,
+  setLogLevel,
   doc, 
   getDoc, 
   setDoc, 
   updateDoc, 
-  deleteDoc,
+  deleteDoc, 
   collection, 
   getDocs, 
   onSnapshot, 
   runTransaction, 
   serverTimestamp, 
   query, 
-  orderBy,
-  where,
-  limit,
-  addDoc,
+  orderBy, 
+  where, 
+  limit, 
+  addDoc, 
   getAuth, 
   signInWithEmailAndPassword, 
   signOut, 
@@ -26,13 +28,30 @@ import {
 
 import { firebaseConfig, INITIAL_PRODUCTS, canonicalizeProductId } from "./firebase-config.js";
 
+// Silence benign 10-second backend retry warnings
+try {
+  if (typeof setLogLevel === 'function') {
+    setLogLevel('error');
+  }
+} catch (e) {}
+
 // Initialize Firebase App
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firestore with specific database ID if configured
-const db = firebaseConfig.firestoreDatabaseId 
-  ? getFirestore(app, firebaseConfig.firestoreDatabaseId) 
-  : getFirestore(app);
+// Initialize Firestore with robust long-polling to prevent 10s fetch-stream timeout in preview iframes
+let db;
+try {
+  const dbId = firebaseConfig.firestoreDatabaseId;
+  const settings = {
+    experimentalAutoDetectLongPolling: true,
+    useFetchStreams: false
+  };
+  db = dbId ? initializeFirestore(app, settings, dbId) : initializeFirestore(app, settings);
+} catch (err) {
+  db = firebaseConfig.firestoreDatabaseId 
+    ? getFirestore(app, firebaseConfig.firestoreDatabaseId) 
+    : getFirestore(app);
+}
 
 const auth = getAuth(app);
 

@@ -11096,6 +11096,9 @@ var ve = new Logger("@firebase/firestore");
 function __PRIVATE_getLogLevel() {
   return ve.logLevel;
 }
+function setLogLevel2(e2) {
+  ve.setLogLevel(e2);
+}
 function __PRIVATE_logDebug(e2, ...t2) {
   if (ve.logLevel <= LogLevel.DEBUG) {
     const n2 = t2.map(__PRIVATE_argToString);
@@ -25309,6 +25312,23 @@ var da = class extends Dt {
     }
   }
 };
+function initializeFirestore(t2, n2, r2) {
+  r2 || (r2 = $e);
+  const i2 = _getProvider(t2, "firestore");
+  if (i2.isInitialized(r2)) {
+    const t3 = i2.getImmediate({
+      identifier: r2
+    }), s2 = i2.getOptions(r2);
+    if (deepEqual(s2, n2)) return t3;
+    throw new e(ta.FAILED_PRECONDITION, "initializeFirestore() has already been called with different options. To avoid this error, call initializeFirestore() with the same options as when it was originally called, or call getFirestore() to return the already initialized instance.");
+  }
+  if (void 0 !== n2.cacheSizeBytes && void 0 !== n2.localCache) throw new e(ta.INVALID_ARGUMENT, "cache and cacheSizeBytes cannot be specified at the same time as cacheSizeBytes willbe deprecated. Instead, specify the cache size in the cache object");
+  if (void 0 !== n2.cacheSizeBytes && -1 !== n2.cacheSizeBytes && n2.cacheSizeBytes < bt) throw new e(ta.INVALID_ARGUMENT, "cacheSizeBytes must be at least 1048576");
+  return n2.host && isCloudWorkstation(n2.host) && pingServer(n2.host), i2.initialize({
+    options: n2,
+    instanceIdentifier: r2
+  });
+}
 function getFirestore(e2, t2) {
   const n2 = "object" == typeof e2 ? e2 : getApp(), r2 = "string" == typeof e2 ? e2 : t2 || $e, i2 = _getProvider(n2, "firestore").getImmediate({
     identifier: r2
@@ -32117,6 +32137,7 @@ export {
   getDocs,
   getFirestore,
   initializeApp,
+  initializeFirestore,
   limit,
   onAuthStateChanged,
   onSnapshot,
@@ -32125,6 +32146,7 @@ export {
   runTransaction,
   serverTimestamp,
   setDoc,
+  setLogLevel2 as setLogLevel,
   signInAnonymously,
   signInWithEmailAndPassword,
   signOut,
@@ -32163,7 +32185,6 @@ export {
 @firebase/util/dist/index.esm.js:
 @firebase/util/dist/index.esm.js:
 @firebase/logger/dist/esm/index.esm.js:
-@firebase/firestore/dist/common-CLMydGSF.esm.js:
 @firebase/firestore/dist/common-CLMydGSF.esm.js:
 @firebase/firestore/dist/common-CLMydGSF.esm.js:
 @firebase/firestore/dist/common-CLMydGSF.esm.js:
