@@ -1782,3 +1782,174 @@ if (typeof document !== 'undefined') {
     initScrollReveal();
   }
 }
+
+/* ==========================================================================
+   FEATURE: ZENVORA SHOOP LUXURY HERO BANNER SLIDESHOW (7 SLIDES)
+   - Inspired by MehakPosh.pk luxury editorial presentation
+   - Automatic 3-second rotation with smooth 850ms crossfade transitions
+   - Preloads all 7 fashion images with robust fallback error handling
+   - Non-intrusive: static foreground text and buttons remain 100% stationary
+   ========================================================================== */
+function initHeroSlideshow() {
+  const container = document.getElementById('hero-slides-wrapper');
+  if (!container) return; // Only runs on pages with the hero slideshow (e.g. index.html)
+
+  const slides = container.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.hero-dot');
+  const slideNumEl = document.querySelector('.hero-slide-num');
+  const slideTitleEl = document.querySelector('.hero-slide-title');
+
+  if (slides.length === 0) return;
+
+  const SLIDE_DATA = [
+    {
+      index: 0,
+      title: "Pastel Lawn Collection",
+      src: "hero-slide-1.jpg",
+      fallback: "arabic-lawn.png2.jpeg"
+    },
+    {
+      index: 1,
+      title: "Navy Blue Embroidered Suits",
+      src: "hero-slide-2.jpg",
+      fallback: "royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women2.jpeg"
+    },
+    {
+      index: 2,
+      title: "Festive Red & Maroon Dresses",
+      src: "hero-slide-3.jpg",
+      fallback: "red-arabic-lawn.png2.jpeg"
+    },
+    {
+      index: 3,
+      title: "Beige, Cream & Sage-Green Suits",
+      src: "hero-slide-4.jpg",
+      fallback: "printed-lawn-suit-white.png.jpeg"
+    },
+    {
+      index: 4,
+      title: "Festive & Formal Luxury Couture",
+      src: "hero-slide-5.jpg",
+      fallback: "brown-embroidered-3-piece.png4.jpeg"
+    },
+    {
+      index: 5,
+      title: "Stylish Men's Kurta & Suits",
+      src: "hero-slide-6.jpg",
+      fallback: "mens-grey.png.jpeg"
+    },
+    {
+      index: 6,
+      title: "Curated Fashion & Accessories",
+      src: "hero-slide-7.jpg",
+      fallback: "girl-leather-textured-shoulder-bag-girl-waring.jpeg"
+    }
+  ];
+
+  let currentIndex = 0;
+  const totalSlides = slides.length;
+  const INTERVAL_TIME = 3000; // Exact 3-second automatic rotation
+  let rotationTimer = null;
+
+  // 1. Preload all 7 images and attach error handling
+  SLIDE_DATA.forEach((item, idx) => {
+    // Preload into browser cache
+    const preloader = new Image();
+    preloader.src = item.src;
+    preloader.onerror = function() {
+      const fb = new Image();
+      fb.src = item.fallback;
+    };
+
+    // Attach graceful error handling to DOM image element
+    const slideEl = slides[idx];
+    if (slideEl) {
+      const img = slideEl.querySelector('img');
+      if (img) {
+        img.onerror = function() {
+          if (this.dataset.fallbackApplied !== 'true') {
+            this.dataset.fallbackApplied = 'true';
+            this.src = item.fallback;
+          }
+        };
+      }
+    }
+  });
+
+  // 2. Function to activate a specific slide index
+  function activateSlide(index) {
+    // Normalize index within 0 to totalSlides - 1
+    currentIndex = ((index % totalSlides) + totalSlides) % totalSlides;
+
+    // Update slides class
+    slides.forEach((slide, i) => {
+      if (i === currentIndex) {
+        slide.classList.add('active');
+        slide.setAttribute('aria-hidden', 'false');
+      } else {
+        slide.classList.remove('active');
+        slide.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // Update dot indicators
+    dots.forEach((dot, i) => {
+      const isActive = i === currentIndex;
+      dot.classList.toggle('active', isActive);
+      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
+    // Update category label and numeric counter
+    const currentData = SLIDE_DATA[currentIndex];
+    if (slideNumEl) {
+      slideNumEl.textContent = `0${currentIndex + 1} / 0${totalSlides}`;
+    }
+    if (slideTitleEl && currentData) {
+      slideTitleEl.textContent = currentData.title;
+    }
+  }
+
+  // 3. Move to next slide automatically
+  function nextSlide() {
+    activateSlide(currentIndex + 1);
+  }
+
+  // 4. Start and reset timer
+  function startAutoRotation() {
+    stopAutoRotation();
+    rotationTimer = setInterval(nextSlide, INTERVAL_TIME);
+  }
+
+  function stopAutoRotation() {
+    if (rotationTimer) {
+      clearInterval(rotationTimer);
+      rotationTimer = null;
+    }
+  }
+
+  // 5. Connect indicator dots for instant user interaction
+  dots.forEach(dot => {
+    dot.addEventListener('click', function(e) {
+      e.preventDefault();
+      const targetIndex = parseInt(this.getAttribute('data-slide'), 10);
+      if (!isNaN(targetIndex)) {
+        activateSlide(targetIndex);
+        // Reset timer on manual click so user gets full 3 seconds on chosen slide
+        startAutoRotation();
+      }
+    });
+  });
+
+  // 6. Initial activation and start rotation
+  activateSlide(0);
+  startAutoRotation();
+}
+
+// Auto-initialize Hero Slideshow safely across lifecycle
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeroSlideshow);
+  } else {
+    initHeroSlideshow();
+  }
+}

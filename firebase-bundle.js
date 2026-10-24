@@ -4488,69 +4488,69 @@ for (let i2 = 0; i2 < ASCII_SIZE; i2++) {
   else ASCII_TO_LOWER[i2] = i2;
 }
 var Codepoint = class {
-  static CODES = /* @__PURE__ */ new Map([
-    ["\x07", 7],
-    ["\b", 8],
-    ["	", 9],
-    ["\n", 10],
-    ["\v", 11],
-    ["\f", 12],
-    ["\r", 13],
-    [" ", 32],
-    ['"', 34],
-    ["$", 36],
-    ["&", 38],
-    ["'", 39],
-    ["(", 40],
-    [")", 41],
-    ["*", 42],
-    ["+", 43],
-    ["-", 45],
-    [".", 46],
-    ["0", 48],
-    ["1", 49],
-    ["2", 50],
-    ["3", 51],
-    ["4", 52],
-    ["5", 53],
-    ["6", 54],
-    ["7", 55],
-    ["8", 56],
-    ["9", 57],
-    [":", 58],
-    ["<", 60],
-    [">", 62],
-    ["?", 63],
-    ["A", 65],
-    ["B", 66],
-    ["C", 67],
-    ["F", 70],
-    ["P", 80],
-    ["Q", 81],
-    ["U", 85],
-    ["Z", 90],
-    ["[", 91],
-    ["\\", 92],
-    ["]", 93],
-    ["^", 94],
-    ["_", 95],
-    ["`", 96],
-    ["a", 97],
-    ["b", 98],
-    ["f", 102],
-    ["i", 105],
-    ["m", 109],
-    ["n", 110],
-    ["r", 114],
-    ["s", 115],
-    ["t", 116],
-    ["v", 118],
-    ["x", 120],
-    ["z", 122],
-    ["{", 123],
-    ["|", 124],
-    ["}", 125]
-  ]);
+  static CODES = Object.freeze({
+    "\x07": 7,
+    "\b": 8,
+    "	": 9,
+    "\n": 10,
+    "\v": 11,
+    "\f": 12,
+    "\r": 13,
+    " ": 32,
+    '"': 34,
+    $: 36,
+    "&": 38,
+    "'": 39,
+    "(": 40,
+    ")": 41,
+    "*": 42,
+    "+": 43,
+    "-": 45,
+    ".": 46,
+    0: 48,
+    1: 49,
+    2: 50,
+    3: 51,
+    4: 52,
+    5: 53,
+    6: 54,
+    7: 55,
+    8: 56,
+    9: 57,
+    ":": 58,
+    "<": 60,
+    ">": 62,
+    "?": 63,
+    A: 65,
+    B: 66,
+    C: 67,
+    F: 70,
+    P: 80,
+    Q: 81,
+    U: 85,
+    Z: 90,
+    "[": 91,
+    "\\": 92,
+    "]": 93,
+    "^": 94,
+    _: 95,
+    "`": 96,
+    a: 97,
+    b: 98,
+    f: 102,
+    i: 105,
+    m: 109,
+    n: 110,
+    r: 114,
+    s: 115,
+    t: 116,
+    v: 118,
+    x: 120,
+    z: 122,
+    "{": 123,
+    "|": 124,
+    "}": 125
+  });
   static toUpperCase(codepoint) {
     if (codepoint < ASCII_SIZE) return ASCII_TO_UPPER[codepoint];
     const s2 = String.fromCodePoint(codepoint).toUpperCase();
@@ -4595,13 +4595,15 @@ var UnicodeRangeTable = class {
     return this.data.length / this.SIZE;
   }
 };
+var B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-";
 var B64_MAP = /* @__PURE__ */ new Uint8Array(256);
-for (let i2 = 0, b2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-"; i2 < 64; i2++) B64_MAP[b2.charCodeAt(i2)] = i2;
+for (let i2 = 0; i2 < 64; i2++) B64_MAP[B64.charCodeAt(i2)] = i2;
 var decodeVLQ = (str) => {
   const res = [];
-  let value = 0, shift = 0;
+  let value = 0;
+  let shift = 0;
   for (let i2 = 0; i2 < str.length; i2++) {
-    let digit = B64_MAP[str.charCodeAt(i2)];
+    const digit = B64_MAP[str.charCodeAt(i2)];
     value |= (digit & 31) << shift;
     if ((digit & 32) === 0) {
       res.push(value);
@@ -4615,7 +4617,8 @@ var decodeRanges = (str, isStride1) => {
   const res = decodeVLQ(str);
   const numRanges = isStride1 ? res.length / 2 : res.length / 3;
   const out = new Uint32Array(numRanges * 3);
-  let current = 0, resIdx = 0;
+  let current = 0;
+  let resIdx = 0;
   for (let i2 = 0; i2 < numRanges; i2++) {
     current += res[resIdx++];
     out[i2 * 3] = current;
@@ -4720,9 +4723,6 @@ var UnicodeTables = class {
     Uppercase: () => new UnicodeRangeTable(decodeRanges("hCZBmDWBCGBiB2BCDOCDuBCBECEBBCCCBCCBBBDDBCBBCCBEBBCBBCECBCCDCCBCCBBBCCCBEEIJDCMCDQCDDDCCBC4BCIBBCBBDCCBCBCGCiJCCEJJHCCBBBCCCBCCBPBCIBkBDDBBBEWCGDDCBBDyBBxBgBCK2BCBMCD+CCDlBBq6ClBBCGGzW1CB0kCHHBpBBDCBhK0ECKgDCKHBJFBLHBJHBJFBMGCJHBpCDBNDBNDBNEBMDBnIFFECBDCBDEEBDBHGCBCBDDBLBBGbbBOBUzZzZBYBx5BvBBxBCCBBBDGCBCBCDDJCBCgDCJCCFuqeuqeCqBCUaCoEMCE8BCLECBICFCCDCCEUCBDBCEBCOCBCBCCCBQCZs5Vs5VBYBmmBnBBpEjBB9EKBCOBCGBCBBr3ByBB+EVB75CfBhsVfBhCYBoqZZBbZBbZBbCCBGDBDDBCBCHBbZBbBBCDBDHBCGBcBBCDBCEBCEEBFBcZBbZBbZBbZBbZBbZBfYBiBYBiBYBiBYBiBYBiB2pE2pEBgBBvgCZBHZBHZB", false)),
     White_Space: () => new UnicodeRangeTable(decodeRanges("JEBTlDlDbgvFgvFgsCKBeBBGwBwBh9DAB", false))
   });
-  static get Upper() {
-    return this.CATEGORIES.get("Lu");
-  }
   static SCRIPTS = new LazyMap({
     Adlam: () => new UnicodeRangeTable(decodeRanges("go6DrCFJFB", true)),
     Ahom: () => new UnicodeRangeTable(decodeRanges("g4lCaDOFW", true)),
@@ -4922,6 +4922,10 @@ var UnicodeTables = class {
 };
 var Unicode = class Unicode2 {
   static MAX_RUNE = 1114111;
+  static RUNE_ERROR = 65533;
+  static isUnsearchable(r2) {
+    return r2 === Unicode2.RUNE_ERROR || r2 >= Unicode2.MIN_HIGH_SURROGATE && r2 <= Unicode2.MAX_LOW_SURROGATE;
+  }
   static MAX_ASCII = 127;
   static MAX_LATIN1 = 255;
   static MAX_BMP = 65535;
@@ -4961,22 +4965,17 @@ var Unicode = class Unicode2 {
     }
     return ranges.length > 0 && r2 >= ranges.getLo(0) && Unicode2.is32(ranges, r2);
   }
-  static isUpper(r2) {
-    if (r2 <= Unicode2.MAX_LATIN1) {
-      const s2 = String.fromCodePoint(r2);
-      return s2.toUpperCase() === s2 && s2.toLowerCase() !== s2;
-    }
-    return Unicode2.is(UnicodeTables.Upper, r2);
-  }
   static isPrint(r2) {
     if (r2 <= Unicode2.MAX_LATIN1) return r2 >= 32 && r2 < Unicode2.MAX_ASCII || r2 >= 161 && r2 !== 173;
     return Unicode2.is(UnicodeTables.Print, r2);
   }
   static simpleFold(r2) {
     if (UnicodeTables.CASE_ORBIT.has(r2)) return UnicodeTables.CASE_ORBIT.get(r2);
-    const l2 = Codepoint.toLowerCase(r2);
-    if (l2 !== r2) return l2;
-    return Codepoint.toUpperCase(r2);
+    if (r2 <= Unicode2.MAX_ASCII) {
+      const l2 = Codepoint.toLowerCase(r2);
+      return l2 !== r2 ? l2 : Codepoint.toUpperCase(r2);
+    }
+    return r2;
   }
   static equalsIgnoreCase(r1, r2) {
     if (r1 === r2) return true;
@@ -5008,15 +5007,15 @@ var Utils = class Utils2 {
     return [];
   }
   static isByteArray(input) {
-    return Array.isArray(input) || input instanceof Uint8Array;
+    return Array.isArray(input) || Object.prototype.toString.call(input) === "[object Uint8Array]";
   }
   static isalnum(c2) {
-    return Codepoint.CODES.get("0") <= c2 && c2 <= Codepoint.CODES.get("9") || Codepoint.CODES.get("a") <= c2 && c2 <= Codepoint.CODES.get("z") || Codepoint.CODES.get("A") <= c2 && c2 <= Codepoint.CODES.get("Z");
+    return Codepoint.CODES["0"] <= c2 && c2 <= Codepoint.CODES["9"] || Codepoint.CODES["a"] <= c2 && c2 <= Codepoint.CODES["z"] || Codepoint.CODES["A"] <= c2 && c2 <= Codepoint.CODES["Z"];
   }
   static unhex(c2) {
-    if (Codepoint.CODES.get("0") <= c2 && c2 <= Codepoint.CODES.get("9")) return c2 - Codepoint.CODES.get("0");
-    if (Codepoint.CODES.get("a") <= c2 && c2 <= Codepoint.CODES.get("f")) return c2 - Codepoint.CODES.get("a") + 10;
-    if (Codepoint.CODES.get("A") <= c2 && c2 <= Codepoint.CODES.get("F")) return c2 - Codepoint.CODES.get("A") + 10;
+    if (Codepoint.CODES["0"] <= c2 && c2 <= Codepoint.CODES["9"]) return c2 - Codepoint.CODES["0"];
+    if (Codepoint.CODES["a"] <= c2 && c2 <= Codepoint.CODES["f"]) return c2 - Codepoint.CODES["a"] + 10;
+    if (Codepoint.CODES["A"] <= c2 && c2 <= Codepoint.CODES["F"]) return c2 - Codepoint.CODES["A"] + 10;
     return -1;
   }
   static escapeRune(rune) {
@@ -5025,25 +5024,25 @@ var Utils = class Utils2 {
       if (Utils2.METACHARACTERS.indexOf(String.fromCodePoint(rune)) >= 0) out += "\\";
       out += String.fromCodePoint(rune);
     } else switch (rune) {
-      case Codepoint.CODES.get('"'):
+      case Codepoint.CODES['"']:
         out += '\\"';
         break;
-      case Codepoint.CODES.get("\\"):
+      case Codepoint.CODES["\\"]:
         out += "\\\\";
         break;
-      case Codepoint.CODES.get("	"):
+      case Codepoint.CODES["	"]:
         out += "\\t";
         break;
-      case Codepoint.CODES.get("\n"):
+      case Codepoint.CODES["\n"]:
         out += "\\n";
         break;
-      case Codepoint.CODES.get("\r"):
+      case Codepoint.CODES["\r"]:
         out += "\\r";
         break;
-      case Codepoint.CODES.get("\b"):
+      case Codepoint.CODES["\b"]:
         out += "\\b";
         break;
-      case Codepoint.CODES.get("\f"):
+      case Codepoint.CODES["\f"]:
         out += "\\f";
         break;
       default: {
@@ -5067,7 +5066,7 @@ var Utils = class Utils2 {
       runes.push(cp);
       i2 += cp > Unicode.MAX_BMP ? 2 : 1;
     }
-    return runes;
+    return new Int32Array(runes);
   }
   static runeToString(r2) {
     return String.fromCodePoint(r2);
@@ -5187,7 +5186,7 @@ var MatcherInputBase = class MatcherInputBase2 {
   asCharSequence() {
     throw Error("not implemented");
   }
-  /** @returns {Uint8Array|number[]} */
+  /** @returns {Uint8Array|number[]|null} */
   asBytes() {
     throw Error("not implemented");
   }
@@ -5294,13 +5293,14 @@ var MachineInputBase = class {
     return -8;
   }
   constructor() {
+    this.start = 0;
     this.end = 0;
   }
   canCheckPrefix() {
     return true;
   }
   endPos() {
-    return this.end;
+    return this.end - this.start;
   }
   hasString() {
     return false;
@@ -5312,7 +5312,8 @@ var MachineInputBase = class {
     return 0;
   }
 };
-var MachineUTF8Input = class extends MachineInputBase {
+var MachineUTF8Input = class MachineUTF8Input2 extends MachineInputBase {
+  static RUNE_ERROR_STEP = Unicode.RUNE_ERROR << 3 | 1;
   constructor(bytes, start = 0, end = bytes.length) {
     super();
     this.bytes = bytes;
@@ -5326,33 +5327,46 @@ var MachineUTF8Input = class extends MachineInputBase {
     return idx !== -1 && idx <= this.end - target.length;
   }
   hasAnyString(prefilter, pos) {
-    if (!prefilter.ac8) return false;
-    return prefilter.ac8.searchUTF8(this.bytes, this.start + pos, this.end);
+    return prefilter.automaton8().searchUTF8(this.bytes, this.start + pos, this.end);
   }
   step(pos) {
     pos += this.start;
     if (pos >= this.end) return MachineInputBase.EOF();
     const c2 = this.bytes[pos] & 255;
     if (c2 < 128) return c2 << 3 | 1;
-    else if (c2 >= 194 && c2 <= 223 && pos + 1 < this.end) {
-      const c1 = this.bytes[pos + 1] & 255;
-      if ((c1 & 192) !== 128) return c2 << 3 | 1;
-      return ((c2 & 31) << 6 | c1 & 63) << 3 | 2;
-    } else if (c2 >= 224 && c2 <= 239 && pos + 2 < this.end) {
-      const c1 = this.bytes[pos + 1] & 255;
-      if ((c1 & 192) !== 128) return c2 << 3 | 1;
+    let size;
+    let rune;
+    let lo = 128;
+    let hi = 191;
+    if (c2 >= 194 && c2 <= 223) {
+      size = 2;
+      rune = c2 & 31;
+    } else if (c2 >= 224 && c2 <= 239) {
+      size = 3;
+      rune = c2 & 15;
+      if (c2 === 224) lo = 160;
+      else if (c2 === 237) hi = 159;
+    } else if (c2 >= 240 && c2 <= 244) {
+      size = 4;
+      rune = c2 & 7;
+      if (c2 === 240) lo = 144;
+      else if (c2 === 244) hi = 143;
+    } else return MachineUTF8Input2.RUNE_ERROR_STEP;
+    if (pos + size > this.end) return MachineUTF8Input2.RUNE_ERROR_STEP;
+    const c1 = this.bytes[pos + 1] & 255;
+    if (c1 < lo || c1 > hi) return MachineUTF8Input2.RUNE_ERROR_STEP;
+    rune = rune << 6 | c1 & 63;
+    if (size > 2) {
       const c22 = this.bytes[pos + 2] & 255;
-      if ((c22 & 192) !== 128) return c2 << 3 | 1;
-      return ((c2 & 15) << 12 | (c1 & 63) << 6 | c22 & 63) << 3 | 3;
-    } else if (c2 >= 240 && c2 <= 244 && pos + 3 < this.end) {
-      const c1 = this.bytes[pos + 1] & 255;
-      if ((c1 & 192) !== 128) return c2 << 3 | 1;
-      const c22 = this.bytes[pos + 2] & 255;
-      if ((c22 & 192) !== 128) return c2 << 3 | 1;
-      const c3 = this.bytes[pos + 3] & 255;
-      if ((c3 & 192) !== 128) return c2 << 3 | 1;
-      return ((c2 & 7) << 18 | (c1 & 63) << 12 | (c22 & 63) << 6 | c3 & 63) << 3 | 4;
-    } else return c2 << 3 | 1;
+      if ((c22 & 192) !== 128) return MachineUTF8Input2.RUNE_ERROR_STEP;
+      rune = rune << 6 | c22 & 63;
+      if (size > 3) {
+        const c3 = this.bytes[pos + 3] & 255;
+        if ((c3 & 192) !== 128) return MachineUTF8Input2.RUNE_ERROR_STEP;
+        rune = rune << 6 | c3 & 63;
+      }
+    }
+    return rune << 3 | size;
   }
   index(re2, pos) {
     pos += this.start;
@@ -5370,7 +5384,8 @@ var MachineUTF8Input = class extends MachineInputBase {
         if (lim < this.start) lim = this.start;
         while (start >= lim && (this.bytes[start] & 192) === 128) start--;
         if (start < this.start) start = this.start;
-        r1 = this.step(start - this.start) >> 3;
+        const r3 = this.step(start - this.start);
+        r1 = start + (r3 & 7) === pos ? r3 >> 3 : Unicode.RUNE_ERROR;
       }
     }
     const r2 = pos < this.end ? this.step(pos - this.start) >> 3 : -1;
@@ -5417,8 +5432,7 @@ var MachineUTF16Input = class extends MachineInputBase {
     return idx !== -1 && idx <= this.end - prefilter.str.length;
   }
   hasAnyString(prefilter, pos) {
-    if (!prefilter.ac16) return false;
-    return prefilter.ac16.searchUTF16(this.charSequence, this.start + pos, this.end);
+    return prefilter.automaton16().searchUTF16(this.charSequence, this.start + pos, this.end);
   }
   step(pos) {
     pos += this.start;
@@ -5537,13 +5551,13 @@ var Matcher = class Matcher2 {
       if (str.indexOf("\\") < 0 && str.indexOf("$") < 0) return str;
       return str.split("").map((s2) => {
         const c2 = s2.codePointAt(0);
-        if (c2 === Codepoint.CODES.get("\\") || c2 === Codepoint.CODES.get("$")) return `\\${s2}`;
+        if (c2 === Codepoint.CODES["\\"] || c2 === Codepoint.CODES["$"]) return `\\${s2}`;
         return s2;
       }).join("");
     }
     if (str.indexOf("$") < 0) return str;
     return str.split("").map((s2) => {
-      if (s2.codePointAt(0) === Codepoint.CODES.get("$")) return "$$";
+      if (s2.codePointAt(0) === Codepoint.CODES["$"]) return "$$";
       return s2;
     }).join("");
   }
@@ -5559,7 +5573,9 @@ var Matcher = class Matcher2 {
     this.patternGroupCount = re2.numberOfCapturingGroups();
     this.groups = [];
     this.namedGroups = re2.namedGroups;
+    this.hasNamedGroups = Object.keys(this.namedGroups).length > 0;
     this.numberOfInstructions = re2.numberOfInstructions();
+    this.lookbehindState = null;
     if (input instanceof MatcherInputBase) this.resetMatcherInput(input);
     else if (Utils.isByteArray(input)) this.resetMatcherInput(MatcherInput.utf8(input));
     else this.resetMatcherInput(MatcherInput.utf16(input));
@@ -5591,9 +5607,13 @@ var Matcher = class Matcher2 {
   */
   resetMatcherInput(input) {
     if (input === null) throw new Error("input is null");
-    if (!(input instanceof MatcherInputBase)) if (Utils.isByteArray(input)) input = MatcherInput.utf8(input);
-    else input = MatcherInput.utf16(input);
+    if (!(input instanceof MatcherInputBase)) {
+      if (Utils.isByteArray(input)) input = MatcherInput.utf8(input);
+      else input = MatcherInput.utf16(input);
+    }
     this.matcherInput = input;
+    if (this.lookbehindState !== null) this.lookbehindState.reset();
+    else this.lookbehindState = this.patternInput.re2().createLookbehindState();
     this.reset();
     return this;
   }
@@ -5681,11 +5701,11 @@ var Matcher = class Matcher2 {
   * @private
   */
   loadGroup(group) {
-    if (group < 0 || group > this.patternGroupCount) throw new RE2JSGroupException(`Group index out of bounds: ${group}`);
+    if (!Number.isInteger(group) || group < 0 || group > this.patternGroupCount) throw new RE2JSGroupException(`Group index out of bounds: ${group}`);
     if (!this.hasMatch) throw new RE2JSGroupException("perhaps no match attempted");
     if (group === 0 || this.hasGroups) return;
     const end = this.matcherInputLength;
-    const res = this.patternInput.re2().matchMachineInput(this.matcherInput, this.groups[0], end, this.anchorFlag, 1 + this.patternGroupCount);
+    const res = this.patternInput.re2().matchMachineInput(this.matcherInput, this.groups[0], end, this.anchorFlag, 1 + this.patternGroupCount, this.lookbehindState);
     if (!res[0]) throw new RE2JSGroupException("inconsistency in matching group data");
     this.groups = res[1];
     this.hasGroups = true;
@@ -5718,7 +5738,7 @@ var Matcher = class Matcher2 {
   */
   find(start = null) {
     if (start !== null) {
-      if (start < 0 || start > this.matcherInputLength) throw new RE2JSGroupException(`start index out of bounds: ${start}`);
+      if (!Number.isInteger(start) || start < 0 || start > this.matcherInputLength) throw new RE2JSGroupException(`start index out of bounds: ${start}`);
       this.reset();
       return this.genMatch(start, 0);
     }
@@ -5741,7 +5761,7 @@ var Matcher = class Matcher2 {
   * @private
   */
   genMatch(startByte, anchor) {
-    const res = this.patternInput.re2().matchMachineInput(this.matcherInput, startByte, this.matcherInputLength, anchor, 1);
+    const res = this.patternInput.re2().matchMachineInput(this.matcherInput, startByte, this.matcherInputLength, anchor, 1, this.lookbehindState);
     if (!res[0]) {
       this.hasMatch = false;
       return false;
@@ -5771,23 +5791,19 @@ var Matcher = class Matcher2 {
   }
   /**
   * Appends to result two strings: the text from the append position up to the beginning of the
-  * most recent match, and then the replacement with submatch groups substituted for references of
-  * the form {@code $n}, where {@code n} is the group number in decimal. It advances the append
-  * position to where the most recent match ended.
+  * most recent match, and then the replacement with submatch groups substituted for references to
+  * them. It advances the append position to where the most recent match ended.
   *
-  * To embed a literal {@code $}, use \$ (actually {@code "\\$"} with string escapes). The escape
-  * is only necessary when {@code $} is followed by a digit, but it is always allowed. Only
-  * {@code $} and {@code \} need escaping, but any character can be escaped.
-  *
-  * The group number {@code n} in {@code $n} is always at least one digit and expands to use more
-  * digits as long as the resulting number is a valid group number for this pattern. To cut it off
-  * earlier, escape the first digit that should not be used.
+  * By default the replacement is expanded as by String.prototype.replace (see
+  * appendReplacementInternalJs). In Java mode it follows re2j / java.util.regex: $n takes as
+  * many digits as still form a valid group number, ${name} is a named group, and a backslash
+  * escapes the next character (so "\\$" in a JS string literal inserts a literal $).
   *
   * @param {string} replacement the replacement string
   * @param {boolean} [javaMode=false] activate java mode (different behaviour for capture groups and special characters)
   * @returns {string}
   * @throws IllegalStateException if there was no most recent match
-  * @throws IndexOutOfBoundsException if replacement refers to an invalid group
+  * @throws IndexOutOfBoundsException in Java mode, if replacement refers to an invalid group
   * @private
   */
   appendReplacement(replacement, javaMode = false) {
@@ -5811,7 +5827,7 @@ var Matcher = class Matcher2 {
     let i2 = 0;
     while (i2 < m2) {
       const cCode = replacement.codePointAt(i2);
-      if (cCode === Codepoint.CODES.get("\\")) {
+      if (cCode === Codepoint.CODES["\\"]) {
         if (last < i2) res += replacement.substring(last, i2);
         i2++;
         if (i2 >= m2) throw new RE2JSGroupException("character to be escaped is missing");
@@ -5819,26 +5835,26 @@ var Matcher = class Matcher2 {
         i2++;
         continue;
       }
-      if (cCode === Codepoint.CODES.get("$")) {
+      if (cCode === Codepoint.CODES["$"]) {
         if (last < i2) res += replacement.substring(last, i2);
         if (i2 + 1 >= m2) throw new RE2JSGroupException("Illegal group reference: group index is missing");
         const nextCode = replacement.codePointAt(i2 + 1);
-        if (Codepoint.CODES.get("0") <= nextCode && nextCode <= Codepoint.CODES.get("9")) {
-          let n2 = nextCode - Codepoint.CODES.get("0");
+        if (Codepoint.CODES["0"] <= nextCode && nextCode <= Codepoint.CODES["9"]) {
+          let n2 = nextCode - Codepoint.CODES["0"];
           let j = i2 + 2;
           for (; j < m2; j++) {
             const digit = replacement.codePointAt(j);
-            if (digit < Codepoint.CODES.get("0") || digit > Codepoint.CODES.get("9") || n2 * 10 + digit - Codepoint.CODES.get("0") > this.patternGroupCount) break;
-            n2 = n2 * 10 + digit - Codepoint.CODES.get("0");
+            if (digit < Codepoint.CODES["0"] || digit > Codepoint.CODES["9"] || n2 * 10 + digit - Codepoint.CODES["0"] > this.patternGroupCount) break;
+            n2 = n2 * 10 + digit - Codepoint.CODES["0"];
           }
           if (n2 > this.patternGroupCount) throw new RE2JSGroupException(`n > number of groups: ${n2}`);
           const group = this.group(n2);
           if (group !== null) res += group;
           i2 = j;
           last = i2;
-        } else if (nextCode === Codepoint.CODES.get("{")) {
+        } else if (nextCode === Codepoint.CODES["{"]) {
           let j = i2 + 2;
-          while (j < m2 && replacement.codePointAt(j) !== Codepoint.CODES.get("}")) j++;
+          while (j < m2 && replacement.codePointAt(j) !== Codepoint.CODES["}"]) j++;
           if (j >= m2) throw new RE2JSGroupException("named capture group is missing trailing '}'");
           const groupName = replacement.substring(i2 + 2, j);
           const groupVal = this.group(groupName);
@@ -5854,84 +5870,71 @@ var Matcher = class Matcher2 {
     return res;
   }
   /**
+  * Expands |replacement| for the current match by the rules of String.prototype.replace
+  * (ECMAScript GetSubstitution): $$ is "$", $& the match, $` the text before it, $' the text
+  * after it, $n and $nn a group (two digits only when they form a valid group number, so with
+  * one group "$10" is group 1 then "0"; an unmatched group is empty), and $<name> a named group
+  * (empty when no such group), only when the pattern has named groups. Anything else, such as
+  * "$0" or "$<" without a closing ">", is kept as is.
   * @param {string} replacement - the replacement string
   * @returns {string}
   * @private
   */
   appendReplacementInternalJs(replacement) {
+    const isDigit = (c2) => c2 >= 48 && c2 <= 57;
+    const groupCount = this.patternGroupCount;
     let res = "";
-    let last = 0;
-    const m2 = replacement.length;
-    for (let i2 = 0; i2 < m2 - 1; i2++) if (replacement.codePointAt(i2) === Codepoint.CODES.get("$")) {
-      let c2 = replacement.codePointAt(i2 + 1);
-      if (Codepoint.CODES.get("$") === c2) {
-        if (last < i2) res += replacement.substring(last, i2);
+    let i2 = 0;
+    while (i2 < replacement.length) {
+      const dollar = replacement.indexOf("$", i2);
+      if (dollar < 0) break;
+      res += replacement.substring(i2, dollar);
+      i2 = dollar;
+      const c2 = replacement.charCodeAt(i2 + 1);
+      if (c2 === Codepoint.CODES["$"]) {
         res += "$";
-        i2++;
-        last = i2 + 1;
-        continue;
-      } else if (Codepoint.CODES.get("&") === c2) {
-        if (last < i2) res += replacement.substring(last, i2);
-        const group = this.group(0);
-        if (group !== null) res += group;
-        else res += "$&";
-        i2++;
-        last = i2 + 1;
-        continue;
-      } else if (Codepoint.CODES.get("`") === c2) {
-        if (last < i2) res += replacement.substring(last, i2);
+        i2 += 2;
+      } else if (c2 === Codepoint.CODES["&"]) {
+        res += this.group(0);
+        i2 += 2;
+      } else if (c2 === Codepoint.CODES["`"]) {
         res += this.substring(0, this.start(0));
-        i2++;
-        last = i2 + 1;
-        continue;
-      } else if (Codepoint.CODES.get("'") === c2) {
-        if (last < i2) res += replacement.substring(last, i2);
+        i2 += 2;
+      } else if (c2 === Codepoint.CODES["'"]) {
         res += this.substring(this.end(0), this.matcherInputLength);
-        i2++;
-        last = i2 + 1;
-        continue;
-      } else if (Codepoint.CODES.get("1") <= c2 && c2 <= Codepoint.CODES.get("9")) {
-        let n2 = c2 - Codepoint.CODES.get("0");
-        if (last < i2) res += replacement.substring(last, i2);
-        for (i2 += 2; i2 < m2; i2++) {
-          c2 = replacement.codePointAt(i2);
-          if (c2 < Codepoint.CODES.get("0") || c2 > Codepoint.CODES.get("9") || n2 * 10 + c2 - Codepoint.CODES.get("0") > this.patternGroupCount) break;
-          n2 = n2 * 10 + c2 - Codepoint.CODES.get("0");
+        i2 += 2;
+      } else if (isDigit(c2)) {
+        let digits = 1;
+        let index = c2 - 48;
+        const c22 = replacement.charCodeAt(i2 + 2);
+        if (isDigit(c22) && index * 10 + c22 - 48 <= groupCount) {
+          digits = 2;
+          index = index * 10 + c22 - 48;
         }
-        if (n2 > this.patternGroupCount) {
-          res += `$${n2}`;
-          last = i2;
-          i2--;
-          continue;
+        if (index >= 1 && index <= groupCount) {
+          const group = this.group(index);
+          if (group !== null) res += group;
+        } else res += replacement.substring(i2, i2 + 1 + digits);
+        i2 += 1 + digits;
+      } else if (c2 === Codepoint.CODES["<"] && this.hasNamedGroups) {
+        const gt = replacement.indexOf(">", i2 + 2);
+        if (gt < 0) {
+          res += "$<";
+          i2 += 2;
+        } else {
+          const name4 = replacement.substring(i2 + 2, gt);
+          if (Object.prototype.hasOwnProperty.call(this.namedGroups, name4)) {
+            const group = this.group(name4);
+            if (group !== null) res += group;
+          }
+          i2 = gt + 1;
         }
-        const group = this.group(n2);
-        if (group !== null) res += group;
-        last = i2;
-        i2--;
-        continue;
-      } else if (c2 === Codepoint.CODES.get("<")) {
-        if (last < i2) res += replacement.substring(last, i2);
-        i2++;
-        let j = i2 + 1;
-        while (j < replacement.length && replacement.codePointAt(j) !== Codepoint.CODES.get(">") && replacement.codePointAt(j) !== Codepoint.CODES.get(" ")) j++;
-        if (j === replacement.length || replacement.codePointAt(j) !== Codepoint.CODES.get(">")) {
-          res += replacement.substring(i2 - 1, j + 1);
-          last = j + 1;
-          i2 = j;
-          continue;
-        }
-        const groupName = replacement.substring(i2 + 1, j);
-        if (Object.prototype.hasOwnProperty.call(this.namedGroups, groupName)) {
-          const groupVal = this.group(groupName);
-          if (groupVal !== null) res += groupVal;
-        } else res += `$<${groupName}>`;
-        last = j + 1;
-        i2 = j;
-        continue;
+      } else {
+        res += "$";
+        i2 += 1;
       }
     }
-    if (last < m2) res += replacement.substring(last, m2);
-    return res;
+    return res + replacement.substring(i2);
   }
   /**
   * Return the substring of the input from the append position to the end of the
@@ -5977,14 +5980,13 @@ var Matcher = class Matcher2 {
     let res = "";
     this.reset();
     const isFunc = typeof replacement === "function";
-    const hasNamedGroups = Object.keys(this.namedGroups).length > 0;
     let originalInput = null;
     if (isFunc) {
       if (this.groupCount() >= Matcher2.MAX_REPLACER_ARGS) throw new RE2JSGroupException("Too many capture groups to safely invoke replacer function");
       originalInput = this.matcherInput.isUTF8Encoding() ? this.matcherInput.asBytes() : this.matcherInput.asCharSequence();
     }
     while (this.find()) {
-      res += isFunc ? this.appendReplacementFunc(replacement, hasNamedGroups, originalInput) : this.appendReplacement(replacement, javaMode);
+      res += isFunc ? this.appendReplacementFunc(replacement, originalInput) : this.appendReplacement(replacement, javaMode);
       if (!all) break;
     }
     res += this.appendTail();
@@ -5994,46 +5996,48 @@ var Matcher = class Matcher2 {
   * Evaluates a replacer function for the current match and appends the result,
   * along with any un-matched preceding text, advancing the append position.
   * @param {Function} replacer - the replacer function
-  * @param {boolean} hasNamedGroups - cached flag if pattern has named groups
   * @param {string|Uint8Array|number[]} originalInput - the cached original input reference
   * @returns {string} the evaluated string to append
   * @private
   */
-  appendReplacementFunc(replacer, hasNamedGroups, originalInput) {
+  appendReplacementFunc(replacer, originalInput) {
     let res = "";
     const s2 = this.start();
     const e2 = this.end();
     if (this.appendPos < s2) res += this.substring(this.appendPos, s2);
     this.appendPos = e2;
-    const args = this.buildReplacerArgs(s2, hasNamedGroups, originalInput);
+    const args = this.matchArray();
+    args.push(s2, originalInput);
+    if (this.hasNamedGroups) args.push(this.namedGroupsObject());
     res += String(replacer(...args));
     return res;
   }
   /**
-  * Builds the argument array for the replacer function matching the standard
-  * JS String.prototype.replace(regex, replacer) signature.
-  * @param {number} matchStart - the start index of the match
-  * @param {boolean} hasNamedGroups - cached flag if pattern has named groups
-  * @param {string|Uint8Array|number[]} originalInput - the cached original input reference
-  * @returns {Array} array of arguments
+  * The match and its groups, as the elements of a JS RegExpExecArray: undefined for a group that
+  * did not take part in the match. Used by exec(), matchAll() and replacer functions.
+  * @returns {Array<string|undefined>}
   * @private
   */
-  buildReplacerArgs(matchStart, hasNamedGroups, originalInput) {
-    const args = [this.group(0)];
-    const numGroups = this.groupCount();
-    for (let i2 = 1; i2 <= numGroups; i2++) {
-      const start = this.start(i2);
-      if (start < 0) args.push(void 0);
-      else args.push(this.substring(start, this.end(i2)));
+  matchArray() {
+    const result = [this.group(0)];
+    for (let i2 = 1; i2 <= this.patternGroupCount; i2++) {
+      const group = this.group(i2);
+      result.push(group === null ? void 0 : group);
     }
-    args.push(matchStart);
-    args.push(originalInput);
-    if (hasNamedGroups) {
-      const parsedGroups = this.getNamedGroups();
-      for (const key in parsedGroups) if (parsedGroups[key] === null) parsedGroups[key] = void 0;
-      args.push(parsedGroups);
-    }
-    return args;
+    return result;
+  }
+  /**
+  * The named groups, as the groups property of a JS RegExpExecArray: an object without a
+  * prototype mapping each name to its group (undefined when it did not take part in the match),
+  * or undefined when the pattern has no named groups.
+  * @returns {Record<string, string|undefined>|undefined}
+  * @private
+  */
+  namedGroupsObject() {
+    if (!this.hasNamedGroups) return;
+    const result = this.getNamedGroups();
+    for (const name4 in result) if (result[name4] === null) result[name4] = void 0;
+    return result;
   }
 };
 var Inst = class Inst2 {
@@ -6063,7 +6067,7 @@ var Inst = class Inst2 {
     this.op = op;
     this.out = 0;
     this.arg = 0;
-    this.runes = [];
+    this.runes = /* @__PURE__ */ new Int32Array(0);
     this.next = null;
   }
   matchRune(r2) {
@@ -6162,18 +6166,26 @@ var Inst = class Inst2 {
     }
   }
 };
-var Queue = class {
+var Queue = class Queue2 {
   constructor(numInst) {
     this.sparse = new Int32Array(numInst);
     this.densePcs = new Int32Array(numInst);
     this.denseCaps = null;
     this.size = 0;
     this.ncap = 0;
+    this.mainThreads = 0;
   }
+  static INITIAL_THREADS = 32;
   init(ncap) {
     this.ncap = ncap;
-    const needed = this.densePcs.length * ncap;
+    const needed = Math.min(this.densePcs.length, Queue2.INITIAL_THREADS) * ncap;
     if (!this.denseCaps || this.denseCaps.length < needed) this.denseCaps = new Int32Array(needed);
+  }
+  growCaps(needed) {
+    const limit2 = this.densePcs.length * this.ncap;
+    const grown = new Int32Array(Math.min(limit2, Math.max(needed, 2 * this.denseCaps.length)));
+    grown.set(this.denseCaps);
+    this.denseCaps = grown;
   }
   contains(pc) {
     const j = this.sparse[pc];
@@ -6190,6 +6202,7 @@ var Queue = class {
   }
   clear() {
     this.size = 0;
+    this.mainThreads = 0;
   }
   toString() {
     let out = "{";
@@ -6201,6 +6214,18 @@ var Queue = class {
     return out;
   }
 };
+var LookbehindState = class {
+  constructor(prog) {
+    this.pos = -1;
+    this.pcs = new Int32Array(prog.numInst());
+    this.size = 0;
+    this.lbTable = new Int32Array(prog.numLb + 1);
+  }
+  reset() {
+    this.pos = -1;
+    this.size = 0;
+  }
+};
 var Machine = class Machine2 {
   static fromRE2(re2) {
     const m2 = new Machine2();
@@ -6208,19 +6233,18 @@ var Machine = class Machine2 {
     m2.re2 = re2;
     m2.q0 = new Queue(m2.prog.numInst());
     m2.q1 = new Queue(m2.prog.numInst());
+    m2.addStack = new Int32Array(2 * (m2.prog.numInst() + 1));
     m2.matched = false;
     m2.matchcap = new Int32Array(m2.prog.numCap < 2 ? 2 : m2.prog.numCap);
     m2.ncap = 0;
     return m2;
-  }
-  static fromMachine(machine) {
-    return Machine2.fromRE2(machine.re2);
   }
   constructor() {
     this.prog = null;
     this.re2 = null;
     this.q0 = null;
     this.q1 = null;
+    this.addStack = null;
     this.matched = false;
     this.matchcap = null;
     this.ncap = 0;
@@ -6241,14 +6265,23 @@ var Machine = class Machine2 {
     if (this.ncap === 0) return Utils.emptyInts();
     return Utils.toArray(this.matchcap.subarray(0, this.ncap));
   }
-  match(input, pos, anchor) {
+  match(input, pos, anchor, lbState = null) {
     const startCond = this.re2.cond;
     if (startCond === Utils.EMPTY_ALL) return false;
     if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && pos !== 0) return false;
     this.matched = false;
     this.matchcap.fill(-1);
-    let currentPos = this.prog.numLb > 0 ? 0 : pos;
-    let matchStartPos = pos;
+    const hasLookbehinds = this.prog.numLb > 0;
+    const matchStartPos = pos;
+    let currentPos = pos;
+    let resumeLookbehinds = false;
+    if (hasLookbehinds) {
+      if (lbState !== null && lbState.pos >= 0 && lbState.pos <= pos) {
+        currentPos = lbState.pos;
+        resumeLookbehinds = true;
+      } else currentPos = 0;
+    }
+    let saveLookbehinds = hasLookbehinds && lbState !== null;
     let runq = this.q0;
     let nextq = this.q1;
     let r2 = input.step(currentPos);
@@ -6264,12 +6297,16 @@ var Machine = class Machine2 {
     let flag;
     if (currentPos === 0) flag = Utils.emptyOpContext(-1, rune);
     else flag = input.context(currentPos);
+    if (hasLookbehinds) {
+      if (resumeLookbehinds) this.restoreLookbehinds(lbState, runq, flag);
+      else this.spawnLookbehinds(runq, currentPos, flag);
+    }
     while (true) {
-      if (runq.isEmpty()) {
+      if (runq.mainThreads === 0) {
         if ((startCond & Utils.EMPTY_BEGIN_TEXT) !== 0 && currentPos !== 0) break;
         if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && currentPos !== 0) break;
         if (this.matched) break;
-        if (this.prog.numLb === 0 && !(this.re2.prefix.length === 0) && rune1 !== this.re2.prefixRune && input.canCheckPrefix()) {
+        if (this.prog.numLb === 0 && runq.isEmpty() && !(this.re2.prefix.length === 0) && rune1 !== this.re2.prefixRune && input.canCheckPrefix()) {
           const advance = input.index(this.re2, currentPos);
           if (advance < 0) break;
           currentPos += advance;
@@ -6282,9 +6319,12 @@ var Machine = class Machine2 {
           flag = input.context(currentPos);
         }
       }
-      if (currentPos === 0 && this.prog.numLb > 0) for (let i2 = 0; i2 < this.prog.lbStarts.length; i2++) this.add(runq, this.prog.lbStarts[i2], currentPos, this.matchcap, 0, flag);
-      if (!this.matched && (currentPos === 0 || anchor === RE2Flags.UNANCHORED)) {
-        if (currentPos >= matchStartPos) {
+      if (currentPos >= matchStartPos) {
+        if (saveLookbehinds) {
+          this.saveLookbehinds(lbState, runq, currentPos);
+          saveLookbehinds = false;
+        }
+        if (!this.matched && (currentPos === 0 || anchor === RE2Flags.UNANCHORED)) {
           if (this.ncap > 0) this.matchcap[0] = currentPos;
           this.add(runq, this.prog.start, currentPos, this.matchcap, 0, flag);
         }
@@ -6306,6 +6346,7 @@ var Machine = class Machine2 {
       runq = nextq;
       nextq = tmpq;
     }
+    runq.clear();
     nextq.clear();
     return this.matched;
   }
@@ -6329,12 +6370,12 @@ var Machine = class Machine2 {
     }
     let flag = currentPos === 0 ? Utils.emptyOpContext(-1, rune) : input.context(currentPos);
     const matches = /* @__PURE__ */ new Set();
+    if (this.prog.numLb > 0) this.spawnLookbehinds(runq, currentPos, flag);
     while (true) {
-      if (runq.isEmpty()) {
+      if (runq.mainThreads === 0) {
         if ((startCond & Utils.EMPTY_BEGIN_TEXT) !== 0 && currentPos !== 0) break;
         if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && currentPos !== 0) break;
       }
-      if (currentPos === 0 && this.prog.numLb > 0) for (let i2 = 0; i2 < this.prog.lbStarts.length; i2++) this.add(runq, this.prog.lbStarts[i2], currentPos, this.matchcap, 0, flag);
       if (currentPos === 0 || anchor === RE2Flags.UNANCHORED) {
         if (currentPos >= matchStartPos) this.add(runq, this.prog.start, currentPos, this.matchcap, 0, flag);
       }
@@ -6421,75 +6462,99 @@ var Machine = class Machine2 {
     }
     runq.clear();
   }
+  spawnLookbehinds(q, pos, flag) {
+    for (let i2 = 0; i2 < this.prog.lbStarts.length; i2++) this.add(q, this.prog.lbStarts[i2], pos, this.matchcap, 0, flag);
+  }
+  restoreLookbehinds(lbState, q, flag) {
+    this.lbTable.set(lbState.lbTable);
+    for (let j = 0; j < lbState.size; j++) this.add(q, lbState.pcs[j], lbState.pos, this.matchcap, 0, flag);
+  }
+  saveLookbehinds(lbState, q, pos) {
+    let size = 0;
+    for (let j = 0; j < q.size; j++) {
+      const pc = q.densePcs[j];
+      if (this.prog.lbInst[pc] === 1 && Inst.isRuneOp(this.prog.inst[pc].op)) lbState.pcs[size++] = pc;
+    }
+    lbState.size = size;
+    lbState.pos = pos;
+    lbState.lbTable.set(this.lbTable);
+  }
   add(q, pc, pos, capArray, capOffset, cond) {
-    while (true) {
-      if (pc === 0) return;
-      if (q.contains(pc)) return;
-      const d = q.add(pc);
-      const inst = this.prog.inst[pc];
-      switch (inst.op) {
-        case Inst.FAIL:
-          return;
-        case Inst.ALT:
-        case Inst.ALT_MATCH:
-          this.add(q, inst.out, pos, capArray, capOffset, cond);
-          pc = inst.arg;
-          continue;
-        case Inst.EMPTY_WIDTH:
-          if ((inst.arg & ~cond) === 0) {
+    const stk = this.addStack;
+    let nstk = 0;
+    for (; ; ) {
+      while (pc !== 0 && !q.contains(pc)) {
+        const d = q.add(pc);
+        const inst = this.prog.inst[pc];
+        switch (inst.op) {
+          case Inst.FAIL:
+            pc = 0;
+            break;
+          case Inst.ALT:
+          case Inst.ALT_MATCH:
+            stk[nstk++] = inst.arg;
+            stk[nstk++] = 0;
             pc = inst.out;
-            continue;
-          }
-          return;
-        case Inst.NOP:
-          pc = inst.out;
-          continue;
-        case Inst.CAPTURE:
-          if (inst.arg < this.ncap) {
-            const opos = capArray[capOffset + inst.arg];
-            capArray[capOffset + inst.arg] = pos;
-            this.add(q, inst.out, pos, capArray, capOffset, cond);
-            capArray[capOffset + inst.arg] = opos;
-            return;
-          } else {
+            break;
+          case Inst.EMPTY_WIDTH:
+            pc = (inst.arg & ~cond) === 0 ? inst.out : 0;
+            break;
+          case Inst.NOP:
             pc = inst.out;
-            continue;
-          }
-        case Inst.LB_WRITE:
-          this.lbTable[Math.abs(inst.arg)] = pos;
-          pc = inst.out;
-          continue;
-        case Inst.LB_CHECK:
-          if (inst.arg > 0) {
-            if (this.lbTable[inst.arg] === pos) {
-              pc = inst.out;
-              continue;
+            break;
+          case Inst.CAPTURE:
+            if (inst.arg < this.ncap) {
+              stk[nstk++] = -inst.arg - 1;
+              stk[nstk++] = capArray[capOffset + inst.arg];
+              capArray[capOffset + inst.arg] = pos;
             }
-          } else if (this.lbTable[-inst.arg] !== pos) {
             pc = inst.out;
-            continue;
-          }
-          return;
-        case Inst.MATCH:
-        case Inst.RUNE:
-        case Inst.RUNE1:
-        case Inst.RUNE_ANY:
-        case Inst.RUNE_ANY_NOT_NL:
-          if (this.ncap > 0) {
-            const destOffset = d * this.ncap;
-            for (let c2 = 0; c2 < this.ncap; c2++) q.denseCaps[destOffset + c2] = capArray[capOffset + c2];
-          }
-          return;
-        default:
-          throw new RE2JSInternalException("unhandled");
+            break;
+          case Inst.LB_WRITE:
+            this.lbTable[Math.abs(inst.arg)] = pos;
+            pc = inst.out;
+            break;
+          case Inst.LB_CHECK:
+            if (inst.arg > 0) pc = this.lbTable[inst.arg] === pos ? inst.out : 0;
+            else pc = this.lbTable[-inst.arg] !== pos ? inst.out : 0;
+            break;
+          case Inst.MATCH:
+          case Inst.RUNE:
+          case Inst.RUNE1:
+          case Inst.RUNE_ANY:
+          case Inst.RUNE_ANY_NOT_NL:
+            if (this.prog.lbInst[pc] === 0) q.mainThreads++;
+            if (this.ncap > 0) {
+              const destOffset = d * this.ncap;
+              if (destOffset + this.ncap > q.denseCaps.length) q.growCaps(destOffset + this.ncap);
+              for (let c2 = 0; c2 < this.ncap; c2++) q.denseCaps[destOffset + c2] = capArray[capOffset + c2];
+            }
+            pc = 0;
+            break;
+          default:
+            throw new RE2JSInternalException("unhandled");
+        }
       }
+      if (nstk === 0) return;
+      nstk -= 2;
+      const entry = stk[nstk];
+      if (entry < 0) {
+        capArray[capOffset - entry - 1] = stk[nstk + 1];
+        pc = 0;
+      } else pc = entry;
     }
   }
 };
-var hashPCs = (pcs) => {
+var hashState = (pcs, flag, ids) => {
   let h = -2128831035;
   for (let i2 = 0; i2 < pcs.length; i2++) {
     h ^= pcs[i2];
+    h = Math.imul(h, 16777619);
+  }
+  h ^= flag;
+  h = Math.imul(h, 16777619);
+  for (let i2 = 0; i2 < ids.length; i2++) {
+    h ^= ids[i2];
     h = Math.imul(h, 16777619);
   }
   return h;
@@ -6499,46 +6564,108 @@ var arraysEqual = (a, b2) => {
   for (let i2 = 0; i2 < a.length; i2++) if (a[i2] !== b2[i2]) return false;
   return true;
 };
+var isState = (state, pcs, flag, ids) => state.flag === flag && arraysEqual(state.nfaStates, pcs) && arraysEqual(state.matchIDs, ids);
+var NO_IDS = [];
+var END_TEXT = -1;
 var DFAState = class {
-  constructor(nfaStates, isMatch, matchIDs = []) {
+  constructor(nfaStates, flag, matchIDs) {
     this.nfaStates = nfaStates;
-    this.isMatch = isMatch;
+    this.flag = flag;
+    this.isMatch = (flag & DFA.FLAG_MATCH) !== 0;
     this.matchIDs = matchIDs;
-    this.nextLatin1 = new Array(Unicode.MAX_LATIN1 + 1).fill(null);
-    this.nextLatin1Anchored = new Array(Unicode.MAX_LATIN1 + 1).fill(null);
-    this.transKeys = [];
-    this.transVals = [];
-    this.lastSeen = 0;
+    this.next = null;
+    this.nextAnchored = null;
   }
 };
 var DFA = class DFA2 {
-  static MAX_CACHE_CLEARS = 5;
-  static STATE_MEMORY_ESTIMATE = 838;
+  static FLAG_EMPTY_MASK = 255;
+  static FLAG_MATCH = 256;
+  static FLAG_LAST_WORD = 512;
+  static FLAG_NEED_SHIFT = 16;
+  static STATE_OVERHEAD = 150;
+  static ARRAY_OVERHEAD = 40;
+  static ELEMENT_SIZE = 8;
+  static TABLE_OVERHEAD = 48;
+  static PROGRESS_PER_STATE = 10;
   constructor(prog, maxMem = 8388608) {
     this.prog = prog;
+    this.maxMem = maxMem;
     this.stateCache = /* @__PURE__ */ new Map();
     this.stateCount = 0;
-    this.startState = null;
-    this.stateLimit = Math.max(1, Math.floor(maxMem / DFA2.STATE_MEMORY_ESTIMATE));
-    this.cacheClears = 0;
+    this.startStates = /* @__PURE__ */ new Map();
     this.failed = false;
-    this.clock = 0;
+    for (let pc = 0; pc < prog.numInst(); pc++) {
+      const op = prog.getInst(pc).op;
+      if (op === Inst.LB_WRITE || op === Inst.LB_CHECK) {
+        this.failed = true;
+        break;
+      }
+    }
+    this.computeRuneClasses();
+    this.stateBudget = maxMem;
+    this.memBudget = maxMem;
   }
-  computeClosure(pcs) {
+  computeRuneClasses() {
+    const bounds = /* @__PURE__ */ new Set();
+    const addRange = (lo, hi) => {
+      bounds.add(lo);
+      bounds.add(hi + 1);
+    };
+    for (let pc = 0; pc < this.prog.numInst(); pc++) {
+      const inst = this.prog.getInst(pc);
+      switch (inst.op) {
+        case Inst.RUNE:
+        case Inst.RUNE1:
+          if (inst.runes.length === 1) {
+            addRange(inst.runes[0], inst.runes[0]);
+            if ((inst.arg & RE2Flags.FOLD_CASE) !== 0) for (let f = Unicode.simpleFold(inst.runes[0]); f !== inst.runes[0]; f = Unicode.simpleFold(f)) addRange(f, f);
+          } else for (let j = 0; j < inst.runes.length; j += 2) addRange(inst.runes[j], inst.runes[j + 1]);
+          break;
+        case Inst.RUNE_ANY_NOT_NL:
+          addRange(10, 10);
+          break;
+        case Inst.EMPTY_WIDTH:
+          if ((inst.arg & (Utils.EMPTY_BEGIN_LINE | Utils.EMPTY_END_LINE)) !== 0) addRange(10, 10);
+          if ((inst.arg & (Utils.EMPTY_WORD_BOUNDARY | Utils.EMPTY_NO_WORD_BOUNDARY)) !== 0) {
+            addRange(48, 57);
+            addRange(65, 90);
+            addRange(95, 95);
+            addRange(97, 122);
+          }
+      }
+    }
+    bounds.delete(0);
+    this.classBounds = Int32Array.from(bounds).sort();
+    this.numClasses = this.classBounds.length + 1;
+    const latin1Class = new Int32Array(Unicode.MAX_LATIN1 + 1);
+    for (let r2 = 0; r2 <= Unicode.MAX_LATIN1; r2++) latin1Class[r2] = this.searchClass(r2);
+    this.latin1Class = latin1Class;
+  }
+  runeClass(r2) {
+    if (r2 <= Unicode.MAX_LATIN1) return this.latin1Class[r2];
+    return this.searchClass(r2);
+  }
+  searchClass(r2) {
+    const bounds = this.classBounds;
+    let lo = 0;
+    let hi = bounds.length;
+    while (lo < hi) {
+      const mid = lo + hi >> 1;
+      if (bounds[mid] <= r2) lo = mid + 1;
+      else hi = mid;
+    }
+    return lo;
+  }
+  closure(pcs, flag) {
     const closure = /* @__PURE__ */ new Set();
-    const stack = [...pcs];
-    let isMatch = false;
-    const matchIDs = [];
+    const stack = Array.from(pcs);
+    let needflags = 0;
     while (stack.length > 0) {
       const pc = stack.pop();
-      if (closure.has(pc)) continue;
+      if (pc === 0 || closure.has(pc)) continue;
       closure.add(pc);
       const inst = this.prog.getInst(pc);
       switch (inst.op) {
-        case Inst.MATCH:
-          isMatch = true;
-          if (!matchIDs.includes(inst.arg)) matchIDs.push(inst.arg);
-          break;
         case Inst.ALT:
         case Inst.ALT_MATCH:
           stack.push(inst.out);
@@ -6549,184 +6676,197 @@ var DFA = class DFA2 {
           stack.push(inst.out);
           break;
         case Inst.EMPTY_WIDTH:
-        case Inst.LB_WRITE:
-        case Inst.LB_CHECK:
-          return null;
+          needflags |= inst.arg;
+          if ((inst.arg & ~flag) === 0) stack.push(inst.out);
       }
     }
-    const sortedPCs = Int32Array.from(closure).sort();
-    matchIDs.sort((a, b2) => a - b2);
     return {
-      pcs: sortedPCs,
-      isMatch,
-      matchIDs
+      pcs: Array.from(closure).sort((a, b2) => a - b2),
+      needflags
     };
   }
-  getState(pcs) {
-    const closureResult = this.computeClosure(pcs);
-    if (!closureResult) return null;
-    const sortedPCs = closureResult.pcs;
-    const hash = hashPCs(sortedPCs);
-    let bucket = this.stateCache.get(hash);
-    if (bucket) for (let i2 = 0; i2 < bucket.length; i2++) {
-      const state2 = bucket[i2];
-      if (arraysEqual(state2.nfaStates, sortedPCs)) {
-        state2.lastSeen = ++this.clock;
-        return state2;
-      }
+  getState(pcs, flag, ids) {
+    const hash = hashState(pcs, flag, ids);
+    const cached = this.stateCache.get(hash);
+    if (cached instanceof DFAState) {
+      if (isState(cached, pcs, flag, ids)) return cached;
+    } else if (cached !== void 0) {
+      for (let i2 = 0; i2 < cached.length; i2++) if (isState(cached[i2], pcs, flag, ids)) return cached[i2];
     }
-    else {
-      bucket = [];
-      this.stateCache.set(hash, bucket);
-    }
-    if (this.failed) return null;
-    if (this.stateCount >= this.stateLimit) {
-      this.cacheClears++;
-      if (this.cacheClears >= DFA2.MAX_CACHE_CLEARS) {
-        this.failed = true;
-        this.stateCache.clear();
-        this.stateCount = 0;
-        this.startState = null;
-        return null;
-      }
-      this.evictCache();
-      bucket = this.stateCache.get(hash);
-      if (!bucket) {
-        bucket = [];
-        this.stateCache.set(hash, bucket);
-      }
-    }
-    const state = new DFAState(sortedPCs, closureResult.isMatch, closureResult.matchIDs);
-    state.lastSeen = ++this.clock;
-    bucket.push(state);
+    const cost = DFA2.stateCost(pcs, ids);
+    if (this.memBudget < cost) return null;
+    this.memBudget -= cost;
+    const state = new DFAState(pcs, flag, ids);
+    if (cached === void 0) this.stateCache.set(hash, state);
+    else if (cached instanceof DFAState) this.stateCache.set(hash, [cached, state]);
+    else cached.push(state);
     this.stateCount++;
     return state;
   }
-  evictCache() {
-    const allStates = [];
-    for (const bucket of this.stateCache.values()) for (let i2 = 0; i2 < bucket.length; i2++) allStates.push(bucket[i2]);
-    allStates.sort((a, b2) => a.lastSeen - b2.lastSeen);
-    const keepCount = Math.max(1, Math.floor(this.stateLimit / 2));
-    const startIndex = allStates.length - keepCount;
-    const survivorsArray = allStates.slice(startIndex);
-    const survivors = new Set(survivorsArray);
+  static stateCost(pcs, ids) {
+    const idsCost = ids.length === 0 ? 0 : DFA2.ARRAY_OVERHEAD + DFA2.ELEMENT_SIZE * ids.length;
+    return DFA2.STATE_OVERHEAD + DFA2.ELEMENT_SIZE * pcs.length + idsCost;
+  }
+  *cachedStates() {
+    for (const cached of this.stateCache.values()) if (cached instanceof DFAState) yield cached;
+    else yield* cached;
+  }
+  makeState(pcs, flag, ids) {
+    const closure = this.closure(pcs, flag & DFA2.FLAG_EMPTY_MASK);
+    let stateFlag = flag;
+    if (closure.needflags === 0) stateFlag &= DFA2.FLAG_MATCH;
+    stateFlag |= closure.needflags << DFA2.FLAG_NEED_SHIFT;
+    return this.getState(closure.pcs, stateFlag, ids);
+  }
+  allocTable(state, anchor) {
+    const size = this.numClasses + 1;
+    const cost = DFA2.TABLE_OVERHEAD + DFA2.ELEMENT_SIZE * size;
+    if (this.memBudget < cost) return null;
+    this.memBudget -= cost;
+    const table = new Array(size).fill(null);
+    if (anchor === RE2Flags.UNANCHORED) state.next = table;
+    else state.nextAnchored = table;
+    return table;
+  }
+  clearCache() {
     this.stateCache.clear();
     this.stateCount = 0;
-    for (let i2 = 0; i2 < survivorsArray.length; i2++) {
-      const state = survivorsArray[i2];
-      state.nextLatin1.fill(null);
-      state.nextLatin1Anchored.fill(null);
-      state.transKeys.length = 0;
-      state.transVals.length = 0;
-      const hash = hashPCs(state.nfaStates);
-      let bucket = this.stateCache.get(hash);
-      if (!bucket) {
-        bucket = [];
-        this.stateCache.set(hash, bucket);
-      }
-      bucket.push(state);
-      this.stateCount++;
-    }
-    if (this.startState && !survivors.has(this.startState)) this.startState = null;
+    this.startStates.clear();
+    this.memBudget = this.stateBudget;
   }
-  step(state, charCode, anchor) {
-    if (charCode <= Unicode.MAX_LATIN1) if (anchor === RE2Flags.UNANCHORED) {
-      const next = state.nextLatin1[charCode];
-      if (next !== null) return next;
+  resetCache(current) {
+    this.clearCache();
+    return this.getState(current.nfaStates, current.flag, current.matchIDs);
+  }
+  step(state, cls, rune, anchor) {
+    let table = anchor === RE2Flags.UNANCHORED ? state.next : state.nextAnchored;
+    if (table !== null) {
+      const cached = table[cls];
+      if (cached !== null) return cached;
     } else {
-      const next = state.nextLatin1Anchored[charCode];
-      if (next !== null) return next;
+      table = this.allocTable(state, anchor);
+      if (table === null) return null;
     }
-    else {
-      const key = charCode + (anchor === RE2Flags.UNANCHORED ? 0 : Unicode.MAX_RUNE + 1);
-      const keys = state.transKeys;
-      const len = keys.length;
-      for (let i2 = 0; i2 < len; i2++) if (keys[i2] === key) return state.transVals[i2];
+    const needflag = state.flag >>> DFA2.FLAG_NEED_SHIFT;
+    const oldbeforeflag = state.flag & DFA2.FLAG_EMPTY_MASK;
+    let beforeflag = oldbeforeflag;
+    let afterflag = 0;
+    if (rune === 10) {
+      beforeflag |= Utils.EMPTY_END_LINE;
+      afterflag |= Utils.EMPTY_BEGIN_LINE;
     }
+    if (rune === END_TEXT) beforeflag |= Utils.EMPTY_END_LINE | Utils.EMPTY_END_TEXT;
+    const islastword = (state.flag & DFA2.FLAG_LAST_WORD) !== 0;
+    const isword = rune !== END_TEXT && Utils.isWordRune(rune);
+    beforeflag |= isword === islastword ? Utils.EMPTY_NO_WORD_BOUNDARY : Utils.EMPTY_WORD_BOUNDARY;
+    let pcs = state.nfaStates;
+    if ((beforeflag & ~oldbeforeflag & needflag) !== 0) pcs = this.closure(pcs, beforeflag).pcs;
     const nextPCs = [];
-    for (let i2 = 0; i2 < state.nfaStates.length; i2++) {
-      const pc = state.nfaStates[i2];
-      const inst = this.prog.getInst(pc);
-      if (Inst.isRuneOp(inst.op) && inst.matchRune(charCode)) nextPCs.push(inst.out);
+    let ismatch = false;
+    let ids = NO_IDS;
+    for (let i2 = 0; i2 < pcs.length; i2++) {
+      const inst = this.prog.getInst(pcs[i2]);
+      if (inst.op === Inst.MATCH) {
+        if (!ismatch) {
+          ismatch = true;
+          ids = [];
+        }
+        ids.push(inst.arg);
+      } else if (rune !== END_TEXT && Inst.isRuneOp(inst.op) && inst.matchRune(rune)) nextPCs.push(inst.out);
     }
-    if (anchor === RE2Flags.UNANCHORED) nextPCs.push(this.prog.start);
-    const nextState = this.getState(nextPCs);
-    if (charCode <= Unicode.MAX_LATIN1) if (anchor === RE2Flags.UNANCHORED) state.nextLatin1[charCode] = nextState;
-    else state.nextLatin1Anchored[charCode] = nextState;
-    else {
-      const key = charCode + (anchor === RE2Flags.UNANCHORED ? 0 : Unicode.MAX_RUNE + 1);
-      state.transKeys.push(key);
-      state.transVals.push(nextState);
-    }
+    if (ids.length > 1) ids.sort((a, b2) => a - b2);
+    if (anchor === RE2Flags.UNANCHORED && rune !== END_TEXT) nextPCs.push(this.prog.start);
+    let flag = afterflag;
+    if (ismatch) flag |= DFA2.FLAG_MATCH;
+    if (isword) flag |= DFA2.FLAG_LAST_WORD;
+    const nextState = this.makeState(nextPCs, flag, ids);
+    if (nextState === null) return null;
+    table[cls] = nextState;
     return nextState;
   }
-  match(input, pos, anchor) {
-    if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && pos !== 0) return false;
-    if (!this.startState) {
-      this.startState = this.getState([this.prog.start]);
-      if (!this.startState) return null;
+  start(input, pos) {
+    const context = input.context(pos);
+    let flags;
+    if ((context & Utils.EMPTY_BEGIN_TEXT) !== 0) flags = Utils.EMPTY_BEGIN_TEXT | Utils.EMPTY_BEGIN_LINE;
+    else if ((context & Utils.EMPTY_BEGIN_LINE) !== 0) flags = Utils.EMPTY_BEGIN_LINE;
+    else {
+      const r2 = input.step(pos);
+      const nextIsWord = r2 >= 0 && Utils.isWordRune(r2 >> 3);
+      flags = (context & Utils.EMPTY_WORD_BOUNDARY) !== 0 !== nextIsWord ? DFA2.FLAG_LAST_WORD : 0;
     }
-    let endPos = input.endPos();
-    let currentState = this.startState;
-    if (currentState.isMatch) if (anchor === RE2Flags.ANCHOR_BOTH) {
-      if (pos === endPos) return true;
-    } else return true;
+    let state = this.startStates.get(flags);
+    if (state === void 0) {
+      state = this.makeState([this.prog.start], flags, NO_IDS);
+      if (state === null) {
+        this.clearCache();
+        state = this.makeState([this.prog.start], flags, NO_IDS);
+        if (state === null) return null;
+      }
+      this.startStates.set(flags, state);
+    }
+    return state;
+  }
+  stepOrReset(state, cls, rune, anchor, pos, search) {
+    let next = this.step(state, cls, rune, anchor);
+    if (next !== null) return next;
+    if (search.resetPos >= 0 && pos - search.resetPos < DFA2.PROGRESS_PER_STATE * this.stateCount) return null;
+    search.resetPos = pos;
+    const restored = this.resetCache(state);
+    if (restored === null) return null;
+    next = this.step(restored, cls, rune, anchor);
+    return next;
+  }
+  run(input, pos, anchor, state, onMatch) {
+    const endPos = input.endPos();
+    const latin1Class = this.latin1Class;
+    const unanchored = anchor === RE2Flags.UNANCHORED;
+    const search = { resetPos: -1 };
     let i2 = pos;
     while (i2 < endPos) {
       const r2 = input.step(i2);
       const rune = r2 >> 3;
       const width = r2 & 7;
       if (width === 0) break;
-      currentState = anchor === RE2Flags.UNANCHORED && rune <= Unicode.MAX_LATIN1 && currentState.nextLatin1[rune] || this.step(currentState, rune, anchor);
-      if (currentState === null) return null;
-      currentState.lastSeen = ++this.clock;
-      if (currentState.isMatch) if (anchor === RE2Flags.ANCHOR_BOTH) {
-        if (i2 + width === endPos) return true;
-      } else return true;
-      if (currentState.nfaStates.length === 0) {
-        if (anchor !== RE2Flags.UNANCHORED) return false;
+      const cls = rune <= Unicode.MAX_LATIN1 ? latin1Class[rune] : this.runeClass(rune);
+      let next = unanchored && state.next !== null ? state.next[cls] : null;
+      if (next === null) {
+        next = this.stepOrReset(state, cls, rune, anchor, i2, search);
+        if (next === null) return null;
       }
+      state = next;
+      if (state.isMatch && onMatch(state, false)) return true;
+      if (!unanchored && state.nfaStates.length === 0) return false;
       i2 += width;
     }
-    return false;
+    state = this.stepOrReset(state, this.numClasses, END_TEXT, anchor, i2, search);
+    if (state === null) return null;
+    return state.isMatch && onMatch(state, true);
+  }
+  match(input, pos, anchor) {
+    if (this.failed) return null;
+    if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && pos !== 0) return false;
+    const startState = this.start(input, pos);
+    if (startState === null) return null;
+    return this.run(input, pos, anchor, startState, (state, atEnd) => anchor !== RE2Flags.ANCHOR_BOTH || atEnd);
   }
   matchSet(input, pos, anchor) {
+    if (this.failed) return null;
     if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && pos !== 0) return [];
-    if (!this.startState) {
-      this.startState = this.getState([this.prog.start]);
-      if (!this.startState) return null;
-    }
-    let endPos = input.endPos();
-    let currentState = this.startState;
+    const startState = this.start(input, pos);
+    if (startState === null) return null;
     const matches = /* @__PURE__ */ new Set();
-    const checkMatch = (state, currentPos) => {
-      if (state.isMatch) if (anchor === RE2Flags.ANCHOR_BOTH) {
-        if (currentPos === endPos) state.matchIDs.forEach((id) => matches.add(id));
-      } else state.matchIDs.forEach((id) => matches.add(id));
+    const collect = (state, atEnd) => {
+      if (anchor !== RE2Flags.ANCHOR_BOTH || atEnd) for (let k2 = 0; k2 < state.matchIDs.length; k2++) matches.add(state.matchIDs[k2]);
+      return false;
     };
-    checkMatch(currentState, pos);
-    let i2 = pos;
-    while (i2 < endPos) {
-      const r2 = input.step(i2);
-      const rune = r2 >> 3;
-      const width = r2 & 7;
-      if (width === 0) break;
-      currentState = anchor === RE2Flags.UNANCHORED && rune <= Unicode.MAX_LATIN1 && currentState.nextLatin1[rune] || this.step(currentState, rune, anchor);
-      if (currentState === null) return null;
-      currentState.lastSeen = ++this.clock;
-      i2 += width;
-      checkMatch(currentState, i2);
-      if (currentState.nfaStates.length === 0) {
-        if (anchor !== RE2Flags.UNANCHORED) break;
-      }
-    }
+    if (this.run(input, pos, anchor, startState, collect) === null) return null;
     return Array.from(matches).sort((a, b2) => a - b2);
   }
 };
 var VISITED_BITS = 32;
 var MAX_BACKTRACK_PROG = 500;
 var INITIAL_JOB_CAPACITY = 256;
-var MAX_BACKTRACK_VECTOR = 256 * 1024;
+var MAX_BACKTRACK_VECTOR = 262144;
 var BitState = class {
   constructor() {
     this.end = 0;
@@ -6796,7 +6936,7 @@ var BitState = class {
         const inst = re2.prog.getInst(currentPc);
         switch (inst.op) {
           case Inst.FAIL:
-            throw new RE2JSInternalException("unexpected InstFail");
+            break;
           case Inst.ALT:
             if (arg) {
               arg = false;
@@ -7012,7 +7152,7 @@ var OnePassProg = class {
       const inst = new Inst(orig.op);
       inst.out = orig.out;
       inst.arg = orig.arg;
-      inst.runes = orig.runes ? orig.runes.slice() : [];
+      inst.runes = orig.runes ? new Int32Array(orig.runes) : /* @__PURE__ */ new Int32Array(0);
       inst.next = null;
       this.inst[i2] = inst;
     }
@@ -7082,7 +7222,7 @@ var makeOnePass = (p2) => {
         const rightRunes = onePassRunes[inst.arg] || [];
         const mergeRes = mergeRuneSets(leftRunes, rightRunes, inst.out, inst.arg);
         if (!mergeRes) return false;
-        onePassRunes[pc] = mergeRes.merged;
+        onePassRunes[pc] = new Int32Array(mergeRes.merged);
         inst.next = new Uint32Array(mergeRes.next);
         break;
       }
@@ -7091,7 +7231,7 @@ var makeOnePass = (p2) => {
       case Inst.NOP:
         ok = check(inst.out);
         m2[pc] = m2[inst.out];
-        onePassRunes[pc] = onePassRunes[inst.out] ? onePassRunes[inst.out].slice() : [];
+        onePassRunes[pc] = onePassRunes[inst.out] ? new Int32Array(onePassRunes[inst.out]) : /* @__PURE__ */ new Int32Array(0);
         inst.next = new Uint32Array(Math.floor(onePassRunes[pc].length / 2) + 1).fill(inst.out);
         break;
       case Inst.MATCH:
@@ -7103,7 +7243,7 @@ var makeOnePass = (p2) => {
         if (inst.next && inst.next.length > 0) break;
         instQueue.insert(inst.out);
         if (!inst.runes || inst.runes.length === 0) {
-          onePassRunes[pc] = [];
+          onePassRunes[pc] = /* @__PURE__ */ new Int32Array(0);
           inst.next = new Uint32Array([inst.out]);
           break;
         }
@@ -7114,7 +7254,7 @@ var makeOnePass = (p2) => {
           for (let r1 = Unicode.simpleFold(r0); r1 !== r0; r1 = Unicode.simpleFold(r1)) runes.push(r1, r1);
           runes.sort((a, b2) => a - b2);
         } else for (let j = 0; j < inst.runes.length; j++) runes.push(inst.runes[j]);
-        onePassRunes[pc] = runes;
+        onePassRunes[pc] = new Int32Array(runes);
         inst.next = new Uint32Array(Math.floor(runes.length / 2) + 1).fill(inst.out);
         inst.op = Inst.RUNE;
         break;
@@ -7130,7 +7270,7 @@ var makeOnePass = (p2) => {
           for (let r1 = Unicode.simpleFold(r0); r1 !== r0; r1 = Unicode.simpleFold(r1)) runes.push(r1, r1);
           runes.sort((a, b2) => a - b2);
         } else runes.push(inst.runes[0], inst.runes[0]);
-        onePassRunes[pc] = runes;
+        onePassRunes[pc] = new Int32Array(runes);
         inst.next = new Uint32Array(Math.floor(runes.length / 2) + 1).fill(inst.out);
         inst.op = Inst.RUNE;
         break;
@@ -7139,21 +7279,20 @@ var makeOnePass = (p2) => {
         m2[pc] = false;
         if (inst.next && inst.next.length > 0) break;
         instQueue.insert(inst.out);
-        onePassRunes[pc] = [0, Unicode.MAX_RUNE];
+        onePassRunes[pc] = new Int32Array([0, Unicode.MAX_RUNE]);
         inst.next = new Uint32Array([inst.out]);
         break;
       case Inst.RUNE_ANY_NOT_NL:
         m2[pc] = false;
         if (inst.next && inst.next.length > 0) break;
         instQueue.insert(inst.out);
-        onePassRunes[pc] = [
+        onePassRunes[pc] = new Int32Array([
           0,
           9,
           11,
           Unicode.MAX_RUNE
-        ];
+        ]);
         inst.next = new Uint32Array(Math.floor(onePassRunes[pc].length / 2) + 1).fill(inst.out);
-        break;
     }
     return ok;
   };
@@ -7186,8 +7325,7 @@ var cleanupOnePass = (p2, original) => {
       case Inst.RUNE_ANY_NOT_NL:
         p2.inst[ix].next = null;
         p2.inst[ix].op = instOriginal.op;
-        p2.inst[ix].runes = instOriginal.runes ? instOriginal.runes.slice() : [];
-        break;
+        p2.inst[ix].runes = instOriginal.runes ? new Int32Array(instOriginal.runes) : /* @__PURE__ */ new Int32Array(0);
     }
   }
 };
@@ -7218,7 +7356,6 @@ var OnePass = class OnePass2 {
           break;
         default:
           if (opOut === Inst.MATCH && hasAlt) return null;
-          break;
       }
     }
     let p2 = onePassCopy(prog);
@@ -7346,7 +7483,7 @@ var Regexp = class Regexp2 {
     return [];
   }
   static quoteIfHyphen(rune) {
-    if (rune === Codepoint.CODES.get("-")) return "\\";
+    if (rune === Codepoint.CODES["-"]) return "\\";
     return "";
   }
   static fromRegexp(re) {
@@ -7366,7 +7503,7 @@ var Regexp = class Regexp2 {
     this.op = op;
     this.flags = 0;
     this.subs = Regexp2.emptySubs();
-    this.runes = [];
+    this.runes = /* @__PURE__ */ new Int32Array(0);
     this.min = 0;
     this.max = 0;
     this.cap = 0;
@@ -7377,7 +7514,7 @@ var Regexp = class Regexp2 {
   reinit() {
     this.flags = 0;
     this.subs = Regexp2.emptySubs();
-    this.runes = [];
+    this.runes = /* @__PURE__ */ new Int32Array(0);
     this.cap = 0;
     this.min = 0;
     this.max = 0;
@@ -7421,7 +7558,6 @@ var Regexp = class Regexp2 {
               if (this.max >= 0) out += this.max;
             }
             out += "}";
-            break;
         }
         if ((this.flags & RE2Flags.NON_GREEDY) !== 0) out += "?";
         break;
@@ -7516,7 +7652,6 @@ var Regexp = class Regexp2 {
         break;
       default:
         out += this.op;
-        break;
     }
     return out;
   }
@@ -7538,6 +7673,7 @@ var Regexp = class Regexp2 {
         break;
       case Regexp2.Op.LITERAL:
       case Regexp2.Op.CHAR_CLASS:
+        if ((this.flags & RE2Flags.FOLD_CASE) !== (that.flags & RE2Flags.FOLD_CASE)) return false;
         if (this.runes === null && that.runes === null) break;
         if (this.runes === null || that.runes === null) return false;
         if (this.runes.length !== that.runes.length) return false;
@@ -7562,66 +7698,137 @@ var Regexp = class Regexp2 {
       case Regexp2.Op.PLB:
       case Regexp2.Op.NLB:
         if (this.lb !== that.lb || !this.subs[0].equals(that.subs[0])) return false;
-        break;
     }
     return true;
   }
 };
+var RegexpWalker = class {
+  static walk(root, handler) {
+    const stack = [];
+    let re = root;
+    let result;
+    for (; ; ) {
+      if (re.subs.length === 0) result = handler.leaf(re);
+      else {
+        const state = handler.enter(re);
+        if (state.result === void 0) {
+          stack.push({
+            re,
+            state,
+            i: 0
+          });
+          re = re.subs[0];
+          continue;
+        }
+        result = state.result;
+      }
+      for (; ; ) {
+        if (stack.length === 0) return result;
+        const frame = stack[stack.length - 1];
+        handler.child(frame.re, frame.state, result, frame.i);
+        frame.i++;
+        if (frame.state.result === void 0 && frame.i < frame.re.subs.length) {
+          re = frame.re.subs[frame.i];
+          break;
+        }
+        stack.pop();
+        result = frame.state.result !== void 0 ? frame.state.result : handler.leave(frame.re, frame.state);
+      }
+    }
+  }
+};
 var AhoCorasick = class {
-  constructor(wordArrays) {
-    this.next = [/* @__PURE__ */ Object.create(null)];
-    this.fail = [0];
-    this.match = [false];
-    for (const word of wordArrays) {
+  constructor(words, alphabetSize) {
+    const edges = /* @__PURE__ */ new Map();
+    const parent = [0];
+    const unit = [0];
+    const depth = [0];
+    const terminal = [0];
+    for (const word of words) {
       let node = 0;
       for (let i2 = 0; i2 < word.length; i2++) {
-        const val = word[i2];
-        if (!(val in this.next[node])) {
-          this.next.push(/* @__PURE__ */ Object.create(null));
-          this.fail.push(0);
-          this.match.push(false);
-          this.next[node][val] = this.next.length - 1;
+        const key = node * alphabetSize + word[i2];
+        let child = edges.get(key);
+        if (child === void 0) {
+          child = parent.length;
+          edges.set(key, child);
+          parent.push(node);
+          unit.push(word[i2]);
+          depth.push(depth[node] + 1);
+          terminal.push(0);
         }
-        node = this.next[node][val];
+        node = child;
       }
-      this.match[node] = true;
+      terminal[node] = 1;
     }
-    const queue = [];
-    for (const val in this.next[0]) if (Object.prototype.hasOwnProperty.call(this.next[0], val)) {
-      const child = this.next[0][val];
-      this.fail[child] = 0;
-      queue.push(child);
-    }
-    while (queue.length > 0) {
-      const curr = queue.shift();
-      for (const val in this.next[curr]) if (Object.prototype.hasOwnProperty.call(this.next[curr], val)) {
-        const child = this.next[curr][val];
-        let failNode = this.fail[curr];
-        while (failNode !== 0 && !(val in this.next[failNode])) failNode = this.fail[failNode];
-        if (val in this.next[failNode]) this.fail[child] = this.next[failNode][val];
-        else this.fail[child] = 0;
-        this.match[child] = this.match[child] || this.match[this.fail[child]];
-        queue.push(child);
+    const numNodes = parent.length;
+    const children = new Int32Array(numNodes - 1);
+    for (let c2 = 1; c2 < numNodes; c2++) children[c2 - 1] = c2;
+    children.sort((a, b2) => parent[a] - parent[b2] || unit[a] - unit[b2]);
+    const childStart = new Int32Array(numNodes + 1);
+    for (let c2 = 1; c2 < numNodes; c2++) childStart[parent[c2] + 1]++;
+    for (let n2 = 0; n2 < numNodes; n2++) childStart[n2 + 1] += childStart[n2];
+    const childUnit = new Int32Array(numNodes - 1);
+    for (let k2 = 0; k2 < children.length; k2++) childUnit[k2] = unit[children[k2]];
+    this.childStart = childStart;
+    this.childUnit = childUnit;
+    this.childNode = children;
+    const byDepth = new Int32Array(numNodes);
+    for (let n2 = 0; n2 < numNodes; n2++) byDepth[n2] = n2;
+    byDepth.sort((a, b2) => depth[a] - depth[b2]);
+    const fail = new Int32Array(numNodes);
+    const match = Uint8Array.from(terminal);
+    for (let k2 = 1; k2 < numNodes; k2++) {
+      const c2 = byDepth[k2];
+      const p2 = parent[c2];
+      if (p2 !== 0) {
+        let f = fail[p2];
+        let next = this.next(f, unit[c2]);
+        while (next < 0 && f !== 0) {
+          f = fail[f];
+          next = this.next(f, unit[c2]);
+        }
+        fail[c2] = next >= 0 ? next : 0;
       }
+      match[c2] |= match[fail[c2]];
+    }
+    this.fail = fail;
+    this.match = match;
+  }
+  next(node, u2) {
+    let lo = this.childStart[node];
+    let hi = this.childStart[node + 1];
+    const units = this.childUnit;
+    while (lo < hi) {
+      const mid = lo + hi >> 1;
+      const m2 = units[mid];
+      if (m2 === u2) return this.childNode[mid];
+      if (m2 < u2) lo = mid + 1;
+      else hi = mid;
+    }
+    return -1;
+  }
+  advance(node, u2) {
+    for (; ; ) {
+      const next = this.next(node, u2);
+      if (next >= 0) return next;
+      if (node === 0) return 0;
+      node = this.fail[node];
     }
   }
   searchUTF16(charSeq, start, end) {
     let node = 0;
     for (let i2 = start; i2 < end; i2++) {
-      const val = charSeq.charCodeAt(i2);
-      while (node !== 0 && !(val in this.next[node])) node = this.fail[node];
-      if (val in this.next[node]) node = this.next[node][val];
-      if (this.match[node]) return true;
+      node = this.advance(node, charSeq.charCodeAt(i2));
+      if (this.match[node] === 1) return true;
     }
     return false;
   }
   searchUTF8(bytes, start, end) {
     let node = 0;
     for (let i2 = start; i2 < end; i2++) {
-      const val = bytes[i2];
-      while (node !== 0 && !(val in this.next[node])) node = this.fail[node];
-      if (val in this.next[node]) node = this.next[node][val];
-      if (this.match[node]) return true;
+      node = this.advance(node, bytes[i2]);
+      if (this.match[node] === 1) return true;
     }
     return false;
   }
@@ -7633,13 +7840,32 @@ var Prefilter = class Prefilter2 {
     AND: 2,
     OR: 3
   };
+  static MAX_SCANS = 32;
+  static MAX_AC_UNITS = 1 << 18;
   constructor(type) {
     this.type = type;
     this.subs = [];
     this.str = "";
     this.bytes = null;
+    this.cost = type === Prefilter2.Type.EXACT ? 1 : 0;
+    this.allExact = false;
     this.ac16 = null;
     this.ac8 = null;
+  }
+  automaton16() {
+    if (this.ac16 === null) {
+      const words = this.subs.map((s2) => {
+        const arr = new Array(s2.str.length);
+        for (let i2 = 0; i2 < s2.str.length; i2++) arr[i2] = s2.str.charCodeAt(i2);
+        return arr;
+      });
+      this.ac16 = new AhoCorasick(words, 65536);
+    }
+    return this.ac16;
+  }
+  automaton8() {
+    if (this.ac8 === null) this.ac8 = new AhoCorasick(this.subs.map((s2) => s2.bytes), 256);
+    return this.ac8;
   }
   eval(input, pos) {
     switch (this.type) {
@@ -7651,7 +7877,7 @@ var Prefilter = class Prefilter2 {
         for (let i2 = 0; i2 < this.subs.length; i2++) if (!this.subs[i2].eval(input, pos)) return false;
         return true;
       case Prefilter2.Type.OR:
-        if (this.ac16 && this.ac8) return input.hasAnyString(this, pos);
+        if (this.allExact) return input.hasAnyString(this, pos);
         for (let i2 = 0; i2 < this.subs.length; i2++) if (this.subs[i2].eval(input, pos)) return true;
         return false;
       default:
@@ -7661,103 +7887,119 @@ var Prefilter = class Prefilter2 {
 };
 var PrefilterTree = class PrefilterTree2 {
   static build(re) {
-    const pf = PrefilterTree2.fromRegexp(re);
-    return PrefilterTree2.simplify(pf);
-  }
-  static fromRegexp(re) {
     if (!re) return new Prefilter(Prefilter.Type.NONE);
+    return RegexpWalker.walk(re, PrefilterTree2.WALKER);
+  }
+  static WALKER = {
+    leaf: (re) => PrefilterTree2.leaf(re),
+    enter: (re) => PrefilterTree2.enter(re),
+    child: (re, state, result) => PrefilterTree2.child(re, state, result),
+    leave: (re, state) => PrefilterTree2.leave(re, state)
+  };
+  static leaf(re) {
+    if (re.op !== Regexp.Op.LITERAL) return new Prefilter(Prefilter.Type.NONE);
+    if (re.runes.length === 0 || (re.flags & RE2Flags.FOLD_CASE) !== 0) return new Prefilter(Prefilter.Type.NONE);
+    let str = "";
+    for (let i2 = 0; i2 < re.runes.length; i2++) {
+      if (Unicode.isUnsearchable(re.runes[i2])) return new Prefilter(Prefilter.Type.NONE);
+      str += String.fromCodePoint(re.runes[i2]);
+    }
+    const pf = new Prefilter(Prefilter.Type.EXACT);
+    pf.str = str;
+    pf.bytes = Utils.stringToUtf8ByteArray(pf.str);
+    return pf;
+  }
+  static enter(re) {
     switch (re.op) {
-      case Regexp.Op.PLB:
-      case Regexp.Op.NLB:
-      case Regexp.Op.NO_MATCH:
-      case Regexp.Op.EMPTY_MATCH:
-      case Regexp.Op.BEGIN_LINE:
-      case Regexp.Op.END_LINE:
-      case Regexp.Op.BEGIN_TEXT:
-      case Regexp.Op.END_TEXT:
-      case Regexp.Op.WORD_BOUNDARY:
-      case Regexp.Op.NO_WORD_BOUNDARY:
-      case Regexp.Op.CHAR_CLASS:
-      case Regexp.Op.ANY_CHAR_NOT_NL:
-      case Regexp.Op.ANY_CHAR:
-        return new Prefilter(Prefilter.Type.NONE);
-      case Regexp.Op.LITERAL: {
-        if (re.runes.length === 0 || (re.flags & RE2Flags.FOLD_CASE) !== 0) return new Prefilter(Prefilter.Type.NONE);
-        const pf = new Prefilter(Prefilter.Type.EXACT);
-        let str = "";
-        for (let i2 = 0; i2 < re.runes.length; i2++) str += String.fromCodePoint(re.runes[i2]);
-        pf.str = str;
-        pf.bytes = Utils.stringToUtf8ByteArray(pf.str);
-        return pf;
-      }
       case Regexp.Op.CAPTURE:
       case Regexp.Op.PLUS:
-        return PrefilterTree2.fromRegexp(re.subs[0]);
+        return { sub: null };
       case Regexp.Op.REPEAT:
-        if (re.min >= 1) return PrefilterTree2.fromRegexp(re.subs[0]);
-        return new Prefilter(Prefilter.Type.NONE);
-      case Regexp.Op.CONCAT: {
-        const pf = new Prefilter(Prefilter.Type.AND);
-        for (const sub of re.subs) pf.subs.push(PrefilterTree2.fromRegexp(sub));
-        return pf;
-      }
-      case Regexp.Op.ALTERNATE: {
-        const pf = new Prefilter(Prefilter.Type.OR);
-        for (const sub of re.subs) pf.subs.push(PrefilterTree2.fromRegexp(sub));
-        return pf;
-      }
+        if (re.min >= 1) return { sub: null };
+        return { result: new Prefilter(Prefilter.Type.NONE) };
+      case Regexp.Op.CONCAT:
+        return {
+          pf: new Prefilter(Prefilter.Type.AND),
+          subs: []
+        };
+      case Regexp.Op.ALTERNATE:
+        return {
+          pf: new Prefilter(Prefilter.Type.OR),
+          subs: []
+        };
       default:
-        return new Prefilter(Prefilter.Type.NONE);
+        return { result: new Prefilter(Prefilter.Type.NONE) };
     }
   }
-  static simplify(pf) {
-    if (pf.type === Prefilter.Type.EXACT || pf.type === Prefilter.Type.NONE) return pf;
+  static child(re, state, s2) {
+    if (state.subs === void 0) {
+      state.sub = s2;
+      return;
+    }
+    if (state.pf.type === Prefilter.Type.AND) {
+      if (s2.type === Prefilter.Type.NONE) return;
+      if (s2.type === Prefilter.Type.AND) {
+        for (let j = 0; j < s2.subs.length; j++) state.subs.push(s2.subs[j]);
+        return;
+      }
+      state.subs.push(s2);
+      return;
+    }
+    if (s2.type === Prefilter.Type.NONE) {
+      state.result = new Prefilter(Prefilter.Type.NONE);
+      return;
+    }
+    if (s2.type === Prefilter.Type.OR) {
+      for (let j = 0; j < s2.subs.length; j++) state.subs.push(s2.subs[j]);
+      return;
+    }
+    state.subs.push(s2);
+  }
+  static leave(re, state) {
+    if (state.subs === void 0) return state.sub;
+    const pf = state.pf;
+    const seen = /* @__PURE__ */ new Set();
+    const subs = [];
+    for (const sub of state.subs) {
+      if (sub.type === Prefilter.Type.EXACT) {
+        if (seen.has(sub.str)) continue;
+        seen.add(sub.str);
+      }
+      subs.push(sub);
+    }
     if (pf.type === Prefilter.Type.AND) {
-      const newSubs = [];
-      for (const sub of pf.subs) {
-        const s2 = PrefilterTree2.simplify(sub);
-        if (s2.type !== Prefilter.Type.NONE) if (s2.type === Prefilter.Type.AND) for (let j = 0; j < s2.subs.length; j++) newSubs.push(s2.subs[j]);
-        else newSubs.push(s2);
+      const kept = [];
+      let cost2 = 0;
+      for (const sub of subs) {
+        if (cost2 + sub.cost > Prefilter.MAX_SCANS) continue;
+        kept.push(sub);
+        cost2 += sub.cost;
       }
-      if (newSubs.length === 0) return new Prefilter(Prefilter.Type.NONE);
-      if (newSubs.length === 1) return newSubs[0];
-      pf.subs = newSubs;
+      if (kept.length === 0) return new Prefilter(Prefilter.Type.NONE);
+      if (kept.length === 1) return kept[0];
+      pf.subs = kept;
+      pf.cost = cost2;
       return pf;
     }
-    if (pf.type === Prefilter.Type.OR) {
-      const newSubs = [];
-      for (const sub of pf.subs) {
-        const s2 = PrefilterTree2.simplify(sub);
-        if (s2.type === Prefilter.Type.NONE) return new Prefilter(Prefilter.Type.NONE);
-        if (s2.type === Prefilter.Type.OR) for (let j = 0; j < s2.subs.length; j++) newSubs.push(s2.subs[j]);
-        else newSubs.push(s2);
-      }
-      if (newSubs.length === 0) return new Prefilter(Prefilter.Type.NONE);
-      if (newSubs.length === 1) return newSubs[0];
-      const seen = /* @__PURE__ */ new Set();
-      const uniqueSubs = [];
-      for (const sub of newSubs) if (sub.type === Prefilter.Type.EXACT) {
-        if (!seen.has(sub.str)) {
-          seen.add(sub.str);
-          uniqueSubs.push(sub);
-        }
-      } else uniqueSubs.push(sub);
-      pf.subs = uniqueSubs;
-      let allExact = true;
-      for (const sub of uniqueSubs) if (sub.type !== Prefilter.Type.EXACT) {
-        allExact = false;
-        break;
-      }
-      if (allExact && uniqueSubs.length > 1) {
-        pf.ac16 = new AhoCorasick(uniqueSubs.map((s2) => {
-          const arr = [];
-          for (let i2 = 0; i2 < s2.str.length; i2++) arr.push(s2.str.charCodeAt(i2));
-          return arr;
-        }));
-        pf.ac8 = new AhoCorasick(uniqueSubs.map((s2) => s2.bytes));
-      }
+    if (subs.length === 0) return new Prefilter(Prefilter.Type.NONE);
+    if (subs.length === 1) return subs[0];
+    pf.subs = subs;
+    let allExact = true;
+    let cost = 0;
+    let units = 0;
+    for (const sub of subs) {
+      if (sub.type !== Prefilter.Type.EXACT) allExact = false;
+      else units += sub.bytes.length;
+      cost += sub.cost;
+    }
+    if (allExact) {
+      if (units > Prefilter.MAX_AC_UNITS) return new Prefilter(Prefilter.Type.NONE);
+      pf.allExact = true;
+      pf.cost = 1;
       return pf;
     }
+    if (cost > Prefilter.MAX_SCANS) return new Prefilter(Prefilter.Type.NONE);
+    pf.cost = cost;
     return pf;
   }
 };
@@ -7778,6 +8020,7 @@ var Prog = class {
     this.numCap = 2;
     this.lbStarts = [];
     this.numLb = 0;
+    this.lbInst = null;
   }
   getInst(pc) {
     return this.inst[pc];
@@ -7788,6 +8031,28 @@ var Prog = class {
   addInst(op) {
     this.inst.push(new Inst(op));
   }
+  markLookbehindInsts() {
+    const lbInst = new Uint8Array(this.inst.length);
+    const pending = this.lbStarts.slice();
+    while (pending.length > 0) {
+      const pc = pending.pop();
+      if (pc === 0 || lbInst[pc] === 1) continue;
+      lbInst[pc] = 1;
+      const i2 = this.inst[pc];
+      switch (i2.op) {
+        case Inst.ALT:
+        case Inst.ALT_MATCH:
+          pending.push(i2.out, i2.arg);
+          break;
+        case Inst.MATCH:
+        case Inst.FAIL:
+          break;
+        default:
+          pending.push(i2.out);
+      }
+    }
+    this.lbInst = lbInst;
+  }
   skipNop(pc) {
     let i2 = this.inst[pc];
     while (i2.op === Inst.NOP || i2.op === Inst.CAPTURE) {
@@ -7796,11 +8061,12 @@ var Prog = class {
     }
     return i2;
   }
+  /** @returns {[boolean, string]} */
   prefix() {
     let prefix = "";
     let i2 = this.skipNop(this.start);
     if (!Inst.isRuneOp(i2.op) || i2.runes.length !== 1) return [i2.op === Inst.MATCH, prefix];
-    while (Inst.isRuneOp(i2.op) && i2.runes.length === 1 && (i2.arg & RE2Flags.FOLD_CASE) === 0) {
+    while (Inst.isRuneOp(i2.op) && i2.runes.length === 1 && (i2.arg & RE2Flags.FOLD_CASE) === 0 && !Unicode.isUnsearchable(i2.runes[0])) {
       prefix += String.fromCodePoint(i2.runes[0]);
       i2 = this.skipNop(i2.out);
     }
@@ -7865,6 +8131,13 @@ var Prog = class {
     return out;
   }
 };
+var ANY_RUNE_NOT_NL = new Int32Array([
+  0,
+  Codepoint.CODES["\n"] - 1,
+  Codepoint.CODES["\n"] + 1,
+  Unicode.MAX_RUNE
+]);
+var ANY_RUNE = new Int32Array([0, Unicode.MAX_RUNE]);
 var Frag = class {
   constructor(i2 = 0, out = new PatchList(), nullable = false) {
     this.i = i2;
@@ -7873,32 +8146,24 @@ var Frag = class {
   }
 };
 var Compiler = class Compiler2 {
-  static ANY_RUNE_NOT_NL() {
-    return [
-      0,
-      Codepoint.CODES.get("\n") - 1,
-      Codepoint.CODES.get("\n") + 1,
-      Unicode.MAX_RUNE
-    ];
-  }
-  static ANY_RUNE() {
-    return [0, Unicode.MAX_RUNE];
-  }
   static compileRegexp(re) {
     const c2 = new Compiler2();
     const f = c2.compile(re);
     c2.prog.patch(f.out, c2.newInst(Inst.MATCH).i);
     c2.prog.start = f.i;
+    c2.prog.markLookbehindInsts();
     return c2.prog;
   }
   static compileSet(regexps) {
     const c2 = new Compiler2();
     if (regexps.length === 0) {
       c2.prog.start = c2.newInst(Inst.FAIL).i;
+      c2.prog.markLookbehindInsts();
       return c2.prog;
     }
     let starts = [];
     for (let i2 = 0; i2 < regexps.length; i2++) {
+      c2.lbOffset = c2.prog.numLb;
       const f = c2.compile(regexps[i2]);
       const m2 = c2.newInst(Inst.MATCH);
       c2.prog.getInst(m2.i).arg = i2;
@@ -7914,11 +8179,20 @@ var Compiler = class Compiler2 {
       start = f.i;
     }
     c2.prog.start = start;
+    c2.prog.markLookbehindInsts();
     return c2.prog;
   }
   constructor() {
     this.prog = new Prog();
     this.newInst(Inst.FAIL);
+    this.lbOffset = 0;
+    this.runeCache = /* @__PURE__ */ new Map();
+    this.walker = {
+      leaf: (re) => this.leaf(re),
+      enter: (re) => this.enter(re),
+      child: (re, state, result) => this.child(re, state, result),
+      leave: (re, state) => this.leave(re, state)
+    };
   }
   newInst(op) {
     this.prog.addInst(op);
@@ -7940,7 +8214,11 @@ var Compiler = class Compiler2 {
     return f;
   }
   cat(f1, f2) {
-    if (f1.i === 0 || f2.i === 0) return this.fail();
+    if (f1.i === 0 || f2.i === 0) {
+      this.prog.patch(f1.out, 0);
+      this.prog.patch(f2.out, 0);
+      return this.fail();
+    }
     this.prog.patch(f1.out, f2.i);
     return new Frag(f1.i, f2.out, f1.nullable && f2.nullable);
   }
@@ -7969,6 +8247,7 @@ var Compiler = class Compiler2 {
     return f;
   }
   quest(f1, nongreedy) {
+    if (f1.i === 0) return this.nop();
     const f = this.newInst(Inst.ALT);
     const i2 = this.prog.getInst(f.i);
     if (nongreedy) {
@@ -7982,10 +8261,12 @@ var Compiler = class Compiler2 {
     return f;
   }
   star(f1, nongreedy) {
+    if (f1.i === 0) return this.nop();
     if (f1.nullable) return this.quest(this.plus(f1, nongreedy), nongreedy);
     return this.loop(f1, nongreedy);
   }
   plus(f1, nongreedy) {
+    if (f1.i === 0) return this.fail();
     return new Frag(f1.i, this.loop(f1, nongreedy).out, f1.nullable);
   }
   empty(op) {
@@ -8005,13 +8286,14 @@ var Compiler = class Compiler2 {
     f.out = new PatchList(f.i << 1, f.i << 1);
     if ((flags & RE2Flags.FOLD_CASE) === 0 && runes.length === 1 || runes.length === 2 && runes[0] === runes[1]) i2.op = Inst.RUNE1;
     else if (runes.length === 2 && runes[0] === 0 && runes[1] === Unicode.MAX_RUNE) i2.op = Inst.RUNE_ANY;
-    else if (runes.length === 4 && runes[0] === 0 && runes[1] === Codepoint.CODES.get("\n") - 1 && runes[2] === Codepoint.CODES.get("\n") + 1 && runes[3] === Unicode.MAX_RUNE) i2.op = Inst.RUNE_ANY_NOT_NL;
+    else if (runes.length === 4 && runes[0] === 0 && runes[1] === Codepoint.CODES["\n"] - 1 && runes[2] === Codepoint.CODES["\n"] + 1 && runes[3] === Unicode.MAX_RUNE) i2.op = Inst.RUNE_ANY_NOT_NL;
     return f;
   }
-  lookBehind(a, lb) {
+  lookBehind(a, parsedLb) {
+    const lb = Math.sign(parsedLb) * (Math.abs(parsedLb) + this.lbOffset);
     const id = this.newInst(Inst.LB_WRITE);
     this.prog.getInst(id.i).arg = lb;
-    const any = this.rune(Compiler2.ANY_RUNE(), 0);
+    const any = this.rune(ANY_RUNE, 0);
     const dotStar = this.star(any, true);
     const lbAutomaton = this.cat(dotStar, a);
     this.prog.patch(lbAutomaton.out, id.i);
@@ -8023,27 +8305,34 @@ var Compiler = class Compiler2 {
     return checkId;
   }
   compile(re) {
+    return RegexpWalker.walk(re, this.walker);
+  }
+  leaf(re) {
     switch (re.op) {
       case Regexp.Op.NO_MATCH:
         return this.fail();
       case Regexp.Op.EMPTY_MATCH:
         return this.nop();
-      case Regexp.Op.LITERAL:
+      case Regexp.Op.LITERAL: {
         if (re.runes.length === 0) return this.nop();
-        else {
-          let f = null;
-          for (let r2 of re.runes) {
-            const f1 = this.rune([r2], re.flags);
-            f = f === null ? f1 : this.cat(f, f1);
+        let f = null;
+        for (let r2 of re.runes) {
+          let singleRune = this.runeCache.get(r2);
+          if (singleRune === void 0) {
+            singleRune = new Int32Array([r2]);
+            this.runeCache.set(r2, singleRune);
           }
-          return f;
+          const f1 = this.rune(singleRune, re.flags);
+          f = f === null ? f1 : this.cat(f, f1);
         }
+        return f;
+      }
       case Regexp.Op.CHAR_CLASS:
         return this.rune(re.runes, re.flags);
       case Regexp.Op.ANY_CHAR_NOT_NL:
-        return this.rune(Compiler2.ANY_RUNE_NOT_NL(), 0);
+        return this.rune(ANY_RUNE_NOT_NL, 0);
       case Regexp.Op.ANY_CHAR:
-        return this.rune(Compiler2.ANY_RUNE(), 0);
+        return this.rune(ANY_RUNE, 0);
       case Regexp.Op.BEGIN_LINE:
         return this.empty(Utils.EMPTY_BEGIN_LINE);
       case Regexp.Op.END_LINE:
@@ -8056,41 +8345,56 @@ var Compiler = class Compiler2 {
         return this.empty(Utils.EMPTY_WORD_BOUNDARY);
       case Regexp.Op.NO_WORD_BOUNDARY:
         return this.empty(Utils.EMPTY_NO_WORD_BOUNDARY);
+      case Regexp.Op.CONCAT:
+      case Regexp.Op.ALTERNATE:
+        return this.nop();
+      default:
+        throw new RE2JSCompileException("regexp: unhandled case in compile");
+    }
+  }
+  enter(re) {
+    switch (re.op) {
       case Regexp.Op.PLB:
       case Regexp.Op.NLB:
-        return this.lookBehind(this.compile(re.subs[0]), re.lb);
+      case Regexp.Op.STAR:
+      case Regexp.Op.PLUS:
+      case Regexp.Op.QUEST:
+        return { sub: null };
+      case Regexp.Op.CAPTURE:
+        return {
+          bra: this.cap(re.cap << 1),
+          sub: null
+        };
+      case Regexp.Op.CONCAT:
+      case Regexp.Op.ALTERNATE:
+        return { f: null };
+      default:
+        throw new RE2JSCompileException("regexp: unhandled case in compile");
+    }
+  }
+  child(re, state, f1) {
+    if (re.op === Regexp.Op.CONCAT) state.f = state.f === null ? f1 : this.cat(state.f, f1);
+    else if (re.op === Regexp.Op.ALTERNATE) state.f = state.f === null ? f1 : this.alt(state.f, f1);
+    else state.sub = f1;
+  }
+  leave(re, state) {
+    switch (re.op) {
+      case Regexp.Op.PLB:
+      case Regexp.Op.NLB:
+        return this.lookBehind(state.sub, re.lb);
       case Regexp.Op.CAPTURE: {
-        const bra = this.cap(re.cap << 1);
-        const sub = this.compile(re.subs[0]);
         const ket = this.cap(re.cap << 1 | 1);
-        return this.cat(this.cat(bra, sub), ket);
+        return this.cat(this.cat(state.bra, state.sub), ket);
       }
       case Regexp.Op.STAR:
-        return this.star(this.compile(re.subs[0]), (re.flags & RE2Flags.NON_GREEDY) !== 0);
+        return this.star(state.sub, (re.flags & RE2Flags.NON_GREEDY) !== 0);
       case Regexp.Op.PLUS:
-        return this.plus(this.compile(re.subs[0]), (re.flags & RE2Flags.NON_GREEDY) !== 0);
+        return this.plus(state.sub, (re.flags & RE2Flags.NON_GREEDY) !== 0);
       case Regexp.Op.QUEST:
-        return this.quest(this.compile(re.subs[0]), (re.flags & RE2Flags.NON_GREEDY) !== 0);
+        return this.quest(state.sub, (re.flags & RE2Flags.NON_GREEDY) !== 0);
       case Regexp.Op.CONCAT:
-        if (re.subs.length === 0) return this.nop();
-        else {
-          let f = null;
-          for (let sub of re.subs) {
-            const f1 = this.compile(sub);
-            f = f === null ? f1 : this.cat(f, f1);
-          }
-          return f;
-        }
       case Regexp.Op.ALTERNATE:
-        if (re.subs.length === 0) return this.nop();
-        else {
-          let f = null;
-          for (let sub of re.subs) {
-            const f1 = this.compile(sub);
-            f = f === null ? f1 : this.alt(f, f1);
-          }
-          return f;
-        }
+        return state.f;
       default:
         throw new RE2JSCompileException("regexp: unhandled case in compile");
     }
@@ -8099,111 +8403,155 @@ var Compiler = class Compiler2 {
 var Simplify = class Simplify2 {
   static simplify(re) {
     if (re === null) return null;
+    return RegexpWalker.walk(re, Simplify2.WALKER);
+  }
+  static WALKER = {
+    leaf: (re) => Simplify2.leaf(re),
+    enter: (re) => Simplify2.enter(re),
+    child: (re, state, result, i2) => Simplify2.child(re, state, result, i2),
+    leave: (re, state) => Simplify2.leave(re, state)
+  };
+  static leaf(re) {
+    if (re.op === Regexp.Op.CHAR_CLASS) {
+      if (re.runes === null) return re;
+      if (re.runes.length === 0) return new Regexp(Regexp.Op.NO_MATCH);
+      if (re.runes.length === 2 && re.runes[0] === 0 && re.runes[1] === Unicode.MAX_RUNE) return new Regexp(Regexp.Op.ANY_CHAR);
+      if (re.runes.length === 4 && re.runes[0] === 0 && re.runes[1] === Codepoint.CODES["\n"] - 1 && re.runes[2] === Codepoint.CODES["\n"] + 1 && re.runes[3] === Unicode.MAX_RUNE) return new Regexp(Regexp.Op.ANY_CHAR_NOT_NL);
+    }
+    return re;
+  }
+  static enter(re) {
+    switch (re.op) {
+      case Regexp.Op.PLB:
+      case Regexp.Op.NLB:
+      case Regexp.Op.CAPTURE:
+      case Regexp.Op.STAR:
+      case Regexp.Op.PLUS:
+      case Regexp.Op.QUEST:
+        return { sub: null };
+      case Regexp.Op.CONCAT:
+      case Regexp.Op.ALTERNATE:
+        return {
+          subs: [],
+          changed: false
+        };
+      case Regexp.Op.REPEAT:
+        if (re.min === 0 && re.max === 0) return { result: new Regexp(Regexp.Op.EMPTY_MATCH) };
+        return { sub: null };
+      default:
+        return { result: re };
+    }
+  }
+  static child(re, state, nsub, i2) {
+    if (state.subs === void 0) {
+      state.sub = nsub;
+      return;
+    }
+    if (nsub !== re.subs[i2]) state.changed = true;
+    if (re.op === Regexp.Op.CONCAT) {
+      if (nsub.op === Regexp.Op.NO_MATCH) {
+        state.result = new Regexp(Regexp.Op.NO_MATCH);
+        return;
+      }
+      if (nsub.op === Regexp.Op.EMPTY_MATCH) {
+        state.changed = true;
+        return;
+      }
+      if (nsub.op === Regexp.Op.CONCAT) {
+        state.changed = true;
+        for (let j = 0; j < nsub.subs.length; j++) state.subs.push(nsub.subs[j]);
+        return;
+      }
+    } else {
+      if (nsub.op === Regexp.Op.NO_MATCH) {
+        state.changed = true;
+        return;
+      }
+      if (nsub.op === Regexp.Op.ALTERNATE) {
+        state.changed = true;
+        for (let j = 0; j < nsub.subs.length; j++) state.subs.push(nsub.subs[j]);
+        return;
+      }
+    }
+    state.subs.push(nsub);
+  }
+  static leave(re, state) {
     switch (re.op) {
       case Regexp.Op.PLB:
       case Regexp.Op.NLB:
       case Regexp.Op.CAPTURE: {
-        const sub = Simplify2.simplify(re.subs[0]);
+        const sub = state.sub;
         if (sub !== re.subs[0]) {
           const nre = Regexp.fromRegexp(re);
-          nre.runes = [];
+          nre.runes = /* @__PURE__ */ new Int32Array(0);
           nre.subs = [sub];
           return nre;
         }
         return re;
       }
       case Regexp.Op.CONCAT:
-      case Regexp.Op.ALTERNATE: {
-        const newSubs = [];
-        let changed = false;
-        for (let i2 = 0; i2 < re.subs.length; i2++) {
-          const sub = re.subs[i2];
-          const nsub = Simplify2.simplify(sub);
-          if (nsub !== sub) changed = true;
-          if (re.op === Regexp.Op.CONCAT) {
-            if (nsub.op === Regexp.Op.NO_MATCH) return new Regexp(Regexp.Op.NO_MATCH);
-            if (nsub.op === Regexp.Op.EMPTY_MATCH) {
-              changed = true;
-              continue;
-            }
-            if (nsub.op === Regexp.Op.CONCAT) {
-              changed = true;
-              for (let j = 0; j < nsub.subs.length; j++) newSubs.push(nsub.subs[j]);
-              continue;
-            }
-          } else if (re.op === Regexp.Op.ALTERNATE) {
-            if (nsub.op === Regexp.Op.NO_MATCH) {
-              changed = true;
-              continue;
-            }
-            if (nsub.op === Regexp.Op.ALTERNATE) {
-              changed = true;
-              for (let j = 0; j < nsub.subs.length; j++) newSubs.push(nsub.subs[j]);
-              continue;
-            }
-          }
-          newSubs.push(nsub);
-        }
-        if (changed) {
+      case Regexp.Op.ALTERNATE:
+        if (state.changed) {
+          const newSubs = state.subs;
           if (newSubs.length === 0) return new Regexp(re.op === Regexp.Op.CONCAT ? Regexp.Op.EMPTY_MATCH : Regexp.Op.NO_MATCH);
           if (newSubs.length === 1) return newSubs[0];
           const nre = Regexp.fromRegexp(re);
-          nre.runes = [];
+          nre.runes = /* @__PURE__ */ new Int32Array(0);
           nre.subs = newSubs;
           return nre;
         }
         return re;
-      }
-      case Regexp.Op.CHAR_CLASS:
-        if (re.runes === null) return re;
-        if (re.runes.length === 0) return new Regexp(Regexp.Op.NO_MATCH);
-        if (re.runes.length === 2 && re.runes[0] === 0 && re.runes[1] === Unicode.MAX_RUNE) return new Regexp(Regexp.Op.ANY_CHAR);
-        if (re.runes.length === 4 && re.runes[0] === 0 && re.runes[1] === Codepoint.CODES.get("\n") - 1 && re.runes[2] === Codepoint.CODES.get("\n") + 1 && re.runes[3] === Unicode.MAX_RUNE) return new Regexp(Regexp.Op.ANY_CHAR_NOT_NL);
-        return re;
       case Regexp.Op.STAR:
       case Regexp.Op.PLUS:
-      case Regexp.Op.QUEST: {
-        const sub = Simplify2.simplify(re.subs[0]);
-        return Simplify2.simplify1(re.op, re.flags, sub, re);
-      }
-      case Regexp.Op.REPEAT: {
-        if (re.min === 0 && re.max === 0) return new Regexp(Regexp.Op.EMPTY_MATCH);
-        const sub = Simplify2.simplify(re.subs[0]);
-        if (re.max === -1) {
-          if (re.min === 0) return Simplify2.simplify1(Regexp.Op.STAR, re.flags, sub, null);
-          if (re.min === 1) return Simplify2.simplify1(Regexp.Op.PLUS, re.flags, sub, null);
-          const nre = new Regexp(Regexp.Op.CONCAT);
-          const subs = [];
-          for (let i2 = 0; i2 < re.min - 1; i2++) subs.push(sub);
-          subs.push(Simplify2.simplify1(Regexp.Op.PLUS, re.flags, sub, null));
-          nre.subs = subs.slice(0);
-          return Simplify2.simplify(nre);
-        }
-        if (re.min === 1 && re.max === 1) return sub;
-        let prefixSubs = null;
-        if (re.min > 0) {
-          prefixSubs = [];
-          for (let i2 = 0; i2 < re.min; i2++) prefixSubs.push(sub);
-        }
-        if (re.max > re.min) {
-          let suffix = Simplify2.simplify1(Regexp.Op.QUEST, re.flags, sub, null);
-          for (let i2 = re.min + 1; i2 < re.max; i2++) {
-            const nre2 = new Regexp(Regexp.Op.CONCAT);
-            nre2.subs = [sub, suffix];
-            suffix = Simplify2.simplify1(Regexp.Op.QUEST, re.flags, nre2, null);
-          }
-          if (prefixSubs === null) return suffix;
-          prefixSubs.push(suffix);
-        }
-        if (prefixSubs !== null) {
-          const prefix = new Regexp(Regexp.Op.CONCAT);
-          prefix.subs = prefixSubs.slice(0);
-          return Simplify2.simplify(prefix);
-        }
-        return new Regexp(Regexp.Op.NO_MATCH);
-      }
+      case Regexp.Op.QUEST:
+        return Simplify2.simplify1(re.op, re.flags, state.sub, re);
+      case Regexp.Op.REPEAT:
+        return Simplify2.simplifyRepeat(re, state.sub);
+      default:
+        return re;
     }
-    return re;
+  }
+  static simplifyRepeat(re, sub) {
+    if (re.max === -1) {
+      if (re.min === 0) return Simplify2.simplify1(Regexp.Op.STAR, re.flags, sub, null);
+      if (re.min === 1) return Simplify2.simplify1(Regexp.Op.PLUS, re.flags, sub, null);
+      const subs = [];
+      for (let i2 = 0; i2 < re.min - 1; i2++) subs.push(sub);
+      subs.push(Simplify2.simplify1(Regexp.Op.PLUS, re.flags, sub, null));
+      return Simplify2.concat(subs);
+    }
+    if (re.min === 1 && re.max === 1) return sub;
+    let prefixSubs = null;
+    if (re.min > 0) {
+      prefixSubs = [];
+      for (let i2 = 0; i2 < re.min; i2++) prefixSubs.push(sub);
+    }
+    if (re.max > re.min) {
+      let suffix = Simplify2.simplify1(Regexp.Op.QUEST, re.flags, sub, null);
+      for (let i2 = re.min + 1; i2 < re.max; i2++) suffix = Simplify2.simplify1(Regexp.Op.QUEST, re.flags, Simplify2.concat([sub, suffix]), null);
+      if (prefixSubs === null) return suffix;
+      prefixSubs.push(suffix);
+    }
+    if (prefixSubs !== null) return Simplify2.concat(prefixSubs);
+    return new Regexp(Regexp.Op.NO_MATCH);
+  }
+  static concat(subs) {
+    const newSubs = [];
+    for (let i2 = 0; i2 < subs.length; i2++) {
+      const sub = subs[i2];
+      if (sub.op === Regexp.Op.NO_MATCH) return new Regexp(Regexp.Op.NO_MATCH);
+      if (sub.op === Regexp.Op.EMPTY_MATCH) continue;
+      if (sub.op === Regexp.Op.CONCAT) {
+        for (let j = 0; j < sub.subs.length; j++) newSubs.push(sub.subs[j]);
+        continue;
+      }
+      newSubs.push(sub);
+    }
+    if (newSubs.length === 0) return new Regexp(Regexp.Op.EMPTY_MATCH);
+    if (newSubs.length === 1) return newSubs[0];
+    const nre = new Regexp(Regexp.Op.CONCAT);
+    nre.subs = newSubs;
+    return nre;
   }
   static simplify1(op, flags, sub, re) {
     if (sub.op === Regexp.Op.EMPTY_MATCH) return sub;
@@ -8361,46 +8709,38 @@ var CharClass = class CharClass2 {
     result += "]";
     return result;
   }
-  static cmp(array, i2, pivotFrom, pivotTo) {
-    const cmp = array[i2] - pivotFrom;
-    return cmp !== 0 ? cmp : pivotTo - array[i2 + 1];
-  }
-  static qsortIntPair(array, left, right) {
-    const pivotIndex = ((left + right) / 2 | 0) & -2;
-    const pivotFrom = array[pivotIndex];
-    const pivotTo = array[pivotIndex + 1];
-    let i2 = left;
-    let j = right;
-    while (i2 <= j) {
-      while (i2 < right && CharClass2.cmp(array, i2, pivotFrom, pivotTo) < 0) i2 += 2;
-      while (j > left && CharClass2.cmp(array, j, pivotFrom, pivotTo) > 0) j -= 2;
-      if (i2 <= j) {
-        if (i2 !== j) {
-          let temp = array[i2];
-          array[i2] = array[j];
-          array[j] = temp;
-          temp = array[i2 + 1];
-          array[i2 + 1] = array[j + 1];
-          array[j + 1] = temp;
-        }
-        i2 += 2;
-        j -= 2;
-      }
+  static sortRanges(array, len) {
+    const n2 = len >> 1;
+    const order = new Array(n2);
+    for (let i2 = 0; i2 < n2; i2++) order[i2] = i2;
+    order.sort((a, b2) => array[2 * a] - array[2 * b2] || array[2 * b2 + 1] - array[2 * a + 1]);
+    const sorted = array.slice(0, len);
+    for (let i2 = 0; i2 < n2; i2++) {
+      array[2 * i2] = sorted[2 * order[i2]];
+      array[2 * i2 + 1] = sorted[2 * order[i2] + 1];
     }
-    if (left < j) CharClass2.qsortIntPair(array, left, j);
-    if (i2 < right) CharClass2.qsortIntPair(array, i2, right);
   }
+  /**
+  * @param {number[]|Int32Array} [r]
+  */
   constructor(r2 = Utils.emptyInts()) {
     this.r = r2;
     this.len = r2.length;
   }
   toArray() {
-    if (this.len === this.r.length) return this.r;
-    else return this.r.slice(0, this.len);
+    if (this.r instanceof Int32Array) return this.len === this.r.length ? this.r : this.r.subarray(0, this.len);
+    return new Int32Array(this.len === this.r.length ? this.r : this.r.slice(0, this.len));
+  }
+  toGrowableArray() {
+    if (Array.isArray(this.r)) {
+      this.r.length = this.len;
+      return this.r;
+    }
+    return Array.from(this.r.subarray(0, this.len));
   }
   cleanClass() {
     if (this.len < 4) return this;
-    CharClass2.qsortIntPair(this.r, 0, this.len - 2);
+    CharClass2.sortRanges(this.r, this.len);
     let w2 = 2;
     for (let i2 = 2; i2 < this.len; i2 += 2) {
       const lo = this.r[i2];
@@ -8597,7 +8937,7 @@ var Parser = class Parser2 {
   static ERR_LARGE = "expression too large";
   static ERR_INVALID_CAPTURE_IN_LOOKBEHIND = "invalid capture in lookbehind";
   static MAX_HEIGHT = 1e3;
-  static MAX_SIZE = 3355443;
+  static MAX_SIZE = 1398101;
   static MAX_RUNES = 33554432;
   static ANY_TABLE = new UnicodeRangeTable(new Uint32Array([
     0,
@@ -8707,15 +9047,15 @@ var Parser = class Parser2 {
     if (name4.length === 0) return false;
     for (let i2 = 0; i2 < name4.length; i2++) {
       const c2 = name4.codePointAt(i2);
-      if (c2 !== Codepoint.CODES.get("_") && !Utils.isalnum(c2)) return false;
+      if (c2 !== Codepoint.CODES["_"] && !Utils.isalnum(c2)) return false;
     }
     return true;
   }
   static parseInt(t2) {
     const start = t2.pos();
-    while (t2.more() && t2.peek() >= Codepoint.CODES.get("0") && t2.peek() <= Codepoint.CODES.get("9")) t2.skip(1);
+    while (t2.more() && t2.peek() >= Codepoint.CODES["0"] && t2.peek() <= Codepoint.CODES["9"]) t2.skip(1);
     const n2 = t2.from(start);
-    if (n2.length === 0 || n2.length > 1 && n2.codePointAt(0) === Codepoint.CODES.get("0")) return -1;
+    if (n2.length === 0 || n2.length > 1 && n2.codePointAt(0) === Codepoint.CODES["0"]) return -1;
     if (n2.length > 8) return -2;
     return parseInt(n2, 10);
   }
@@ -8730,7 +9070,7 @@ var Parser = class Parser2 {
         for (let i2 = 0; i2 < re.runes.length; i2 += 2) if (re.runes[i2] <= r2 && r2 <= re.runes[i2 + 1]) return true;
         return false;
       case Regexp.Op.ANY_CHAR_NOT_NL:
-        return r2 !== Codepoint.CODES.get("\n");
+        return r2 !== Codepoint.CODES["\n"];
       case Regexp.Op.ANY_CHAR:
         return true;
     }
@@ -8741,17 +9081,19 @@ var Parser = class Parser2 {
       case Regexp.Op.ANY_CHAR:
         break;
       case Regexp.Op.ANY_CHAR_NOT_NL:
-        if (Parser2.matchRune(src, Codepoint.CODES.get("\n"))) dst.op = Regexp.Op.ANY_CHAR;
+        if (Parser2.matchRune(src, Codepoint.CODES["\n"])) dst.op = Regexp.Op.ANY_CHAR;
         break;
-      case Regexp.Op.CHAR_CLASS:
-        if (src.op === Regexp.Op.LITERAL) dst.runes = new CharClass(dst.runes).appendLiteral(src.runes[0], src.flags).toArray();
-        else dst.runes = new CharClass(dst.runes).appendClass(src.runes).toArray();
+      case Regexp.Op.CHAR_CLASS: {
+        const cc = new CharClass(Array.isArray(dst.runes) ? dst.runes : Array.from(dst.runes));
+        if (src.op === Regexp.Op.LITERAL) cc.appendLiteral(src.runes[0], src.flags);
+        else cc.appendClass(src.runes);
+        dst.runes = cc.toGrowableArray();
         break;
+      }
       case Regexp.Op.LITERAL:
         if (src.runes[0] === dst.runes[0] && src.flags === dst.flags) break;
         dst.op = Regexp.Op.CHAR_CLASS;
-        dst.runes = new CharClass().appendLiteral(dst.runes[0], dst.flags).appendLiteral(src.runes[0], src.flags).toArray();
-        break;
+        dst.runes = new CharClass().appendLiteral(dst.runes[0], dst.flags).appendLiteral(src.runes[0], src.flags).toGrowableArray();
     }
   }
   static parseEscape(t2) {
@@ -8760,33 +9102,33 @@ var Parser = class Parser2 {
     if (!t2.more()) throw new RE2JSSyntaxException(Parser2.ERR_TRAILING_BACKSLASH);
     let c2 = t2.pop();
     bigswitch: switch (c2) {
-      case Codepoint.CODES.get("1"):
-      case Codepoint.CODES.get("2"):
-      case Codepoint.CODES.get("3"):
-      case Codepoint.CODES.get("4"):
-      case Codepoint.CODES.get("5"):
-      case Codepoint.CODES.get("6"):
-      case Codepoint.CODES.get("7"):
-        if (!t2.more() || t2.peek() < Codepoint.CODES.get("0") || t2.peek() > Codepoint.CODES.get("7")) break;
-      case Codepoint.CODES.get("0"): {
-        let r2 = c2 - Codepoint.CODES.get("0");
+      case Codepoint.CODES["1"]:
+      case Codepoint.CODES["2"]:
+      case Codepoint.CODES["3"]:
+      case Codepoint.CODES["4"]:
+      case Codepoint.CODES["5"]:
+      case Codepoint.CODES["6"]:
+      case Codepoint.CODES["7"]:
+        if (!t2.more() || t2.peek() < Codepoint.CODES["0"] || t2.peek() > Codepoint.CODES["7"]) break;
+      case Codepoint.CODES["0"]: {
+        let r2 = c2 - Codepoint.CODES["0"];
         for (let i2 = 1; i2 < 3; i2++) {
-          if (!t2.more() || t2.peek() < Codepoint.CODES.get("0") || t2.peek() > Codepoint.CODES.get("7")) break;
-          r2 = r2 * 8 + t2.peek() - Codepoint.CODES.get("0");
+          if (!t2.more() || t2.peek() < Codepoint.CODES["0"] || t2.peek() > Codepoint.CODES["7"]) break;
+          r2 = r2 * 8 + t2.peek() - Codepoint.CODES["0"];
           t2.skip(1);
         }
         return r2;
       }
-      case Codepoint.CODES.get("x"): {
+      case Codepoint.CODES["x"]: {
         if (!t2.more()) break;
         c2 = t2.pop();
-        if (c2 === Codepoint.CODES.get("{")) {
+        if (c2 === Codepoint.CODES["{"]) {
           let nhex = 0;
           let r2 = 0;
           while (true) {
             if (!t2.more()) break bigswitch;
             c2 = t2.pop();
-            if (c2 === Codepoint.CODES.get("}")) break;
+            if (c2 === Codepoint.CODES["}"]) break;
             const v2 = Utils.unhex(c2);
             if (v2 < 0) break bigswitch;
             r2 = r2 * 16 + v2;
@@ -8803,21 +9145,20 @@ var Parser = class Parser2 {
         if (x2 < 0 || y2 < 0) break;
         return x2 * 16 + y2;
       }
-      case Codepoint.CODES.get("a"):
-        return Codepoint.CODES.get("\x07");
-      case Codepoint.CODES.get("f"):
-        return Codepoint.CODES.get("\f");
-      case Codepoint.CODES.get("n"):
-        return Codepoint.CODES.get("\n");
-      case Codepoint.CODES.get("r"):
-        return Codepoint.CODES.get("\r");
-      case Codepoint.CODES.get("t"):
-        return Codepoint.CODES.get("	");
-      case Codepoint.CODES.get("v"):
-        return Codepoint.CODES.get("\v");
+      case Codepoint.CODES["a"]:
+        return Codepoint.CODES["\x07"];
+      case Codepoint.CODES["f"]:
+        return Codepoint.CODES["\f"];
+      case Codepoint.CODES["n"]:
+        return Codepoint.CODES["\n"];
+      case Codepoint.CODES["r"]:
+        return Codepoint.CODES["\r"];
+      case Codepoint.CODES["t"]:
+        return Codepoint.CODES["	"];
+      case Codepoint.CODES["v"]:
+        return Codepoint.CODES["\v"];
       default:
         if (c2 <= Unicode.MAX_ASCII && !Utils.isalnum(c2)) return c2;
-        break;
     }
     throw new RE2JSSyntaxException(Parser2.ERR_INVALID_ESCAPE, t2.from(startPos));
   }
@@ -8825,10 +9166,6 @@ var Parser = class Parser2 {
     if (!t2.more()) throw new RE2JSSyntaxException(Parser2.ERR_MISSING_BRACKET, t2.from(wholeClassPos));
     if (t2.lookingAt("\\")) return Parser2.parseEscape(t2);
     return t2.pop();
-  }
-  static concatRunes(x2, y2) {
-    for (let i2 = 0; i2 < y2.length; i2++) x2.push(y2[i2]);
-    return x2;
   }
   static hasCapture(re) {
     if (re === null) return false;
@@ -8960,9 +9297,7 @@ var Parser = class Parser2 {
     const n2 = this.stack.length;
     let i2 = n2;
     while (i2 > 0 && !Regexp.isPseudoOp(this.stack[i2 - 1].op)) i2--;
-    const r2 = this.stack.slice(i2, n2);
-    this.stack = this.stack.slice(0, i2);
-    return r2;
+    return this.stack.splice(i2, n2 - i2);
   }
   push(re) {
     this.numRunes += re.runes.length;
@@ -8987,7 +9322,8 @@ var Parser = class Parser2 {
     const re1 = this.stack[n2 - 1];
     const re2 = this.stack[n2 - 2];
     if (re1.op !== Regexp.Op.LITERAL || re2.op !== Regexp.Op.LITERAL || (re1.flags & RE2Flags.FOLD_CASE) !== (re2.flags & RE2Flags.FOLD_CASE)) return false;
-    re2.runes = Parser2.concatRunes(re2.runes, re1.runes);
+    if (!Array.isArray(re2.runes)) re2.runes = Array.from(re2.runes);
+    for (let i2 = 0; i2 < re1.runes.length; i2++) re2.runes.push(re1.runes[i2]);
     if (r2 >= 0) {
       re1.runes = [r2];
       re1.flags = flags;
@@ -9059,12 +9395,12 @@ var Parser = class Parser2 {
   }
   cleanAlt(re) {
     if (re.op === Regexp.Op.CHAR_CLASS) {
-      re.runes = new CharClass(re.runes).cleanClass().toArray();
+      re.runes = new CharClass(Array.from(re.runes)).cleanClass().toArray();
       if (re.runes.length === 2 && re.runes[0] === 0 && re.runes[1] === Unicode.MAX_RUNE) {
-        re.runes = [];
+        re.runes = /* @__PURE__ */ new Int32Array(0);
         re.op = Regexp.Op.ANY_CHAR;
-      } else if (re.runes.length === 4 && re.runes[0] === 0 && re.runes[1] === Codepoint.CODES.get("\n") - 1 && re.runes[2] === Codepoint.CODES.get("\n") + 1 && re.runes[3] === Unicode.MAX_RUNE) {
-        re.runes = [];
+      } else if (re.runes.length === 4 && re.runes[0] === 0 && re.runes[1] === Codepoint.CODES["\n"] - 1 && re.runes[2] === Codepoint.CODES["\n"] + 1 && re.runes[3] === Unicode.MAX_RUNE) {
+        re.runes = /* @__PURE__ */ new Int32Array(0);
         re.op = Regexp.Op.ANY_CHAR_NOT_NL;
       }
     }
@@ -9229,7 +9565,6 @@ var Parser = class Parser2 {
           }
           default:
             re.subs = re.subs.slice(1, re.subs.length);
-            break;
         }
       }
       return re;
@@ -9270,7 +9605,7 @@ var Parser = class Parser2 {
     while (t2.more()) {
       let repeatPos = -1;
       bigswitch: switch (t2.peek()) {
-        case Codepoint.CODES.get("("):
+        case Codepoint.CODES["("]:
           if ((this.flags & RE2Flags.LOOKBEHIND) !== 0) {
             if (t2.lookingAt("(?<=")) {
               this.parsePosLookBehind();
@@ -9290,80 +9625,80 @@ var Parser = class Parser2 {
           this.op(Regexp.Op.LEFT_PAREN).cap = ++this.numCap;
           t2.skip(1);
           break;
-        case Codepoint.CODES.get("|"):
+        case Codepoint.CODES["|"]:
           this.parseVerticalBar();
           t2.skip(1);
           break;
-        case Codepoint.CODES.get(")"):
+        case Codepoint.CODES[")"]:
           this.parseRightParen();
           t2.skip(1);
           break;
-        case Codepoint.CODES.get("^"):
+        case Codepoint.CODES["^"]:
           if ((this.flags & RE2Flags.ONE_LINE) !== 0) this.op(Regexp.Op.BEGIN_TEXT);
           else this.op(Regexp.Op.BEGIN_LINE);
           t2.skip(1);
           break;
-        case Codepoint.CODES.get("$"):
+        case Codepoint.CODES["$"]:
           if ((this.flags & RE2Flags.ONE_LINE) !== 0) this.op(Regexp.Op.END_TEXT).flags |= RE2Flags.WAS_DOLLAR;
           else this.op(Regexp.Op.END_LINE);
           t2.skip(1);
           break;
-        case Codepoint.CODES.get("."):
+        case Codepoint.CODES["."]:
           if ((this.flags & RE2Flags.DOT_NL) !== 0) this.op(Regexp.Op.ANY_CHAR);
           else this.op(Regexp.Op.ANY_CHAR_NOT_NL);
           t2.skip(1);
           break;
-        case Codepoint.CODES.get("["):
+        case Codepoint.CODES["["]:
           this.parseClass(t2);
           break;
-        case Codepoint.CODES.get("*"):
-        case Codepoint.CODES.get("+"):
-        case Codepoint.CODES.get("?"): {
+        case Codepoint.CODES["*"]:
+        case Codepoint.CODES["+"]:
+        case Codepoint.CODES["?"]: {
           repeatPos = t2.pos();
           let op = null;
           switch (t2.pop()) {
-            case Codepoint.CODES.get("*"):
+            case Codepoint.CODES["*"]:
               op = Regexp.Op.STAR;
               break;
-            case Codepoint.CODES.get("+"):
+            case Codepoint.CODES["+"]:
               op = Regexp.Op.PLUS;
               break;
-            case Codepoint.CODES.get("?"):
+            case Codepoint.CODES["?"]:
               op = Regexp.Op.QUEST;
-              break;
           }
           this.repeat(op, min, max, repeatPos, t2, lastRepeatPos);
           break;
         }
-        case Codepoint.CODES.get("{"): {
-          repeatPos = t2.pos();
+        case Codepoint.CODES["{"]: {
+          const before = t2.pos();
           const minMax = Parser2.parseRepeat(t2);
           if (minMax < 0) {
-            t2.rewindTo(repeatPos);
+            t2.rewindTo(before);
             this.literal(t2.pop());
             break;
           }
+          repeatPos = before;
           min = minMax >> 16;
           max = (minMax & Unicode.MAX_BMP) << 16 >> 16;
           this.repeat(Regexp.Op.REPEAT, min, max, repeatPos, t2, lastRepeatPos);
           break;
         }
-        case Codepoint.CODES.get("\\"): {
+        case Codepoint.CODES["\\"]: {
           const savedPos = t2.pos();
           t2.skip(1);
           if ((this.flags & RE2Flags.PERL_X) !== 0 && t2.more()) switch (t2.pop()) {
-            case Codepoint.CODES.get("A"):
+            case Codepoint.CODES["A"]:
               this.op(Regexp.Op.BEGIN_TEXT);
               break bigswitch;
-            case Codepoint.CODES.get("b"):
+            case Codepoint.CODES["b"]:
               this.op(Regexp.Op.WORD_BOUNDARY);
               break bigswitch;
-            case Codepoint.CODES.get("B"):
+            case Codepoint.CODES["B"]:
               this.op(Regexp.Op.NO_WORD_BOUNDARY);
               break bigswitch;
-            case Codepoint.CODES.get("C"):
+            case Codepoint.CODES["C"]:
               throw new RE2JSSyntaxException(Parser2.ERR_INVALID_ESCAPE, "\\C");
-            case Codepoint.CODES.get("Q"): {
+            case Codepoint.CODES["Q"]: {
               let lit = t2.rest();
               const i2 = lit.indexOf("\\E");
               if (i2 >= 0) {
@@ -9379,12 +9714,11 @@ var Parser = class Parser2 {
               }
               break bigswitch;
             }
-            case Codepoint.CODES.get("z"):
+            case Codepoint.CODES["z"]:
               this.op(Regexp.Op.END_TEXT);
               break bigswitch;
             default:
               t2.rewindTo(savedPos);
-              break;
           }
           else t2.rewindTo(savedPos);
           const re = this.newRegexp(Regexp.Op.CHAR_CLASS);
@@ -9410,7 +9744,6 @@ var Parser = class Parser2 {
         }
         default:
           this.literal(t2.pop());
-          break;
       }
       lastRepeatPos = repeatPos;
     }
@@ -9446,35 +9779,35 @@ var Parser = class Parser2 {
     loop: while (t2.more()) {
       const c2 = t2.pop();
       switch (c2) {
-        case Codepoint.CODES.get("i"):
+        case Codepoint.CODES["i"]:
           flags |= RE2Flags.FOLD_CASE;
           sawFlag = true;
           break;
-        case Codepoint.CODES.get("m"):
+        case Codepoint.CODES["m"]:
           flags &= ~RE2Flags.ONE_LINE;
           sawFlag = true;
           break;
-        case Codepoint.CODES.get("s"):
+        case Codepoint.CODES["s"]:
           flags |= RE2Flags.DOT_NL;
           sawFlag = true;
           break;
-        case Codepoint.CODES.get("U"):
+        case Codepoint.CODES["U"]:
           flags |= RE2Flags.NON_GREEDY;
           sawFlag = true;
           break;
-        case Codepoint.CODES.get("-"):
+        case Codepoint.CODES["-"]:
           if (sign < 0) break loop;
           sign = -1;
           flags = ~flags;
           sawFlag = false;
           break;
-        case Codepoint.CODES.get(":"):
-        case Codepoint.CODES.get(")"):
+        case Codepoint.CODES[":"]:
+        case Codepoint.CODES[")"]:
           if (sign < 0) {
             if (!sawFlag) break loop;
             flags = ~flags;
           }
-          if (c2 === Codepoint.CODES.get(":")) this.op(Regexp.Op.LEFT_PAREN);
+          if (c2 === Codepoint.CODES[":"]) this.op(Regexp.Op.LEFT_PAREN);
           this.flags = flags;
           return;
         default:
@@ -9553,7 +9886,7 @@ var Parser = class Parser2 {
   }
   parsePerlClassEscape(t2, cc) {
     const beforePos = t2.pos();
-    if ((this.flags & RE2Flags.PERL_X) === 0 || !t2.more() || t2.pop() !== Codepoint.CODES.get("\\") || !t2.more()) return false;
+    if ((this.flags & RE2Flags.PERL_X) === 0 || !t2.more() || t2.pop() !== Codepoint.CODES["\\"] || !t2.more()) return false;
     t2.pop();
     const p2 = t2.from(beforePos);
     const g = PERL_GROUPS.has(p2) ? PERL_GROUPS.get(p2) : null;
@@ -9578,14 +9911,14 @@ var Parser = class Parser2 {
     t2.skip(1);
     let sign = 1;
     let c2 = t2.pop();
-    if (c2 === Codepoint.CODES.get("P")) sign = -1;
+    if (c2 === Codepoint.CODES["P"]) sign = -1;
     if (!t2.more()) {
       t2.rewindTo(startPos);
       throw new RE2JSSyntaxException(Parser2.ERR_INVALID_CHAR_RANGE, t2.rest());
     }
     c2 = t2.pop();
     let name4;
-    if (c2 !== Codepoint.CODES.get("{")) name4 = Utils.runeToString(c2);
+    if (c2 !== Codepoint.CODES["{"]) name4 = Utils.runeToString(c2);
     else {
       const rest = t2.rest();
       const end = rest.indexOf("}");
@@ -9597,7 +9930,7 @@ var Parser = class Parser2 {
       t2.skipString(name4);
       t2.skip(1);
     }
-    if (!(name4.length === 0) && name4.codePointAt(0) === Codepoint.CODES.get("^")) {
+    if (!(name4.length === 0) && name4.codePointAt(0) === Codepoint.CODES["^"]) {
       sign = 0 - sign;
       name4 = name4.substring(1);
     }
@@ -9609,7 +9942,7 @@ var Parser = class Parser2 {
     if ((this.flags & RE2Flags.FOLD_CASE) === 0 || fold === null) cc.appendTableWithSign(tab, sign);
     else {
       const tmp = new CharClass().appendTable(tab).appendTable(fold).cleanClass().toArray();
-      cc.appendClassWithSign(tmp, sign);
+      cc.appendClassWithSign(Array.from(tmp), sign);
     }
     return true;
   }
@@ -9623,10 +9956,10 @@ var Parser = class Parser2 {
     if (t2.more() && t2.lookingAt("^")) {
       sign = -1;
       t2.skip(1);
-      if ((this.flags & RE2Flags.CLASS_NL) === 0) cc.appendRange(Codepoint.CODES.get("\n"), Codepoint.CODES.get("\n"));
+      if ((this.flags & RE2Flags.CLASS_NL) === 0) cc.appendRange(Codepoint.CODES["\n"], Codepoint.CODES["\n"]);
     }
     let first = true;
-    while (!t2.more() || t2.peek() !== Codepoint.CODES.get("]") || first) {
+    while (!t2.more() || t2.peek() !== Codepoint.CODES["]"] || first) {
       if (t2.more() && t2.lookingAt("-") && (this.flags & RE2Flags.PERL_X) === 0 && !first) {
         const s2 = t2.rest();
         if (s2 === "-" || !s2.startsWith("-]")) {
@@ -9673,6 +10006,7 @@ var RE2 = class RE22 {
     res.prefixComplete = re2.prefixComplete;
     res.prefixRune = re2.prefixRune;
     res.prefilter = re2.prefilter;
+    res.namedGroups = re2.namedGroups;
     return res;
   }
   /**
@@ -9710,6 +10044,7 @@ var RE2 = class RE22 {
   static compileImpl(expr, mode, longest) {
     let re = Parser.parse(expr, mode);
     const maxCap = re.maxCap();
+    const namedGroups = re.namedGroups;
     re = Simplify.simplify(re);
     const prefilter = PrefilterTree.build(re);
     const prog = Compiler.compileRegexp(re);
@@ -9720,7 +10055,7 @@ var RE2 = class RE22 {
     re2.prefix = prefixStr;
     re2.prefixUTF8 = Utils.stringToUtf8ByteArray(re2.prefix);
     if (re2.prefix.length > 0) re2.prefixRune = re2.prefix.codePointAt(0);
-    re2.namedGroups = re.namedGroups;
+    re2.namedGroups = namedGroups;
     return re2;
   }
   /**
@@ -9741,10 +10076,15 @@ var RE2 = class RE22 {
     this.prefixUTF8 = null;
     this.prefixComplete = false;
     this.prefixRune = 0;
+    this.namedGroups = /* @__PURE__ */ Object.create(null);
     this.machinePool = [];
-    this.dfa = new DFA(this.prog);
+    this.lazyDFA = null;
     this.onepass = OnePass.compile(this.prog);
     this.prefilter = null;
+  }
+  get dfa() {
+    if (this.lazyDFA === null) this.lazyDFA = new DFA(this.prog);
+    return this.lazyDFA;
   }
   matchPrefixComplete(input, pos, anchor, ncap) {
     if ((anchor === RE2Flags.ANCHOR_START || anchor === RE2Flags.ANCHOR_BOTH) && pos !== 0) return null;
@@ -9775,7 +10115,10 @@ var RE2 = class RE22 {
     }
     return [];
   }
-  executeEngine(input, pos, anchor, ncap) {
+  createLookbehindState() {
+    return this.prog.numLb > 0 ? new LookbehindState(this.prog) : null;
+  }
+  executeEngine(input, pos, anchor, ncap, lbState = null) {
     if (this.prefixComplete && (ncap === 0 || this.numSubexp === 0)) return this.matchPrefixComplete(input, pos, anchor, ncap);
     if (this.prefilter !== null && anchor === RE2Flags.UNANCHORED) {
       if (!this.prefilter.eval(input, pos)) return null;
@@ -9783,14 +10126,14 @@ var RE2 = class RE22 {
     if (this.onepass !== null) return OnePass.execute(this, input, pos, anchor, ncap);
     if (ncap > 0) {
       if (this.prog.numLb === 0 && input.endPos() <= Backtracker.maxBitStateLen(this.prog)) return Backtracker.execute(this, input, pos, anchor, ncap);
-      return this.doExecuteNFA(input, pos, anchor, ncap);
+      return this.doExecuteNFA(input, pos, anchor, ncap, lbState);
     }
     if (this.prog.numLb === 0) {
       const dfaResult = this.dfa.match(input, pos, anchor);
       if (dfaResult !== null) return dfaResult ? [] : null;
       if (input.endPos() <= Backtracker.maxBitStateLen(this.prog)) return Backtracker.execute(this, input, pos, anchor, ncap);
     }
-    return this.doExecuteNFA(input, pos, anchor, ncap);
+    return this.doExecuteNFA(input, pos, anchor, ncap, lbState);
   }
   /**
   * Returns the number of parenthesized subexpressions in this regular expression.
@@ -9816,11 +10159,11 @@ var RE2 = class RE22 {
   toString() {
     return this.expr;
   }
-  doExecuteNFA(input, pos, anchor, ncap) {
+  doExecuteNFA(input, pos, anchor, ncap, lbState = null) {
     let m2 = this.get();
     if (!m2) m2 = Machine.fromRE2(this);
     m2.init(ncap);
-    const cap = m2.match(input, pos, anchor) ? m2.submatches() : null;
+    const cap = m2.match(input, pos, anchor, lbState) ? m2.submatches() : null;
     this.put(m2);
     return cap;
   }
@@ -9839,17 +10182,21 @@ var RE2 = class RE22 {
   * @param anchor the anchoring flag (UNANCHORED, ANCHOR_START, ANCHOR_BOTH)
   * @param group the array to fill with submatch positions
   * @param ngroup the number of array pairs to fill in
+  * @param lbState optional state carried between successive matches over the same input (see
+  *   createLookbehindState); omit it to evaluate lookbehinds from the beginning of the input
   * @returns true if a match was found
   */
-  matchWithGroup(input, start, end, anchor, ngroup) {
-    if (!(input instanceof MatcherInputBase)) if (Utils.isByteArray(input)) input = MatcherInput.utf8(input);
-    else input = MatcherInput.utf16(input);
-    return this.matchMachineInput(input, start, end, anchor, ngroup);
+  matchWithGroup(input, start, end, anchor, ngroup, lbState = null) {
+    if (!(input instanceof MatcherInputBase)) {
+      if (Utils.isByteArray(input)) input = MatcherInput.utf8(input);
+      else input = MatcherInput.utf16(input);
+    }
+    return this.matchMachineInput(input, start, end, anchor, ngroup, lbState);
   }
-  matchMachineInput(input, start, end, anchor, ngroup) {
+  matchMachineInput(input, start, end, anchor, ngroup, lbState = null) {
     if (start > end) return [false, null];
     const machineInput = input.isUTF16Encoding() ? MachineInput.fromUTF16(input.asCharSequence(), 0, end) : MachineInput.fromUTF8(input.asBytes(), 0, end);
-    const groupMatch = this.executeEngine(machineInput, start, anchor, 2 * ngroup);
+    const groupMatch = this.executeEngine(machineInput, start, anchor, 2 * ngroup, lbState);
     if (groupMatch === null) return [false, null];
     return [true, groupMatch];
   }
@@ -9886,9 +10233,10 @@ var RE2 = class RE22 {
     let searchPos = 0;
     let out = "";
     const input = MachineInput.fromUTF16(src);
+    const lbState = this.createLookbehindState();
     let numReplaces = 0;
     while (searchPos <= src.length) {
-      const a = this.executeEngine(input, searchPos, RE2Flags.UNANCHORED, 2);
+      const a = this.executeEngine(input, searchPos, RE2Flags.UNANCHORED, 2, lbState);
       if (a === null || a.length === 0) break;
       out += src.substring(lastMatchEnd, a[0]);
       if (a[1] > lastMatchEnd || a[0] === 0) {
@@ -9922,8 +10270,9 @@ var RE2 = class RE22 {
     let pos = 0;
     let i2 = 0;
     let prevMatchEnd = -1;
+    const lbState = this.createLookbehindState();
     while (i2 < n2 && pos <= end) {
-      const matches = this.executeEngine(input, pos, RE2Flags.UNANCHORED, this.prog.numCap);
+      const matches = this.executeEngine(input, pos, RE2Flags.UNANCHORED, this.prog.numCap, lbState);
       if (matches === null || matches.length === 0) break;
       let accept = true;
       if (matches[1] === pos) {
@@ -10191,7 +10540,9 @@ var RE2Set = class RE2Set2 {
   */
   compile() {
     if (this.prog) return;
-    this.prog = Compiler.compileSet(this.regexps);
+    const prog = Compiler.compileSet(this.regexps);
+    if (prog.numInst() > Parser.MAX_SIZE) throw new RE2JSCompileException(`${Parser.ERR_LARGE}: the set compiles to ${prog.numInst()} instructions, more than ${Parser.MAX_SIZE}`);
+    this.prog = prog;
     this.dfa = new DFA(this.prog, this.maxMem);
     this.dummyRe2 = {
       prog: this.prog,
@@ -10389,8 +10740,21 @@ var TranslateRegExpString = class TranslateRegExpString2 {
         i2 += 1;
         changed = true;
         continue;
-      } else if (ch === "[") inCharClass = true;
-      else if (ch === "]") inCharClass = false;
+      } else if (ch === "[") {
+        if (!inCharClass && data[i2 + 1] === "]") {
+          result += "[^\\x00-\\x{10FFFF}]";
+          i2 += 2;
+          changed = true;
+          continue;
+        }
+        if (!inCharClass && data[i2 + 1] === "^" && data[i2 + 2] === "]") {
+          result += "[\\x00-\\x{10FFFF}]";
+          i2 += 3;
+          changed = true;
+          continue;
+        }
+        inCharClass = true;
+      } else if (ch === "]") inCharClass = false;
       else if (!inCharClass && ch === "(" && i2 + 2 < size && data[i2 + 1] === "?" && data[i2 + 2] === "<") {
         if (i2 + 3 < size && !"=!>)".includes(data[i2 + 3])) {
           result += "(?P<";
@@ -10408,6 +10772,13 @@ var TranslateRegExpString = class TranslateRegExpString2 {
     if (prefixFlags.length > 0) return `(?${prefixFlags})${finalResult}`;
     return finalResult;
   }
+};
+var execResult = (m2, input) => {
+  const result = m2.matchArray();
+  result.index = m2.start(0);
+  result.input = input;
+  result.groups = m2.namedGroupsObject();
+  return result;
 };
 var RE2JS = class RE2JS2 {
   /**
@@ -10607,21 +10978,7 @@ var RE2JS = class RE2JS2 {
   */
   exec(input) {
     const m2 = this.matcher(input);
-    if (!m2.find()) return null;
-    const result = [m2.group(0)];
-    for (let i2 = 1; i2 <= m2.groupCount(); i2++) {
-      const val = m2.group(i2);
-      result.push(val === null ? void 0 : val);
-    }
-    result.index = m2.start(0);
-    result.input = input;
-    const namedGroups = this.namedGroups();
-    if (Object.keys(namedGroups).length > 0) {
-      const parsedGroups = m2.getNamedGroups();
-      for (const key in parsedGroups) if (parsedGroups[key] === null) parsedGroups[key] = void 0;
-      result.groups = parsedGroups;
-    } else result.groups = void 0;
-    return result;
+    return m2.find() ? execResult(m2, input) : null;
   }
   /**
   * Splits input around instances of the regular expression. It returns an array giving the strings
@@ -10679,22 +11036,7 @@ var RE2JS = class RE2JS2 {
   */
   *matchAll(input) {
     const m2 = this.matcher(input);
-    while (m2.find()) {
-      const result = [m2.group(0)];
-      for (let i2 = 1; i2 <= m2.groupCount(); i2++) {
-        const groupVal = m2.group(i2);
-        result.push(groupVal === null ? void 0 : groupVal);
-      }
-      result.index = m2.start(0);
-      result.input = input;
-      const namedGroups = this.namedGroups();
-      if (Object.keys(namedGroups).length > 0) {
-        const parsedGroups = m2.getNamedGroups();
-        for (const key in parsedGroups) if (parsedGroups[key] === null) parsedGroups[key] = void 0;
-        result.groups = parsedGroups;
-      } else result.groups = void 0;
-      yield result;
-    }
+    while (m2.find()) yield execResult(m2, input);
   }
   /**
   *
@@ -32128,10 +32470,10 @@ re2js/build/index.js:
   * re2js
   * RE2JS is the JavaScript port of RE2, a regular expression engine that provides linear time matching
   *
-  * @version v2.8.6
+  * @version v2.9.0
   * @author Oleksii Vasyliev
   * @homepage https://github.com/le0pard/re2js#readme
-  * @repository github:le0pard/re2js
+  * @repository [object Object]
   * @license MIT
   *)
 
