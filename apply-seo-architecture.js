@@ -231,9 +231,12 @@ for (const p of INITIAL_PRODUCTS) {
       </div>`
   );
 
-  // 10. Image SEO: ensure meaningful alt text and loading attributes
-  html = html.replace(/<img([^>]*?)alt="(?:image|preview|product image|)"?([^>]*?)>/gi, (match, before, after) => {
-    return `<img${before}alt="${p.productName} - ZENVORA SHOOP"${after}>`;
+  // 10. Image SEO: clean single alt text
+  html = html.replace(/<img id="gallery-main-img"[^>]*>/i, () => {
+    const rawImg = p.image || '';
+    const mainImgWebp = rawImg ? rawImg.replace(/\.(jpeg|jpg|png)$/i, '.webp') : '';
+    const webpSrc = (mainImgWebp && fs.existsSync(path.join(__dirname, mainImgWebp))) ? mainImgWebp : rawImg;
+    return `<img id="gallery-main-img" src="${webpSrc}" onerror="this.onerror=null;this.src='${rawImg}';" alt="${p.productName} - ZENVORA SHOOP" loading="eager" decoding="async" width="600" height="750">`;
   });
 
   // 11. Floating WhatsApp Button

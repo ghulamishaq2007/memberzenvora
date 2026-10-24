@@ -14,7 +14,14 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap">
+  </noscript>
+
+  <!-- Preload ONLY the first hero image for instant LCP display without bandwidth contention -->
+  <link rel="preload" as="image" href="hero-slide-1.webp" type="image/webp" fetchpriority="high">
 
   <link rel="stylesheet" href="style.css?v=20260913_nostock">
   <link rel="manifest" href="manifest.webmanifest">
@@ -348,25 +355,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- Dedicated 7-Image Background Slideshow Layer -->
     <div class="hero-slides-wrapper" id="hero-slides-wrapper" aria-hidden="true">
       <div class="hero-slide active" data-index="0" data-title="Pastel Lawn Collection">
-        <img src="hero-slide-1.jpg" alt="Pakistani female fashion model wearing elegant pastel lawn suit" class="hero-slide-img" fetchpriority="high" loading="eager">
+        <img src="hero-slide-1.webp" alt="Pakistani female fashion model wearing elegant pastel lawn suit" class="hero-slide-img" fetchpriority="high" loading="eager" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-1.jpg';}">
       </div>
       <div class="hero-slide" data-index="1" data-title="Navy Blue Embroidered Suits">
-        <img src="hero-slide-2.jpg" alt="Premium embroidered Pakistani ladies suit in navy blue" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-2.webp" alt="Premium embroidered Pakistani ladies suit in navy blue" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-2.jpg';}">
       </div>
       <div class="hero-slide" data-index="2" data-title="Festive Red &amp; Maroon Dresses">
-        <img src="hero-slide-3.jpg" alt="Beautiful red and maroon embroidered Pakistani dress" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-3.webp" alt="Beautiful red and maroon embroidered Pakistani dress" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-3.jpg';}">
       </div>
       <div class="hero-slide" data-index="3" data-title="Beige, Cream &amp; Sage-Green Suits">
-        <img src="hero-slide-4.jpg" alt="Elegant beige cream and sage-green women outfit" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-4.webp" alt="Elegant beige cream and sage-green women outfit" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-4.jpg';}">
       </div>
       <div class="hero-slide" data-index="4" data-title="Festive &amp; Formal Luxury Couture">
-        <img src="hero-slide-5.jpg" alt="Pakistani women festive and formal fashion collection" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-5.webp" alt="Pakistani women festive and formal fashion collection" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-5.jpg';}">
       </div>
       <div class="hero-slide" data-index="5" data-title="Stylish Men's Kurta &amp; Suits">
-        <img src="hero-slide-6.jpg" alt="Stylish men Pakistani clothing and suits" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-6.webp" alt="Stylish men Pakistani clothing and suits" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-6.jpg';}">
       </div>
       <div class="hero-slide" data-index="6" data-title="Curated Fashion &amp; Accessories">
-        <img src="hero-slide-7.jpg" alt="Beautiful premium fashion campaign featuring Pakistani outfits and accessories" class="hero-slide-img" loading="eager">
+        <img src="hero-slide-7.webp" alt="Beautiful premium fashion campaign featuring Pakistani outfits and accessories" class="hero-slide-img" loading="lazy" decoding="async" width="1920" height="1080" onerror="if(this.dataset.fb!=='1'){this.dataset.fb='1';this.src='hero-slide-7.jpg';}">
       </div>
     </div>
 
@@ -479,7 +486,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Ladies</span>
 <a href="arabic-lawn.html">
-              <img src="./arabic-lawn.png2.jpeg" alt="Turquoise Block Printed 3Pcs Maxi Set for Women" class="product-img" loading="eager" decoding="async">
+              <img src="./arabic-lawn.png2.webp" onerror="this.onerror=null;this.src='./arabic-lawn.png2.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Turquoise Block Printed 3Pcs Maxi Set for Women" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -502,7 +509,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag">Best Seller</span>
 <a href="cotton-lawn.html">
-              <img src="./cotton-lawn.png.jpeg" alt="Blue Embroidered Cotton Lawn 3Pcs Set" class="product-img" loading="lazy" decoding="async">
+              <img src="./cotton-lawn.png.webp" onerror="this.onerror=null;this.src='./cotton-lawn.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Blue Embroidered Cotton Lawn 3Pcs Set" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -541,7 +548,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Ladies</span>
             <a href="royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women.html">
-              <img src="./royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women2.jpeg" alt="Royal Blue Chiffon Maxi Suit with Gold Embroidery for Women - ZENVORA SHOOP" class="product-img" loading="lazy" decoding="async">
+              <img src="./royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women2.webp" onerror="this.onerror=null;this.src='./royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women2.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Royal Blue Chiffon Maxi Suit with Gold Embroidery for Women - ZENVORA SHOOP" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -573,7 +580,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag sale">Festive</span>
 <a href="printed-lawn-3.html">
-              <img src="./printed-lawn-3.png.jpeg" alt="Printed Lawn 3-Piece Women's Suit Multicolor" class="product-img" loading="lazy" decoding="async">
+              <img src="./printed-lawn-3.png.webp" onerror="this.onerror=null;this.src='./printed-lawn-3.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Printed Lawn 3-Piece Women's Suit Multicolor" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -596,7 +603,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Exclusive</span>
 <a href="brown-embroidered-3-piece.html">
-              <img src="brown-embroidered-3-piece.png4.jpeg" alt="Brown Embroidered 3-Piece Cotton Lawn Suit for Women" class="product-img" loading="lazy" decoding="async">
+              <img src="brown-embroidered-3-piece.png4.webp" onerror="this.onerror=null;this.src='brown-embroidered-3-piece.png4.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Brown Embroidered 3-Piece Cotton Lawn Suit for Women" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -623,7 +630,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">ladies</span>
 <a href="printed-lawn-suit-white.html">
-              <img src="printed-lawn-suit-white.png.jpeg" alt="Pakistani Printed Lawn Suit White Green Long Sleeve" class="product-img" loading="lazy" decoding="async">
+              <img src="printed-lawn-suit-white.png.webp" onerror="this.onerror=null;this.src='printed-lawn-suit-white.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Pakistani Printed Lawn Suit White Green Long Sleeve" class="product-img">
             </a>
           
           </div>
@@ -666,7 +673,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">ladies</span>
 <a href="red-arabic-lawn.html">
-              <img src="red-arabic-lawn.png.jpeg" alt="Red Arabic Lawn Suit" class="product-img" loading="lazy" decoding="async">
+              <img src="red-arabic-lawn.png.webp" onerror="this.onerror=null;this.src='red-arabic-lawn.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Red Arabic Lawn Suit" class="product-img">
             </a>
           
           </div>
@@ -693,7 +700,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Men Suit</span>
 <a href="mens-grey.html">
-              <img src="mens-grey.png.jpeg" alt="Men's Grey Wash & Wear Kurta Suit SW-2" class="product-img" loading="lazy" decoding="async">
+              <img src="mens-grey.png.webp" onerror="this.onerror=null;this.src='mens-grey.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Men's Grey Wash & Wear Kurta Suit SW-2" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -721,7 +728,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag">Men Suit</span>
 <a href="men-wash-&-wear-plain-suit-brown.html">
-              <img src="men-wash-&-wear-plain-suit-brown.png.jpeg" alt="Men Wash & Wear Plain Suit Brown All Season" class="product-img" loading="lazy" decoding="async">
+              <img src="men-wash-&-wear-plain-suit-brown.png.webp" onerror="this.onerror=null;this.src='men-wash-&-wear-plain-suit-brown.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Men Wash & Wear Plain Suit Brown All Season" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -749,7 +756,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Gents suits</span>
 <a href="men-cotton-unstitched-suit-light-brown-summer.html">
-              <img src="men-cotton-unstitched-suit-light-brown-summer.png.jpeg" alt="Men Cotton Unstitched Suit Light Brown Summer" class="product-img" loading="lazy" decoding="async">
+              <img src="men-cotton-unstitched-suit-light-brown-summer.png.webp" onerror="this.onerror=null;this.src='men-cotton-unstitched-suit-light-brown-summer.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Men Cotton Unstitched Suit Light Brown Summer" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -779,7 +786,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag">Gents suits</span>
 <a href="black-wash-&-wear-men-suit-fabric-for-all-season.htm">
-              <img src="black-wash-&-wear-men-suit-fabric-for-all-season.png.jpeg" alt="Formal Black Italian Cut Leather Oxford Gents Suits" class="product-img" loading="lazy" decoding="async">
+              <img src="black-wash-&-wear-men-suit-fabric-for-all-season.png.webp" onerror="this.onerror=null;this.src='black-wash-&-wear-men-suit-fabric-for-all-season.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Formal Black Italian Cut Leather Oxford Gents Suits" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -802,7 +809,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Gents Suits</span>
 <a href="men-khaddar-plain-blue-suit-summer.html">
-              <img src="men-khaddar-plain-blue-suit-summer.png.jpeg" alt="Men Khaddar Plain Blue Suit Summer" class="product-img" loading="lazy" decoding="async">
+              <img src="men-khaddar-plain-blue-suit-summer.png.webp" onerror="this.onerror=null;this.src='men-khaddar-plain-blue-suit-summer.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Men Khaddar Plain Blue Suit Summer" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -835,7 +842,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Handbags</span>
 <a href="girl-leather-textured-hand-bag.html">
-              <img src="girl-leather-textured-hand-bag.png.jpeg" alt="Girl's Leather Textured Hand Bag" class="product-img" loading="lazy" decoding="async">
+              <img src="girl-leather-textured-hand-bag.png.webp" onerror="this.onerror=null;this.src='girl-leather-textured-hand-bag.png.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Girl's Leather Textured Hand Bag" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -857,7 +864,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <article class="product-card" data-category="Handbags" data-new="true">
           <div class="product-image-wrap">
             <span class="product-badge-tag new">Handbags</span><a href="girl-leather-textured-shoulder-bag.html">
-              <img src="girl-leather-textured-shoulder-bag-girl-waring.jpeg" alt="Girl's Leather Textured Shoulder Bag" class="product-img" loading="lazy" decoding="async">
+              <img src="girl-leather-textured-shoulder-bag-girl-waring.webp" onerror="this.onerror=null;this.src='girl-leather-textured-shoulder-bag-girl-waring.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Girl's Leather Textured Shoulder Bag" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -880,7 +887,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag">Sandals</span>
 <a href="orange-cross-strap-rexine-slides-for-women.html">
-              <img src="orange-cross-strap-rexine-slides-for-women1.jpeg" alt="Orange Cross Strap Rexine Slides for Women" class="product-img" loading="lazy" decoding="async">
+              <img src="orange-cross-strap-rexine-slides-for-women1.webp" onerror="this.onerror=null;this.src='orange-cross-strap-rexine-slides-for-women1.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Orange Cross Strap Rexine Slides for Women" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -911,7 +918,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <article class="product-card" data-category="Sandals" data-new="false">
           <div class="product-image-wrap">
             <span class="product-badge-tag">Sandals</span><a href="women-white-rexine-fancy-slippers.html">
-              <img src="women-white-rexine-fancy-slippers1.jpeg" alt="Women's White Rexine Fancy Slippers" class="product-img" loading="lazy" decoding="async">
+              <img src="women-white-rexine-fancy-slippers1.webp" onerror="this.onerror=null;this.src='women-white-rexine-fancy-slippers1.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Women's White Rexine Fancy Slippers" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -934,7 +941,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new"> Gents Wallet</span>
             <a href="men-double-fold-stylish-wallet.html">
-              <img src="men-double-fold-stylish-wallet.jpeg" alt="Men's Double Fold Stylish Wallet - ZENVORA SHOOP" class="product-img" loading="lazy" decoding="async">
+              <img src="men-double-fold-stylish-wallet.webp" onerror="this.onerror=null;this.src='men-double-fold-stylish-wallet.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Men's Double Fold Stylish Wallet - ZENVORA SHOOP" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -957,7 +964,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           <div class="product-image-wrap">
             <span class="product-badge-tag new"> Watch </span>
             <a href="black-skeleton-chronograph-watch.html">
-              <img src="black-skeleton-chronograph-watch.jpeg" alt="Black Skeleton Chronograph Watch for Men - ZENVORA SHOOP" class="product-img" loading="lazy" decoding="async">
+              <img src="black-skeleton-chronograph-watch.webp" onerror="this.onerror=null;this.src='black-skeleton-chronograph-watch.jpeg';" loading="lazy" decoding="async" width="400" height="533" alt="Black Skeleton Chronograph Watch for Men - ZENVORA SHOOP" class="product-img">
             </a>
           </div>
           <div class="product-info">
@@ -1209,7 +1216,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "Amazing quality and exactly as shown in the pictures. The Arabic Lawn fabric is so soft, breathable, and gracefully draped. Really satisfied with my order."
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="arabic-lawn.png.jpeg" alt="Arabic Lawn Review Photo" class="review-photo-img" loading="lazy">
+                <img src="arabic-lawn.png.webp" onerror="this.onerror=null;this.src='arabic-lawn.png.jpeg';" loading="lazy" decoding="async" alt="Arabic Lawn Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo
@@ -1242,7 +1249,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "Ordered the Wash & Wear men's suit fabric for office wear. Wrinkle-resistant, elegant drape, and top-tier texture. Cash on delivery was swift and seamless."
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="men-wash-&-wear-plain-suit-brown.png.jpeg" alt="Men Suit Fabric Review Photo" class="review-photo-img" loading="lazy">
+                <img src="men-wash-&-wear-plain-suit-brown.png.webp" onerror="this.onerror=null;this.src='men-wash-&-wear-plain-suit-brown.png.jpeg';" loading="lazy" decoding="async" alt="Men Suit Fabric Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo
@@ -1275,7 +1282,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "The textured leather shoulder bag looks even more luxurious in person! Sturdy gold hardware, roomy compartments, and meticulous stitching. 100% recommended!"
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="girl-leather-textured-shoulder-bag.jpeg" alt="Textured Handbag Review Photo" class="review-photo-img" loading="lazy">
+                <img src="girl-leather-textured-shoulder-bag.webp" onerror="this.onerror=null;this.src='girl-leather-textured-shoulder-bag.jpeg';" loading="lazy" decoding="async" alt="Textured Handbag Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo
@@ -1308,7 +1315,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "The cotton unstitched suit is ideal for summer heat. Light, premium finish, and prompt dispatch right to my doorstep. Smooth ordering via WhatsApp."
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="men-cotton-unstitched-suit-light-brown-summer.png.jpeg" alt="Cotton Suit Review Photo" class="review-photo-img" loading="lazy">
+                <img src="men-cotton-unstitched-suit-light-brown-summer.png.webp" onerror="this.onerror=null;this.src='men-cotton-unstitched-suit-light-brown-summer.png.jpeg';" loading="lazy" decoding="async" alt="Cotton Suit Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo
@@ -1341,7 +1348,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "The cotton lawn colors remained completely vibrant after washing. Authentic Pakistani craftsmanship and highly responsive WhatsApp customer care."
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="cotton-lawn.png.jpeg" alt="Cotton Lawn Review Photo" class="review-photo-img" loading="lazy">
+                <img src="cotton-lawn.png.webp" onerror="this.onerror=null;this.src='cotton-lawn.png.jpeg';" loading="lazy" decoding="async" alt="Cotton Lawn Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo
@@ -1374,7 +1381,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 "Super comfortable footwear and slides! Pure rexine material with soft cushion soles. Perfect fitting, exactly as ordered and great value for money."
               </p>
               <div class="review-photo-wrap" title="Click to enlarge customer photo">
-                <img src="orange-cross-strap-rexine-slides-for-women.png" alt="Rexine Slides Review Photo" class="review-photo-img" loading="lazy">
+                <img src="orange-cross-strap-rexine-slides-for-women.webp" onerror="this.onerror=null;this.src='orange-cross-strap-rexine-slides-for-women.png';" loading="lazy" decoding="async" alt="Rexine Slides Review Photo" class="review-photo-img">
                 <span class="review-photo-badge">
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   Customer Photo

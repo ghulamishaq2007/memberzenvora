@@ -257,16 +257,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
   }
 
-  // Sticky Navbar shadow on scroll
+  // Sticky Navbar shadow on scroll (RAF throttled & passive for 60fps scrolling)
+  let navScrollTicking = false;
   window.addEventListener('scroll', () => {
-    if (navbar) {
-      if (window.scrollY > 20) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
+    if (!navScrollTicking) {
+      window.requestAnimationFrame(() => {
+        if (navbar) {
+          if (window.scrollY > 20) {
+            navbar.classList.add('scrolled');
+          } else {
+            navbar.classList.remove('scrolled');
+          }
+        }
+        navScrollTicking = false;
+      });
+      navScrollTicking = true;
     }
-  });
+  }, { passive: true });
 
   // --- Category Filtering (on index.html) ---
   initCategoryFilter();
@@ -792,7 +799,7 @@ function initProductDetailPage(config) {
       const thumbBtn = document.createElement('button');
       thumbBtn.className = `thumbnail-btn ${index === 0 ? 'active' : ''}`;
       thumbBtn.type = 'button';
-      thumbBtn.innerHTML = `<img src="${imgSrc}" alt="${name} view ${index + 1}" onerror="this.src='https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80'">`;
+      thumbBtn.innerHTML = `<img src="${imgSrc}" alt="${name} view ${index + 1}" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=300&q=80'">`;
       
       thumbBtn.addEventListener('click', () => {
         document.querySelectorAll('.thumbnail-btn').forEach(b => b.classList.remove('active'));
@@ -1398,12 +1405,13 @@ function initSocialProofNotifications() {
       const productName = item.product ? escapeHtml(item.product) : 'Product';
       const timeText = item.time ? escapeHtml(item.time) : 'A few minutes ago';
       const imgSrc = item.image ? escapeHtml(item.image) : 'arabic-lawn.png.jpeg';
+      const webpSrc = imgSrc.replace(/\.(jpeg|jpg|png)$/i, '.webp');
 
       container.innerHTML = `
         <div class="sp-toast-card">
           <button type="button" class="sp-toast-close" id="sp-toast-close-btn" aria-label="Dismiss notification">&times;</button>
           <div class="sp-toast-thumb-wrap">
-            <img src="${imgSrc}" alt="${productName}" class="sp-toast-thumb" loading="lazy" onerror="this.src='icon-192.png'">
+            <img src="${webpSrc}" onerror="this.onerror=null;this.src='${imgSrc}';" alt="${productName}" class="sp-toast-thumb" loading="lazy" decoding="async" width="48" height="48">
           </div>
           <div class="sp-toast-body">
             <div class="sp-toast-top">
@@ -1587,6 +1595,9 @@ function initFaqAccordion() {
 // vertically stacked above the WhatsApp floating button with zero overlap.
 // ==========================================================================
 function initBackToTop() {
+  if (window._backToTopInitialized) return;
+  window._backToTopInitialized = true;
+
   let backToTopBtn = document.getElementById('back-to-top-btn');
 
   // If button not already statically in DOM, create and inject it
@@ -1655,6 +1666,9 @@ if (typeof document !== 'undefined') {
 // Coordinated multi-directional scroll reveals, mobile staggered entrance & luxury indicator
 // ==========================================================================
 function initScrollReveal() {
+  if (window._scrollRevealInitialized) return;
+  window._scrollRevealInitialized = true;
+
   // 1. Luxury Gold Reading/Scroll Progress Indicator
   if (typeof document !== 'undefined') {
     let progressIndicator = document.getElementById('scroll-progress-indicator');
@@ -1793,6 +1807,8 @@ if (typeof document !== 'undefined') {
 function initHeroSlideshow() {
   const container = document.getElementById('hero-slides-wrapper');
   if (!container) return; // Only runs on pages with the hero slideshow (e.g. index.html)
+  if (container.dataset.slideshowInitialized === 'true') return;
+  container.dataset.slideshowInitialized = 'true';
 
   const slides = container.querySelectorAll('.hero-slide');
   const dots = document.querySelectorAll('.hero-dot');
@@ -1805,44 +1821,44 @@ function initHeroSlideshow() {
     {
       index: 0,
       title: "Pastel Lawn Collection",
-      src: "hero-slide-1.jpg",
-      fallback: "arabic-lawn.png2.jpeg"
+      src: "hero-slide-1.webp",
+      fallback: "hero-slide-1.jpg"
     },
     {
       index: 1,
       title: "Navy Blue Embroidered Suits",
-      src: "hero-slide-2.jpg",
-      fallback: "royal-blue-chiffon-maxi-suit-with-gold-embroidery-for-women2.jpeg"
+      src: "hero-slide-2.webp",
+      fallback: "hero-slide-2.jpg"
     },
     {
       index: 2,
       title: "Festive Red & Maroon Dresses",
-      src: "hero-slide-3.jpg",
-      fallback: "red-arabic-lawn.png2.jpeg"
+      src: "hero-slide-3.webp",
+      fallback: "hero-slide-3.jpg"
     },
     {
       index: 3,
       title: "Beige, Cream & Sage-Green Suits",
-      src: "hero-slide-4.jpg",
-      fallback: "printed-lawn-suit-white.png.jpeg"
+      src: "hero-slide-4.webp",
+      fallback: "hero-slide-4.jpg"
     },
     {
       index: 4,
       title: "Festive & Formal Luxury Couture",
-      src: "hero-slide-5.jpg",
-      fallback: "brown-embroidered-3-piece.png4.jpeg"
+      src: "hero-slide-5.webp",
+      fallback: "hero-slide-5.jpg"
     },
     {
       index: 5,
       title: "Stylish Men's Kurta & Suits",
-      src: "hero-slide-6.jpg",
-      fallback: "mens-grey.png.jpeg"
+      src: "hero-slide-6.webp",
+      fallback: "hero-slide-6.jpg"
     },
     {
       index: 6,
       title: "Curated Fashion & Accessories",
-      src: "hero-slide-7.jpg",
-      fallback: "girl-leather-textured-shoulder-bag-girl-waring.jpeg"
+      src: "hero-slide-7.webp",
+      fallback: "hero-slide-7.jpg"
     }
   ];
 
@@ -1851,9 +1867,15 @@ function initHeroSlideshow() {
   const INTERVAL_TIME = 3000; // Exact 3-second automatic rotation
   let rotationTimer = null;
 
-  // 1. Preload all 7 images and attach error handling
-  SLIDE_DATA.forEach((item, idx) => {
-    // Preload into browser cache
+  // Track preloaded slide indices to prevent duplicate network requests
+  const loadedIndices = new Set([0]);
+
+  function preloadSlide(index) {
+    const targetIdx = ((index % totalSlides) + totalSlides) % totalSlides;
+    if (loadedIndices.has(targetIdx)) return;
+    loadedIndices.add(targetIdx);
+
+    const item = SLIDE_DATA[targetIdx];
     const preloader = new Image();
     preloader.src = item.src;
     preloader.onerror = function() {
@@ -1861,11 +1883,14 @@ function initHeroSlideshow() {
       fb.src = item.fallback;
     };
 
-    // Attach graceful error handling to DOM image element
-    const slideEl = slides[idx];
+    const slideEl = slides[targetIdx];
     if (slideEl) {
       const img = slideEl.querySelector('img');
       if (img) {
+        if (!img.src || img.getAttribute('data-loaded') !== 'true') {
+          img.src = item.src;
+          img.setAttribute('data-loaded', 'true');
+        }
         img.onerror = function() {
           if (this.dataset.fallbackApplied !== 'true') {
             this.dataset.fallbackApplied = 'true';
@@ -1874,12 +1899,22 @@ function initHeroSlideshow() {
         };
       }
     }
-  });
+  }
 
-  // 2. Function to activate a specific slide index
+  // Preload slide 1 shortly after initial paint so it's ready well before the 3-second transition
+  setTimeout(() => {
+    preloadSlide(1);
+  }, 750);
+
+  // Function to activate a specific slide index
   function activateSlide(index) {
     // Normalize index within 0 to totalSlides - 1
     currentIndex = ((index % totalSlides) + totalSlides) % totalSlides;
+
+    // Ensure target slide is loaded
+    preloadSlide(currentIndex);
+    // Preload next upcoming slide ahead of rotation
+    preloadSlide(currentIndex + 1);
 
     // Update slides class
     slides.forEach((slide, i) => {
@@ -1909,12 +1944,12 @@ function initHeroSlideshow() {
     }
   }
 
-  // 3. Move to next slide automatically
+  // Move to next slide automatically
   function nextSlide() {
     activateSlide(currentIndex + 1);
   }
 
-  // 4. Start and reset timer
+  // Start and reset timer
   function startAutoRotation() {
     stopAutoRotation();
     rotationTimer = setInterval(nextSlide, INTERVAL_TIME);
@@ -1927,7 +1962,7 @@ function initHeroSlideshow() {
     }
   }
 
-  // 5. Connect indicator dots for instant user interaction
+  // Connect indicator dots for instant user interaction
   dots.forEach(dot => {
     dot.addEventListener('click', function(e) {
       e.preventDefault();
@@ -1940,7 +1975,16 @@ function initHeroSlideshow() {
     });
   });
 
-  // 6. Initial activation and start rotation
+  // Pause rotation when tab is hidden to save CPU and battery
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAutoRotation();
+    } else {
+      startAutoRotation();
+    }
+  });
+
+  // Initial activation and start rotation
   activateSlide(0);
   startAutoRotation();
 }

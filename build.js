@@ -21,7 +21,7 @@ const bundleFirebase = async () => {
     bundle: true,
     format: 'esm',
     outfile: firebaseBundlePath,
-    minify: false
+    minify: true
   });
   console.log('firebase-bundle.js generated.');
 };
